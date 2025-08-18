@@ -4,6 +4,33 @@ import Cookies from 'js-cookie';
 import Register from './register';
 import FullChat from './fullchat';
 import EditUserInfo from './edituserinfo';
+import config from './config'; // reads REACT_APP_API_URL in Amplify
+
+/* ---------------- Backend base ---------------- */
+const API_BASE = config.apiUrl || 'https://xchatback123.xyz';
+
+/* Safe JSON fetch: throws helpful errors if the response isn't JSON */
+async function fetchJSON(url, options) {
+  const res = await fetch(url, options);
+  const ct = res.headers.get('content-type') || '';
+  if (!res.ok) {
+    let msg = `HTTP ${res.status}`;
+    try {
+      if (ct.includes('application/json')) {
+        const j = await res.json();
+        msg = j.error || j.message || msg;
+      } else {
+        msg = await res.text();
+      }
+    } catch {}
+    throw new Error(msg);
+  }
+  if (!ct.includes('application/json')) {
+    // e.g., HTML from a SPA page instead of API JSON
+    throw new Error('Expected JSON but got non-JSON response');
+  }
+  return res.json();
+}
 
 /* ---------------- Shared Design Tokens ---------------- */
 const designTokens = `
@@ -20,7 +47,6 @@ const designTokens = `
   --border: rgba(255,255,255,0.12);
   --shadow: 0 8px 30px rgba(0,0,0,0.25);
 }
-
 .theme-light {
   --bg: #f3f6fb;
   --panel: #ffffff;
@@ -34,7 +60,6 @@ const designTokens = `
   --border: rgba(15,20,32,0.12);
   --shadow: 0 10px 25px rgba(15,20,32,0.08);
 }
-
 * { box-sizing: border-box; }
 html, body, #root { height: 100%; }
 body { margin: 0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial; }
@@ -52,7 +77,6 @@ html, body, #root { overflow: hidden; }
   background: radial-gradient(1200px 900px at -10% -20%, #1b2232 0%, var(--bg) 50%), var(--bg);
   overflow: hidden;
 }
-
 .login-bg {
   position: absolute; inset: 0; pointer-events: none;
   background:
@@ -60,7 +84,6 @@ html, body, #root { overflow: hidden; }
     radial-gradient(600px 400px at 90% 80%, rgba(110,168,254,0.10), transparent 60%);
   filter: blur(2px);
 }
-
 .login-card {
   position: relative;
   width: min(92vw, 420px);
@@ -71,70 +94,40 @@ html, body, #root { overflow: hidden; }
   box-shadow: var(--shadow);
   backdrop-filter: blur(10px);
 }
-
-.login-header {
-  display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;
-}
-
-.login-brand {
-  display: flex; align-items: center; gap: 10px; font-weight: 800; letter-spacing: .3px;
-}
+.login-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+.login-brand { display: flex; align-items: center; gap: 10px; font-weight: 800; letter-spacing: .3px; }
 .login-dot { width: 12px; height: 12px; border-radius: 50%;
   background: linear-gradient(135deg, var(--brand), var(--brand-2)); box-shadow: 0 0 14px var(--brand);
 }
-
 .theme-toggle {
   background: var(--panel); color: var(--text);
   border: 1px solid var(--border); border-radius: 10px;
   padding: 8px 10px; cursor: pointer;
 }
 .theme-toggle:hover { border-color: var(--brand); }
-
 .login-title { font-size: 22px; font-weight: 800; margin: 6px 0 4px; }
 .login-sub { color: var(--text-dim); min-height: 22px; }
-
 .login-form { display: grid; gap: 12px; margin-top: 18px; }
-
 .input-wrap { display: grid; gap: 6px; }
 .input-label { font-size: 12px; color: var(--text-dim); }
-
 .input {
-  width: 100%;
-  padding: 12px 14px;
-  background: var(--panel);
-  color: var(--text);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  outline: none;
+  width: 100%; padding: 12px 14px; background: var(--panel); color: var(--text);
+  border: 1px solid var(--border); border-radius: 12px; outline: none;
 }
 .input::placeholder { color: var(--text-dim); }
-
-.actions {
-  display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 6px;
-}
+.actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 6px; }
 .btn {
-  padding: 12px 10px;
-  border-radius: 12px;
-  border: 1px solid var(--border);
-  background: var(--panel);
-  color: var(--text);
-  cursor: pointer;
+  padding: 12px 10px; border-radius: 12px; border: 1px solid var(--border);
+  background: var(--panel); color: var(--text); cursor: pointer;
   transition: transform .05s ease, background .2s ease, border-color .2s ease;
   font-weight: 600;
 }
 .btn:hover { background: var(--panel-strong); border-color: var(--brand); transform: translateY(-1px); }
 .btn--primary { border-color: var(--brand); }
 .btn--muted { border-style: dashed; }
-
-.login-foot {
-  margin-top: 14px;
-  font-size: 12px; color: var(--text-dim);
-  display: flex; align-items: center; gap: 8px; justify-content: center;
-}
-
+.login-foot { margin-top: 14px; font-size: 12px; color: var(--text-dim); display: flex; align-items: center; gap: 8px; justify-content: center; }
 .alert {
-  margin-top: 10px;
-  color: #fff;
+  margin-top: 10px; color: #fff;
   background: linear-gradient(180deg, rgba(239,68,68,0.30), rgba(239,68,68,0.15));
   border: 1px solid rgba(239,68,68,0.45);
   padding: 8px 10px; border-radius: 10px;
@@ -187,27 +180,22 @@ function Login() {
     try {
       Cookies.set('username', usernameInput, { expires: 1, path: '/', sameSite: 'Lax' });
 
-      // ✅ Backend call proxied through Nginx
-      const authRes = await fetch(
-        `/api/auth?username=${encodeURIComponent(usernameInput)}&password=${encodeURIComponent(passwordInput)}`
+      // Call your backend directly (Amplify does not proxy /api/*)
+      await fetchJSON(
+        `${API_BASE}/auth?username=${encodeURIComponent(usernameInput)}&password=${encodeURIComponent(passwordInput)}`
       );
-      if (!authRes.ok) {
-        setError('Incorrect username or password.');
-        return;
-      }
 
-      const tokenRes = await fetch(
-        `/api/get-token?username=${encodeURIComponent(usernameInput)}`
+      const data = await fetchJSON(
+        `${API_BASE}/get-token?username=${encodeURIComponent(usernameInput)}`
       );
-      if (!tokenRes.ok) throw new Error('Failed to fetch token');
-      const data = await tokenRes.json();
+
       if (data.token) {
         Cookies.set('testtoken', data.token, { expires: 1, path: '/', sameSite: 'Lax' });
       }
       navigate('/fullchat');
     } catch (e) {
       console.error(e);
-      setError('Something went wrong. Please try again.');
+      setError(e.message || 'Something went wrong. Please try again.');
     }
   };
 
