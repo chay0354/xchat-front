@@ -1,0 +1,188 @@
+/* General Reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  font-family: Arial, sans-serif;
+}
+
+/* Split Screen Styling */
+.split-screen {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+}
+
+.dark-gray-part {
+  width: 65%;
+  background: linear-gradient(135deg, #0e0e0e, #1a1a2e, #2c003e, #1c1c1c);
+  /* Deeper gray/black/purple gradient */
+  background-size: 400% 400%;
+  animation: gradient-animation 8s ease infinite;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  /* Align content to the left */
+  padding-left: 5vh;
+  /* Space from the edge */
+}
+
+.blue-part {
+  width: 35%;
+  background-color: #3f51b5;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+h1 {
+  font-size: 5vh;
+  font-weight: bold;
+  color: white;
+  margin-bottom: 2vh;
+  text-align: left;
+}
+
+.animated-text {
+  font-size: 2.5vh;
+  color: white;
+  text-align: left;
+  margin-bottom: 3vh;
+}
+
+/* Login Form Styling */
+.App {
+  width: 100%;
+  height: auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.logo {
+  width: 10vh;
+  height: auto;
+  margin-bottom: 2vh;
+}
+
+.login-form {
+  width: 90%;
+  max-width: 30vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.form-group {
+  margin-bottom: 1.5vh;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  position: relative;
+}
+
+/* Input Styling */
+input {
+  width: 100%;
+  min-height: 3vh;
+  max-height: 3vh;
+  border-radius: 0.8vh;
+  font-size: 1.4vh;
+  padding: 0 1vh;
+  border: 0.2vh solid #ccc;
+  background-color: #f9f9f9;
+  color: #333;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+
+input::placeholder {
+  font-size: 1.2vh;
+  color: #aaa;
+}
+
+/* Button Styling */
+button {
+  width: 100%;
+  /* Full width */
+  min-height: 3vh;
+  /* Min height */
+  max-height: 3vh;
+  /* Max height */
+  border-radius: 0.8vh;
+  font-size: 14px;
+  /* Base font size */
+  font-weight: bold;
+  text-align: center;
+  background-color: black;
+  /* Always black */
+  color: white;
+  /* Always white text */
+  border: none;
+  cursor: pointer;
+  margin-top: 1vh;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  line-height: 3vh;
+  /* Vertically center text */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Register Button Styling (optional: slightly different color) */
+.register-button {
+  background-color: #555;
+  /* Dark gray */
+  margin-top: 1vh;
+  /* Additional spacing */
+}
+
+/* Button Hover Effect */
+button:hover {
+  background-color: #222;
+  /* Lighter black on hover */
+}
+
+/* Responsive Font Size Adjustments */
+@media (max-width: 768px) {
+  button {
+    font-size: 1.3vh;
+    /* Slightly smaller text */
+  }
+}
+
+@media (max-width: 480px) {
+  button {
+    font-size: 1.1vh;
+    /* Further reduce text size on very small screens */
+  }
+}
+
+/* Gradient Animation */
+@keyframes gradient-animation {
+  0% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
+}
