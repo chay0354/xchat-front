@@ -95,16 +95,6 @@ const pageStyles = `
 .btn--primary { border-color: var(--brand); }
 .btn--danger  { border-color: var(--warn); }
 .btn--wide { grid-column: 1 / -1; }
-
-/* Disabled & loading */
-.btn[disabled] { opacity: .6; cursor: not-allowed; transform: none; }
-.spinner {
-  width: 16px; height: 16px; border-radius: 50%;
-  border: 2px solid rgba(255,255,255,.35); border-top-color: var(--brand);
-  animation: spin .8s linear infinite; display: inline-block; vertical-align: -2px;
-}
-@keyframes spin { to { transform: rotate(360deg); } }
-
 .alert {
   color: #fff; border-radius: 10px; padding: 10px 12px;
   border: 1px solid rgba(239,68,68,0.45);
@@ -139,9 +129,6 @@ function Register() {
   const [successMessage, setSuccessMessage] = useState('');
   const [selectedLanguage, setSelectedLanguage] = useState('python');
 
-  // NEW: loading state for the Define action
-  const [loading, setLoading] = useState(false);
-
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -168,34 +155,28 @@ function Register() {
     setTimeout(() => { setSuccessMessage(''); setCurrentStage(2); }, 900);
   };
 
-  // UPDATED: async + spinner while waiting for response
-  const handleDefine = async () => {
+  const handleDefine = () => {
     if (!websiteUrl) {
       setErrorMessage('Please enter your website URL before defining your bot.');
       setSuccessMessage('');
       return;
     }
     setErrorMessage('');
-    setSuccessMessage('');
-    setLoading(true);
-    try {
-      const r = await fetch(`${API_BASE}/chat`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ domain: websiteUrl }),
-      });
-      const data = await r.json();
-      if (data.reply) {
-        setBotDefinition(data.reply);
-        setSuccessMessage('Bot definition received.');
-      } else {
-        setErrorMessage(data.error || 'Failed to get bot definition.');
-      }
-    } catch (e) {
-      setErrorMessage('Error sending request to server.');
-    } finally {
-      setLoading(false);
-    }
+    fetch(`${API_BASE}/chat`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ domain: websiteUrl }),
+    })
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.reply) {
+          setBotDefinition(data.reply);
+          setSuccessMessage('Bot definition received.');
+        } else {
+          setErrorMessage(data.error || 'Failed to get bot definition.');
+        }
+      })
+      .catch(() => setErrorMessage('Error sending request to server.'));
   };
 
   const handleStage2Next = () => {
@@ -214,6 +195,7 @@ function Register() {
       .then((r) => r.json())
       .then((data) => {
         if (data.token) {
+          // set BOTH names so the rest of the app finds it
           Cookies.set('usertoken', data.token, { expires: 1, path: '/', sameSite: 'Lax' });
           Cookies.set('testtoken', data.token, { expires: 1, path: '/', sameSite: 'Lax' });
           setSuccessMessage('Data saved successfully.');
@@ -352,11 +334,9 @@ print(response.json())`;
           </div>
 
           <div className="actions">
-            <button className="btn" onClick={handleStage2Back} disabled={loading}>Back</button>
-            <button className="btn" onClick={handleDefine} disabled={loading}>
-              {loading ? (<><span className="spinner" />&nbsp;Defining…</>) : 'Define'}
-            </button>
-            <button className="btn btn--primary" onClick={handleStage2Next} disabled={loading}>Next</button>
+            <button className="btn" onClick={handleStage2Back}>Back</button>
+            <button className="btn" onClick={handleDefine}>Define</button>
+            <button className="btn btn--primary" onClick={handleStage2Next}>Next</button>
           </div>
         </div>
       );
@@ -458,12 +438,12 @@ print(response.json())`;
 
         <div className="reg-footer">
           {currentStage > 1 && (
-            <button className="btn" onClick={() => setCurrentStage((s) => Math.max(1, s - 1))} disabled={loading}>
+            <button className="btn" onClick={() => setCurrentStage((s) => Math.max(1, s - 1))}>
               ← Back
             </button>
           )}
           {currentStage < 3 && (
-            <button className="btn btn--primary" onClick={() => setCurrentStage((s) => Math.min(3, s + 1))} title="Skip ahead" disabled={loading}>
+            <button className="btn btn--primary" onClick={() => setCurrentStage((s) => Math.min(3, s + 1))} title="Skip ahead">
               Skip
             </button>
           )}
