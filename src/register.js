@@ -124,6 +124,15 @@ const pageStyles = `
 .copy { border: 1px solid var(--border); background: var(--panel); color: var(--text); padding: 6px 10px; border-radius: 8px; cursor: pointer; }
 .copy:hover { border-color: var(--brand); background: var(--panel-strong); }
 .reg-footer { padding: 12px 18px; border-top: 1px solid var(--border); display:flex; align-items:center; justify-content: flex-end; gap: 10px; }
+
+/* Debug details accordion */
+.details {
+  background: var(--panel);
+  border: 1px dashed var(--border);
+  border-radius: 10px;
+  padding: 10px 12px;
+  color: var(--text-dim);
+}
 `;
 
 function Register() {
@@ -141,6 +150,9 @@ function Register() {
 
   // NEW: loading state for the Define action
   const [loading, setLoading] = useState(false);
+
+  // NEW: rich error details from backend /chat
+  const [errorDetails, setErrorDetails] = useState(null);
 
   const navigate = useNavigate();
 
@@ -168,15 +180,17 @@ function Register() {
     setTimeout(() => { setSuccessMessage(''); setCurrentStage(2); }, 900);
   };
 
-  // UPDATED: async + spinner while waiting for response
+  // UPDATED: async + spinner + robust error parsing
   const handleDefine = async () => {
     if (!websiteUrl) {
       setErrorMessage('Please enter your website URL before defining your bot.');
       setSuccessMessage('');
+      setErrorDetails(null);
       return;
     }
     setErrorMessage('');
     setSuccessMessage('');
+    setErrorDetails(null);
     setLoading(true);
     try {
       const r = await fetch(`${API_BASE}/chat`, {
@@ -184,15 +198,54 @@ function Register() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ domain: websiteUrl }),
       });
-      const data = await r.json();
+
+      // Try to parse JSON regardless of status
+      let data = {};
+      try {
+        data = await r.json();
+      } catch {
+        // Non-JSON (shouldn’t happen with our backend)
+        data = {};
+      }
+
+      if (!r.ok) {
+        const msg = [
+          data.error || `Request failed (${r.status})`,
+          data.reason ? `(${data.reason})` : '',
+          data.stage ? ` · stage: ${data.stage}` : '',
+        ].join(' ').trim();
+
+        setErrorMessage(msg || 'Define failed.');
+        setErrorDetails({
+          status: r.status,
+          reason: data.reason,
+          stage: data.stage,
+          warnings: data.warnings,
+          urlsUsed: data.urlsUsed,
+          meta: data.meta
+        });
+
+        console.groupCollapsed('[Define] /chat error');
+        console.log('status:', r.status);
+        console.log('payload:', data);
+        console.groupEnd();
+        return;
+      }
+
       if (data.reply) {
         setBotDefinition(data.reply);
         setSuccessMessage('Bot definition received.');
       } else {
         setErrorMessage(data.error || 'Failed to get bot definition.');
+        setErrorDetails({
+          status: r.status,
+          ...data
+        });
       }
     } catch (e) {
-      setErrorMessage('Error sending request to server.');
+      setErrorMessage('Network error contacting server.');
+      setErrorDetails({ exception: String(e) });
+      console.error('[Define] network error', e);
     } finally {
       setLoading(false);
     }
@@ -211,9 +264,9 @@ function Register() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
     })
-      .then((r) => r.json())
-      .then((data) => {
-        if (data.token) {
+      .then(async (r) => {
+        const data = await r.json().catch(() => ({}));
+        if (r.ok && data.token) {
           Cookies.set('usertoken', data.token, { expires: 1, path: '/', sameSite: 'Lax' });
           Cookies.set('testtoken', data.token, { expires: 1, path: '/', sameSite: 'Lax' });
           setSuccessMessage('Data saved successfully.');
@@ -225,7 +278,11 @@ function Register() {
       .catch(() => setErrorMessage('Error sending data to server.'));
   };
 
-  const handleStage2Back = () => setCurrentStage(1);
+  const handleStage2Back = () => {
+    setErrorMessage('');
+    setErrorDetails(null);
+    setCurrentStage(1);
+  };
 
   const userToken = Cookies.get('usertoken') || 'Token not available';
 
@@ -259,6 +316,45 @@ print(response.json())`;
       setErrorMessage('Copy failed');
       setTimeout(() => setErrorMessage(''), 900);
     }
+  };
+
+  const renderErrorDetails = () => {
+    if (!errorDetails) return null;
+    const { status, reason, stage, warnings, urlsUsed, meta, exception } = errorDetails;
+    return (
+      <details className="details">
+        <summary>More details</summary>
+        <div style={{ marginTop: 8, display: 'grid', gap: 6, fontSize: 13 }}>
+          {status !== undefined && <div><b>Status:</b> {status}</div>}
+          {reason && <div><b>Reason:</b> {reason}</div>}
+          {stage && <div><b>Stage:</b> {stage}</div>}
+          {Array.isArray(warnings) && warnings.length > 0 && (
+            <div>
+              <b>Warnings:</b>
+              <ul>{warnings.map((w, i) => <li key={i}>{w}</li>)}</ul>
+            </div>
+          )}
+          {Array.isArray(urlsUsed) && urlsUsed.length > 0 && (
+            <div>
+              <b>URLs used:</b>
+              <ul>{urlsUsed.map((u, i) => <li key={i}><a href={u} target="_blank" rel="noreferrer">{u}</a></li>)}</ul>
+            </div>
+          )}
+          {meta && Object.keys(meta).length > 0 && (
+            <div>
+              <b>Meta:</b>
+              <pre className="codebox" style={{ marginTop: 6 }}>{JSON.stringify(meta, null, 2)}</pre>
+            </div>
+          )}
+          {exception && (
+            <div>
+              <b>Exception:</b>
+              <pre className="codebox" style={{ marginTop: 6 }}>{exception}</pre>
+            </div>
+          )}
+        </div>
+      </details>
+    );
   };
 
   const renderStageContent = () => {
@@ -318,6 +414,7 @@ print(response.json())`;
           <h2>Stage 2 · Define Your Bot</h2>
           {!!errorMessage && <div className="alert">{errorMessage}</div>}
           {!!successMessage && <div className="success">{successMessage}</div>}
+          {renderErrorDetails()}
 
           <div>
             <div className="label">Website URL (AI will crawl/define)</div>
