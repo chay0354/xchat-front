@@ -1,11 +1,9 @@
-// FullChat.jsx
+// FullChat.jsx (v2 - real voice conversation with VAD)
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Cookies from 'js-cookie';
 import { useNavigate } from 'react-router-dom';
 
-// 🔗 Backend base URL (EC2 behind Nginx/Certbot)
 const API_BASE = 'https://xchatback123.xyz';
-// or: const API_BASE = import.meta.env.VITE_API_BASE || 'https://xchatback123.xyz';
 
 function FullChat() {
   const [chats, setChats] = useState([]);
@@ -14,26 +12,30 @@ function FullChat() {
   const [error, setError] = useState('');
   const [newMessage, setNewMessage] = useState('');
   const [voiceChatMode, setVoiceChatMode] = useState(false);
-  const [voicePhase, setVoicePhase] = useState('idle'); // 'listening' | 'thinking' | 'speaking' | 'idle'
+  const [voicePhase, setVoicePhase] = useState('idle'); // 'idle' | 'listening' | 'thinking' | 'speaking'
   const [theme, setTheme] = useState('dark');
   const [chatFilter, setChatFilter] = useState('');
   const [circleAnimation, setCircleAnimation] = useState('pulse');
 
-  // Voice/recording management
+  // Voice/VAD stuff
   const mediaRecorderRef = useRef(null);
   const audioChunksRef = useRef([]);
   const micStreamRef = useRef(null);
+  const audioCtxRef = useRef(null);
+  const analyserRef = useRef(null);
+  const sourceNodeRef = useRef(null);
+  const rafRef = useRef(null);
+  const startTalkingAtRef = useRef(0);
+  const lastSpeechMsRef = useRef(0);
+  const vadActiveRef = useRef(false); // guards analyzer loop
+  const loopActiveRef = useRef(false); // keep conversation loop on
   const audioPlayerRef = useRef(null);
-  const loopActiveRef = useRef(false); // keeps loop alive while Voice ON
   const lastPlayedIndexRef = useRef(0);
-
-  // UI/scroll
-  const scrollRef = useRef(null);
 
   const username = Cookies.get('username') || '';
   const navigate = useNavigate();
 
-  const isHebrew = (text) => /[\u0590-\u05FF]/.test(text);
+  const isHebrew = (t) => /[\u0590-\u05FF]/.test(t);
 
   const escapeHtml = (unsafe) =>
     (unsafe || '')
@@ -58,7 +60,7 @@ function FullChat() {
     return new Blob([byteArray], { type: mime });
   };
 
-  // Fetch chats (left sidebar) and pick first (prefers "testchat")
+  // ------- initial chats
   useEffect(() => {
     if (!username) {
       setError('No username found in cookies.');
@@ -70,16 +72,16 @@ function FullChat() {
         const res = await fetch(`${API_BASE}/fullchat?username=${encodeURIComponent(username)}`);
         const data = await res.json();
         if (data.chats && data.chats.length > 0) {
-          const sortedChats = data.chats.sort((a, b) => {
+          const sorted = data.chats.sort((a, b) => {
             if (a.convtoken?.toLowerCase() === 'testchat') return -1;
             if (b.convtoken?.toLowerCase() === 'testchat') return 1;
             return a.convtoken.localeCompare(b.convtoken);
           });
-          setChats(sortedChats);
-          setSelectedChat(sortedChats[0]);
+          setChats(sorted);
+          setSelectedChat(sorted[0]);
         }
       } catch (e) {
-        console.error('Error fetching chats:', e);
+        console.error(e);
         setError('Error fetching chat data.');
       } finally {
         setLoading(false);
@@ -87,122 +89,101 @@ function FullChat() {
     })();
   }, [username]);
 
-  // Auto-scroll
+  // scroll bottom
+  const scrollRef = useRef(null);
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   }, [selectedChat, voiceChatMode]);
 
-  // Build messages out of {questionN, answerN}
+  // build thread
   const buildMessages = useCallback(() => {
     if (!selectedChat) return [];
     const conv = selectedChat.conversation || {};
-    const messages = [];
+    const msgs = [];
     let i = 1;
     while (conv['question' + i] || conv['answer' + i]) {
-      if (conv['question' + i]) messages.push({ text: conv['question' + i], isUser: true });
-      if (conv['answer' + i]) messages.push({ text: conv['answer' + i], isUser: false, idx: i });
+      if (conv['question' + i]) msgs.push({ text: conv['question' + i], isUser: true });
+      if (conv['answer' + i]) msgs.push({ text: conv['answer' + i], isUser: false, idx: i });
       i++;
     }
-    return messages;
+    return msgs;
   }, [selectedChat]);
 
   const messages = buildMessages();
-
-  const filteredChats = chats.filter((c) =>
-    c.convtoken.toLowerCase().includes(chatFilter.trim().toLowerCase())
-  );
+  const filteredChats = chats.filter((c) => c.convtoken.toLowerCase().includes(chatFilter.trim().toLowerCase()));
   const isTestChat = selectedChat && selectedChat.convtoken.toLowerCase() === 'testchat';
 
-  // ---- CHAT ACTIONS ----
-
-  const pushNewConversationState = useCallback((newConversation) => {
+  // ----- state helpers
+  const pushConversation = useCallback((newConversation) => {
     if (!selectedChat) return;
-    const updatedChat = { ...selectedChat, conversation: newConversation };
-    setSelectedChat(updatedChat);
-    setChats((prev) => prev.map((c) => (c.convtoken === updatedChat.convtoken ? updatedChat : c)));
+    const updated = { ...selectedChat, conversation: newConversation };
+    setSelectedChat(updated);
+    setChats((prev) => prev.map((c) => (c.convtoken === updated.convtoken ? updated : c)));
   }, [selectedChat]);
 
+  // ----- send text
   const handleSendMessage = async () => {
     if (!newMessage.trim()) return;
     const usertoken = Cookies.get('testtoken');
-    if (!usertoken) {
-      setError('Missing testtoken cookie.');
-      return;
-    }
+    if (!usertoken) { setError('Missing testtoken cookie.'); return; }
     setLoading(true);
     try {
-      const response = await fetch(`${API_BASE}/flow`, {
+      const r = await fetch(`${API_BASE}/flow`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ question: newMessage, convtoken: 'testchat', usertoken }),
+        body: JSON.stringify({ question: newMessage, convtoken: 'testchat', usertoken })
       });
-      if (!response.ok) throw new Error('Error sending message to server');
-      const data = await response.json();
-      pushNewConversationState(data.conversation || {});
-      // play immediate audio if present
+      if (!r.ok) throw new Error('Server error');
+      const data = await r.json();
+      pushConversation(data.conversation || {});
       if (data.audio_b64) {
         await playAssistantAudioB64(data.audio_b64);
       } else {
-        // fall back to last message audioN
         autoPlayLatestFromConversation(data.conversation);
       }
       setNewMessage('');
-    } catch (err) {
-      console.error('Error in sending message:', err);
+    } catch (e) {
+      console.error(e);
       setError('Failed to send message.');
     } finally {
       setLoading(false);
     }
   };
 
+  // ----- send audio
   const sendAudioBlob = async (blob) => {
     const usertoken = Cookies.get('testtoken');
-    if (!usertoken) {
-      setError('Missing testtoken cookie.');
-      return null;
-    }
-    const formData = new FormData();
-    const file = new File([blob], 'audio.webm', { type: blob.type });
-    formData.append('audio', file);
-    formData.append('convtoken', 'testchat');
-    formData.append('usertoken', usertoken);
-
-    const res = await fetch(`${API_BASE}/flow`, { method: 'POST', body: formData });
-    if (!res.ok) throw new Error('Error sending audio to server');
-    const data = await res.json();
-    pushNewConversationState(data.conversation || {});
+    if (!usertoken) { setError('Missing testtoken cookie.'); return null; }
+    const form = new FormData();
+    form.append('audio', new File([blob], 'audio.webm', { type: blob.type }));
+    form.append('convtoken', 'testchat');
+    form.append('usertoken', usertoken);
+    const r = await fetch(`${API_BASE}/flow`, { method: 'POST', body: form });
+    if (!r.ok) throw new Error('Voice send failed');
+    const data = await r.json();
+    pushConversation(data.conversation || {});
     return data;
   };
 
-  // ---- AUDIO PLAYBACK ----
-
+  // ----- play audio
   const playAssistantAudioB64 = async (b64) => {
     try {
       const blob = base64ToBlob(b64, 'audio/mpeg');
       const url = URL.createObjectURL(blob);
-      if (!audioPlayerRef.current) {
-        audioPlayerRef.current = new Audio();
-      }
-      const audioEl = audioPlayerRef.current;
-      audioEl.src = url;
+      if (!audioPlayerRef.current) audioPlayerRef.current = new Audio();
+      const a = audioPlayerRef.current;
+      a.src = url;
       setVoicePhase('speaking');
       setCircleAnimation('vibrate');
-      await audioEl.play();
-      await new Promise((resolve) => {
-        audioEl.onended = () => {
-          URL.revokeObjectURL(url);
-          resolve();
-        };
-        audioEl.onerror = () => {
-          console.warn('Audio playback error');
-          URL.revokeObjectURL(url);
-          resolve();
-        };
+      await a.play();
+      await new Promise((res) => {
+        a.onended = () => { URL.revokeObjectURL(url); res(); };
+        a.onerror = () => { URL.revokeObjectURL(url); res(); };
       });
     } catch (e) {
-      console.error('Error playing audio', e);
+      console.warn('Playback error', e);
     } finally {
       setCircleAnimation('pulse');
       setVoicePhase('idle');
@@ -211,131 +192,208 @@ function FullChat() {
 
   const autoPlayLatestFromConversation = (conversationObj) => {
     if (!conversationObj) return;
-    // find highest N where audioN exists
     let maxN = 0;
-    for (const key of Object.keys(conversationObj)) {
-      if (key.startsWith('audio')) {
-        const n = parseInt(key.replace('audio', ''), 10);
+    for (const k of Object.keys(conversationObj)) {
+      if (k.startsWith('audio')) {
+        const n = parseInt(k.replace('audio', ''), 10);
         if (n > maxN) maxN = n;
       }
     }
     if (maxN && maxN > lastPlayedIndexRef.current) {
       const b64 = conversationObj['audio' + maxN];
       lastPlayedIndexRef.current = maxN;
-      if (b64) {
-        playAssistantAudioB64(b64);
-      }
+      if (b64) playAssistantAudioB64(b64);
     }
   };
 
-  // ---- VOICE LOOP (Listen → Send → Speak → Listen) ----
+  // ======================================================
+  // =============== VAD LISTENING LOOP ===================
+  // ======================================================
+  const SILENCE_HANG_MS = 800;          // stop after 0.8s of silence
+  const MIN_TALK_MS = 600;              // ignore tiny noises; require at least 0.6s of speech
+  const ENERGY_THRESHOLD = 15;          // ~ RMS threshold (0-255 scale); tweak if needed
+  const CHUNK_MS = 200;                 // MediaRecorder chunk size
 
-  const startListening = useCallback(async () => {
+  const stopAudioGraph = () => {
     try {
-      // stop any existing
-      await stopListening();
-
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      micStreamRef.current = stream;
-
-      const options = { mimeType: 'audio/webm' };
-      const mediaRecorder = new MediaRecorder(stream, options);
-      mediaRecorderRef.current = mediaRecorder;
-
-      audioChunksRef.current = [];
-      mediaRecorder.ondataavailable = (e) => {
-        if (e.data && e.data.size > 0) audioChunksRef.current.push(e.data);
-      };
-      mediaRecorder.onstop = async () => {
-        const audioBlob = new Blob(audioChunksRef.current, { type: options.mimeType });
-        setVoicePhase('thinking');
-        try {
-          const data = await sendAudioBlob(audioBlob);
-          // If server returned instant audio
-          if (data?.audio_b64) {
-            await playAssistantAudioB64(data.audio_b64);
-          } else {
-            autoPlayLatestFromConversation(data?.conversation);
-          }
-        } catch (e) {
-          console.error('sendAudioBlob failed', e);
-          setError('Voice send failed.');
-        } finally {
-          if (loopActiveRef.current) {
-            // resume listening
-            await startListening();
-          } else {
-            setVoicePhase('idle');
-          }
-        }
-      };
-
-      setVoicePhase('listening');
-      setCircleAnimation('vibrate');
-      mediaRecorder.start();
-    } catch (err) {
-      console.error('Error accessing microphone:', err);
-      setError('Microphone access failed. Check permissions.');
-      setVoicePhase('idle');
-      setCircleAnimation('pulse');
-    }
-  }, []);
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      rafRef.current = null;
+      vadActiveRef.current = false;
+      if (sourceNodeRef.current) { sourceNodeRef.current.disconnect(); sourceNodeRef.current = null; }
+      if (analyserRef.current) { analyserRef.current.disconnect(); analyserRef.current = null; }
+      if (audioCtxRef.current) { audioCtxRef.current.close(); audioCtxRef.current = null; }
+    } catch { /* no-op */ }
+  };
 
   const stopListening = useCallback(async () => {
     try {
-      if (mediaRecorderRef.current) {
-        const mr = mediaRecorderRef.current;
-        if (mr.state !== 'inactive') {
-          mr.stop();
-        }
-        mediaRecorderRef.current = null;
+      // stop recorder (triggers onstop which sends audio)
+      if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+        mediaRecorderRef.current.stop();
       }
+      mediaRecorderRef.current = null;
+    } catch {}
+    try {
+      // stop tracks
       if (micStreamRef.current) {
         micStreamRef.current.getTracks().forEach((t) => t.stop());
-        micStreamRef.current = null;
       }
-    } catch {
-      // ignore
-    } finally {
-      setCircleAnimation('pulse');
-    }
+      micStreamRef.current = null;
+    } catch {}
+    stopAudioGraph();
+    setCircleAnimation('pulse');
   }, []);
+
+  const startListening = useCallback(async () => {
+    // prevent double-start
+    if (mediaRecorderRef.current || micStreamRef.current || vadActiveRef.current) return;
+
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true
+        }
+      });
+      micStreamRef.current = stream;
+
+      // Build audio graph for VAD
+      audioCtxRef.current = new (window.AudioContext || window.webkitAudioContext)();
+      sourceNodeRef.current = audioCtxRef.current.createMediaStreamSource(stream);
+      analyserRef.current = audioCtxRef.current.createAnalyser();
+      analyserRef.current.fftSize = 2048;
+      sourceNodeRef.current.connect(analyserRef.current);
+
+      const options = { mimeType: 'audio/webm' };
+      const mr = new MediaRecorder(stream, options);
+      mediaRecorderRef.current = mr;
+      audioChunksRef.current = [];
+
+      mr.ondataavailable = (e) => {
+        if (e.data && e.data.size > 0) audioChunksRef.current.push(e.data);
+      };
+
+      mr.onstop = async () => {
+        // send only if we had meaningful speech
+        const now = performance.now();
+        const talkDur = now - startTalkingAtRef.current;
+        stopAudioGraph(); // stop VAD loop for this segment
+
+        if (talkDur >= MIN_TALK_MS && audioChunksRef.current.length) {
+          setVoicePhase('thinking');
+          try {
+            const audioBlob = new Blob(audioChunksRef.current, { type: options.mimeType });
+            const data = await sendAudioBlob(audioBlob);
+            if (data?.audio_b64) {
+              await playAssistantAudioB64(data.audio_b64);
+            } else {
+              autoPlayLatestFromConversation(data?.conversation);
+            }
+          } catch (e) {
+            console.error('sendAudioBlob failed', e);
+            setError('Voice send failed.');
+          }
+        }
+
+        // Continue loop?
+        if (loopActiveRef.current && voiceChatMode) {
+          // small delay to avoid clipping the assistant tail
+          setTimeout(() => { startListening(); }, 150);
+        } else {
+          setVoicePhase('idle');
+        }
+      };
+
+      // Start recorder with timeslice so ondataavailable fires periodically
+      mr.start(CHUNK_MS);
+      setVoicePhase('listening');
+      setCircleAnimation('vibrate');
+
+      // kick VAD
+      vadActiveRef.current = true;
+      startTalkingAtRef.current = performance.now();
+      lastSpeechMsRef.current = performance.now();
+
+      const pcm = new Uint8Array(analyserRef.current.fftSize);
+      const tick = () => {
+        if (!vadActiveRef.current || !analyserRef.current) return;
+
+        analyserRef.current.getByteTimeDomainData(pcm);
+        // compute RMS-like energy
+        let sum = 0;
+        for (let i = 0; i < pcm.length; i++) {
+          const v = pcm[i] - 128; // center
+          sum += v * v;
+        }
+        const rms = Math.sqrt(sum / pcm.length); // ~0..~127
+        const energy = rms; // treat as 0..~127
+
+        const now = performance.now();
+        // detect speech
+        if (energy > ENERGY_THRESHOLD) {
+          // talking
+          lastSpeechMsRef.current = now;
+          // mark start if this is first burst
+          if (voicePhase !== 'listening') setVoicePhase('listening');
+        }
+
+        // if silent for a while, stop recorder (this triggers send)
+        const silentFor = now - lastSpeechMsRef.current;
+        const hasRecordedFor = now - startTalkingAtRef.current;
+
+        // ensure we recorded *something* and then saw silence
+        if (hasRecordedFor > MIN_TALK_MS && silentFor > SILENCE_HANG_MS) {
+          // finalize this turn
+          try {
+            if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
+              mediaRecorderRef.current.stop();
+            }
+            vadActiveRef.current = false;
+            return;
+          } catch (_) { /* ignore */ }
+        }
+
+        rafRef.current = requestAnimationFrame(tick);
+      };
+      rafRef.current = requestAnimationFrame(tick);
+    } catch (err) {
+      console.error('Mic start failed', err);
+      setError('Microphone access failed. Check permissions & HTTPS.');
+      await stopListening();
+      setVoicePhase('idle');
+    }
+  }, [voiceChatMode, stopListening, voicePhase]);
 
   const handleVoiceToggle = async () => {
     if (!isTestChat) return;
     if (!voiceChatMode) {
-      // turn ON
       setVoiceChatMode(true);
       loopActiveRef.current = true;
       lastPlayedIndexRef.current = 0;
       await startListening();
     } else {
-      // turn OFF
       loopActiveRef.current = false;
       setVoiceChatMode(false);
       setVoicePhase('idle');
       await stopListening();
-      if (audioPlayerRef.current) {
-        try { audioPlayerRef.current.pause(); } catch {}
-      }
+      if (audioPlayerRef.current) { try { audioPlayerRef.current.pause(); } catch {} }
     }
   };
 
-  // Manual mic button (one-shot record/stop inside voice mode)
+  // Manual mic (one-shot inside voice UI)
   const handleMicButton = async () => {
     if (!isTestChat) return;
     if (!voiceChatMode) {
-      // one-shot (not looping)
+      // One-shot capture
       loopActiveRef.current = false;
       await startListening();
-      // user must press again to stop
       return;
     }
-    // in voice loop: stop now → it will send immediately and then resume if loopActiveRef still true
+    // In loop: force-stop to send immediately
     if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
       mediaRecorderRef.current.stop();
-      setVoicePhase('thinking');
-      setCircleAnimation('pulse');
+      vadActiveRef.current = false;
     } else {
       await startListening();
     }
@@ -344,24 +402,18 @@ function FullChat() {
   // Clear conversation
   const handleClearConversation = async () => {
     const usertoken = Cookies.get('testtoken');
-    if (!usertoken) {
-      setError('No user token found in cookies.');
-      return;
-    }
+    if (!usertoken) { setError('No user token found in cookies.'); return; }
     try {
-      const response = await fetch(
-        `${API_BASE}/del-conv?usertoken=${encodeURIComponent(usertoken)}&convtoken=testchat`,
-        { method: 'DELETE' }
-      );
-      if (!response.ok) throw new Error('Failed to clear conversation');
+      const r = await fetch(`${API_BASE}/del-conv?usertoken=${encodeURIComponent(usertoken)}&convtoken=testchat`, { method: 'DELETE' });
+      if (!r.ok) throw new Error('Failed to clear conversation');
       if (selectedChat) {
-        const updatedChat = { ...selectedChat, conversation: {} };
-        setSelectedChat(updatedChat);
-        setChats(chats.map((c) => (c.convtoken === selectedChat.convtoken ? updatedChat : c)));
+        const updated = { ...selectedChat, conversation: {} };
+        setSelectedChat(updated);
+        setChats((prev) => prev.map((c) => (c.convtoken === selectedChat.convtoken ? updated : c)));
       }
       lastPlayedIndexRef.current = 0;
-    } catch (error) {
-      console.error('Error clearing conversation:', error);
+    } catch (e) {
+      console.error(e);
       setError('Error clearing conversation');
     }
   };
@@ -422,9 +474,8 @@ function FullChat() {
         </div>
       </aside>
 
-      {/* Main Panel */}
+      {/* Main */}
       <main className="fc-main">
-        {/* Header */}
         <header className="fc-header">
           <div className="fc-header__left">
             <div className="fc-avatar fc-avatar--lg">
@@ -432,67 +483,50 @@ function FullChat() {
             </div>
             <div>
               <div className="fc-title">{selectedChat ? selectedChat.convtoken : 'No conversation'}</div>
-              <div className="fc-subtitle">
-                {isTestChat ? 'Test chat' : 'Select a chat to get started'}
-              </div>
+              <div className="fc-subtitle">{isTestChat ? 'Test chat' : 'Select a chat to get started'}</div>
             </div>
           </div>
           <div className="fc-header__right">
             {isTestChat && (
               <>
-                <button className="fc-btn fc-btn--danger" onClick={handleClearConversation} title="Clear chat">
-                  🗑 Clear
-                </button>
+                <button className="fc-btn fc-btn--danger" onClick={handleClearConversation}>🗑 Clear</button>
                 <button
-                  className={`fc-btn ${voiceChatMode ? 'fc-btn--secondary' : 'fc-btn--primary'}`}
-                  onClick={handleVoiceToggle}
-                  title="Toggle voice mode"
-                >
-                  {voiceChatMode ? (voicePhase === 'listening' ? '🎧 Listening' :
-                    voicePhase === 'speaking' ? '🔊 Speaking' :
-                    voicePhase === 'thinking' ? '💭 Thinking' : '🎧 Voice ON') : '🎤 Voice OFF'}
+                    className={`fc-btn ${voiceChatMode ? 'fc-btn--secondary' : 'fc-btn--primary'}`}
+                    onClick={handleVoiceToggle}
+                  >
+                  {voiceChatMode
+                    ? (voicePhase === 'listening' ? '🎧 Listening'
+                      : voicePhase === 'speaking' ? '🔊 Speaking'
+                      : voicePhase === 'thinking' ? '💭 Thinking'
+                      : '🎧 Voice ON')
+                    : '🎤 Voice OFF'}
                 </button>
               </>
             )}
           </div>
         </header>
 
-        {/* Messages */}
         <section className="fc-messages" ref={scrollRef}>
           {voiceChatMode ? (
-            <VoiceOverlay
-              onExit={handleVoiceToggle}
-              circleAnimation={circleAnimation}
-              phase={voicePhase}
-            />
+            <VoiceOverlay onExit={handleVoiceToggle} circleAnimation={circleAnimation} phase={voicePhase} />
           ) : messages.length === 0 ? (
             <div className="fc-placeholder">No messages yet. Say hi 👋</div>
           ) : (
             <div className="fc-thread">
-              {messages.map((msg, idx) => (
-                <MessageBubble
-                  key={idx}
-                  isUser={msg.isUser}
-                  isHebrew={isHebrew(msg.text)}
-                  html={renderFormattedText(msg.text)}
-                />
+              {messages.map((m, i) => (
+                <MessageBubble key={i} isUser={m.isUser} isHebrew={isHebrew(m.text)} html={renderFormattedText(m.text)} />
               ))}
             </div>
           )}
         </section>
 
-        {/* Composer */}
         {isTestChat && (
           <footer className="fc-composer">
             <div className="fc-composer__inner">
-              <button
-                className="fc-iconbtn"
-                onClick={handleMicButton}
-                title={voicePhase === 'listening' ? 'Stop recording' : 'Record voice'}
-              >
+              <button className="fc-iconbtn" onClick={handleMicButton}
+                title={voicePhase === 'listening' ? 'Stop recording' : 'Record voice'}>
                 {voicePhase === 'listening' ? '⏹' : '🎙'}
               </button>
-
               <input
                 className="fc-input"
                 type="text"
@@ -501,13 +535,7 @@ function FullChat() {
                 placeholder="Write a message… Use **bold** to emphasize"
                 dir="auto"
               />
-
-              <button
-                className="fc-iconbtn"
-                onClick={handleSendMessage}
-                disabled={loading || !newMessage.trim()}
-                title="Send"
-              >
+              <button className="fc-iconbtn" onClick={handleSendMessage} disabled={loading || !newMessage.trim()}>
                 {loading ? <span className="fc-spinner" /> : '➤'}
               </button>
             </div>
@@ -517,8 +545,6 @@ function FullChat() {
     </div>
   );
 }
-
-/* ---------------- Components ---------------- */
 
 function MessageBubble({ isUser, isHebrew, html }) {
   return (
@@ -546,102 +572,38 @@ function VoiceOverlay({ onExit, circleAnimation, phase }) {
   );
 }
 
-/* ---------------- Styles ---------------- */
-
 const globalStyles = `
-:root {
-  --bg: #0f1420;
-  --panel: rgba(255,255,255,0.06);
-  --panel-strong: rgba(255,255,255,0.12);
-  --text: #e8ecf3;
-  --text-dim: #aab3c5;
-  --brand: #6ea8fe;
-  --brand-2: #8a7dff;
-  --ok: #22c55e;
-  --warn: #ef4444;
-  --border: rgba(255,255,255,0.12);
-  --shadow: 0 8px 30px rgba(0,0,0,0.25);
-  --bubble-user: linear-gradient(180deg, #4f9cff 0%, #6ea8fe 100%);
-  --bubble-bot: #1b2232;
-}
-.theme-light {
-  --bg: #f3f6fb;
-  --panel: #ffffff;
-  --panel-strong: #ffffff;
-  --text: #0f1420;
-  --text-dim: #5b667a;
-  --brand: #316bff;
-  --brand-2: #6b5cff;
-  --ok: #16a34a;
-  --warn: #dc2626;
-  --border: rgba(15,20,32,0.12);
-  --shadow: 0 10px 25px rgba(15,20,32,0.08);
-  --bubble-user: linear-gradient(180deg, #316bff 0%, #6b5cff 100%);
-  --bubble-bot: #e8ecf9;
-}
-* { box-sizing: border-box; }
-html, body, #root { height: 100%; overflow: hidden; }
-body { margin: 0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial; }
-.fc-root { display: grid; grid-template-columns: 320px 1fr; height: 100dvh; overflow: hidden; position: relative; background: radial-gradient(1200px 900px at -10% -20%, #1b2232 0%, var(--bg) 50%), var(--bg); color: var(--text); }
-.fc-sidebar { display: flex; flex-direction: column; border-right: 1px solid var(--border); backdrop-filter: blur(10px); background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.03)); min-height: 0; overflow: hidden; }
-.fc-sidebar__top { padding: 18px 16px 8px; }
-.fc-logo { display: flex; align-items: center; gap: 10px; font-weight: 700; letter-spacing: 0.2px; }
-.fc-logo__dot { width: 10px; height: 10px; border-radius: 50%; background: linear-gradient(135deg, var(--brand), var(--brand-2)); box-shadow: 0 0 12px var(--brand); }
-.fc-search { margin-top: 12px; }
-.fc-search input { width: 100%; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--border); background: var(--panel); color: var(--text); outline: none; }
-.fc-chatlist { padding: 8px; overflow-y: auto; flex: 1; }
-.fc-error { color: var(--warn); padding: 10px 12px; background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.25); border-radius: 10px; margin: 6px; }
-.fc-skel, .fc-empty { color: var(--text-dim); padding: 16px; text-align: center; }
-.fc-chatitem { width: 100%; display: flex; gap: 12px; align-items: center; padding: 10px; margin: 6px 0; background: transparent; border: 1px solid transparent; border-radius: 12px; cursor: pointer; text-align: left; color: var(--text); transition: transform .05s ease, background .2s ease, border-color .2s ease; }
-.fc-chatitem:hover { background: var(--panel); border-color: var(--border); }
-.fc-chatitem.active { background: var(--panel-strong); border-color: var(--border); transform: translateY(-1px); }
-.fc-avatar { width: 36px; height: 36px; border-radius: 10px; background: var(--bubble-bot); display:flex; align-items:center; justify-content:center; font-weight:700; }
-.fc-chatmeta { overflow: hidden; }
-.fc-chatmeta__name { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.fc-chatmeta__sub { font-size: 12px; color: var(--text-dim); }
-.fc-sidebar__bottom { padding: 12px 10px; display: grid; gap: 6px; border-top: 1px solid var(--border); }
-.fc-ghost { background: transparent; color: var(--text); border: 1px dashed var(--border); border-radius: 10px; padding: 10px 12px; cursor: pointer; transition: background .2s ease, border-color .2s ease; }
-.fc-ghost:hover { background: var(--panel); border-color: var(--brand); }
-.fc-main { display: grid; grid-template-rows: auto 1fr auto; min-height: 0; }
-.fc-header { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; border-bottom: 1px solid var(--border); background: linear-gradient(180deg, rgba(0,0,0,0.12), rgba(0,0,0,0)) , transparent; backdrop-filter: blur(8px); contain: paint; }
-.fc-header__left { display: flex; align-items: center; gap: 12px; }
-.fc-avatar--lg { width: 44px; height: 44px; border-radius: 12px; background: var(--bubble-bot); display:flex; align-items:center; justify-content:center; font-weight:800; }
-.fc-title { font-size: 16px; font-weight: 700; }
-.fc-subtitle { font-size: 12px; color: var(--text-dim); }
-.fc-header__right { display: flex; gap: 8px; }
-.fc-btn { padding: 8px 12px; border: 1px solid var(--border); border-radius: 10px; cursor: pointer; color: var(--text); background: var(--panel); transition: transform .05s ease, background .2s ease, border-color .2s ease; }
-.fc-btn:hover { background: var(--panel-strong); border-color: var(--brand); transform: translateY(-1px); }
-.fc-btn--primary { border-color: var(--brand); }
-.fc-btn--secondary { border-color: var(--text-dim); }
-.fc-btn--danger { border-color: var(--warn); color: #fff; background: linear-gradient(180deg, rgba(239,68,68,0.3), rgba(239,68,68,0.15)); }
-.fc-messages { padding: 16px 18px; overflow-y: auto; min-height: 0; -webkit-overflow-scrolling: touch; }
-.fc-placeholder { color: var(--text-dim); text-align: center; margin-top: 18vh; }
-.fc-thread { display: grid; gap: 10px; }
-.fc-bubble { max-width: min(72ch, 80%); padding: 12px 14px; border-radius: 16px; line-height: 1.45; box-shadow: var(--shadow); word-wrap: break-word; }
-.fc-bubble--user { margin-left: auto; background: var(--bubble-user); color: #fff; border-top-right-radius: 8px; }
-.fc-bubble--bot { margin-right: auto; background: var(--bubble-bot); border-top-left-radius: 8px; color: var(--text); }
-.fc-bubble__content strong { font-weight: 800; }
-.fc-composer { position: sticky; bottom: 0; padding: 12px 16px; border-top: 1px solid var(--border); background: linear-gradient(0deg, rgba(0,0,0,0.12), rgba(0,0,0,0)) , transparent; backdrop-filter: blur(8px); contain: paint; }
-.fc-composer__inner { display: grid; grid-template-columns: 42px 1fr 42px; gap: 10px; align-items: center; }
-.fc-input { width: 100%; padding: 12px 14px; border-radius: 14px; border: 1px solid var(--border); background: var(--panel); color: var(--text); outline: none; }
-.fc-input::placeholder { color: var(--text-dim); }
-.fc-iconbtn { height: 42px; border-radius: 12px; border: 1px solid var(--border); background: var(--panel); color: var(--text); cursor: pointer; display:flex; align-items:center; justify-content:center; transition: background .2s ease, transform .05s ease, border-color .2s ease; }
-.fc-iconbtn:hover { background: var(--panel-strong); border-color: var(--brand); transform: translateY(-1px); }
-.fc-spinner { width: 18px; height: 18px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.35); border-top-color: #fff; animation: spin 0.8s linear infinite; }
-@keyframes spin { to { transform: rotate(360deg); } }
-.fc-voice { position: relative; display:flex; flex-direction: column; align-items:center; justify-content:center; height: 65vh; gap: 18px; }
-.fc-voice__exit { position: absolute; top: 0; right: 0; border: 1px solid var(--border); background: var(--panel); color: var(--text); border-radius: 10px; padding: 6px 10px; cursor: pointer; }
-.fc-voice__circle { width: 180px; height: 180px; border-radius: 50%; background: radial-gradient(80px 80px at 50% 50%, var(--brand), var(--brand-2)); filter: drop-shadow(0 12px 30px rgba(0,0,0,0.25)); }
-.fc-voice__circle.pulse { animation: pulse 1.5s ease-in-out infinite; }
-.fc-voice__circle.vibrate { animation: vibrate 1s infinite; }
-@keyframes pulse { 0%{ transform: scale(1);} 50%{ transform: scale(1.08);} 100%{ transform: scale(1);} }
-@keyframes vibrate { 0% { transform: translate(0,0); } 25% { transform: translate(2px, -2px); } 50% { transform: translate(-2px, 1px); } 75% { transform: translate(2px, 1px); } 100% { transform: translate(0,0); } }
-.fc-voice__hint { color: var(--text-dim); }
-@media (max-width: 980px) {
-  .fc-root { grid-template-columns: 1fr; }
-  .fc-sidebar { display: none; }
-  .fc-main { grid-template-rows: auto 1fr auto; }
-}
+:root{--bg:#0f1420;--panel:rgba(255,255,255,0.06);--panel-strong:rgba(255,255,255,0.12);--text:#e8ecf3;--text-dim:#aab3c5;--brand:#6ea8fe;--brand-2:#8a7dff;--ok:#22c55e;--warn:#ef4444;--border:rgba(255,255,255,0.12);--shadow:0 8px 30px rgba(0,0,0,0.25);--bubble-user:linear-gradient(180deg,#4f9cff 0%,#6ea8fe 100%);--bubble-bot:#1b2232}
+.theme-light{--bg:#f3f6fb;--panel:#fff;--panel-strong:#fff;--text:#0f1420;--text-dim:#5b667a;--brand:#316bff;--brand-2:#6b5cff;--ok:#16a34a;--warn:#dc2626;--border:rgba(15,20,32,0.12);--shadow:0 10px 25px rgba(15,20,32,0.08);--bubble-user:linear-gradient(180deg,#316bff 0%,#6b5cff 100%);--bubble-bot:#e8ecf9}
+*{box-sizing:border-box}html,body,#root{height:100%;overflow:hidden}body{margin:0;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial}
+.fc-root{display:grid;grid-template-columns:320px 1fr;height:100dvh;overflow:hidden;position:relative;background:radial-gradient(1200px 900px at -10% -20%,#1b2232 0%,var(--bg) 50%),var(--bg);color:var(--text)}
+.fc-sidebar{display:flex;flex-direction:column;border-right:1px solid var(--border);backdrop-filter:blur(10px);background:linear-gradient(180deg,rgba(255,255,255,0.06),rgba(255,255,255,0.03));min-height:0;overflow:hidden}
+.fc-sidebar__top{padding:18px 16px 8px}.fc-logo{display:flex;align-items:center;gap:10px;font-weight:700;letter-spacing:.2px}.fc-logo__dot{width:10px;height:10px;border-radius:50%;background:linear-gradient(135deg,var(--brand),var(--brand-2));box-shadow:0 0 12px var(--brand)}
+.fc-search{margin-top:12px}.fc-search input{width:100%;padding:10px 12px;border-radius:10px;border:1px solid var(--border);background:var(--panel);color:var(--text);outline:none}
+.fc-chatlist{padding:8px;overflow-y:auto;flex:1}.fc-error{color:var(--warn);padding:10px 12px;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.25);border-radius:10px;margin:6px}
+.fc-skel,.fc-empty{color:var(--text-dim);padding:16px;text-align:center}
+.fc-chatitem{width:100%;display:flex;gap:12px;align-items:center;padding:10px;margin:6px 0;background:transparent;border:1px solid transparent;border-radius:12px;cursor:pointer;text-align:left;color:var(--text);transition:transform .05s ease,background .2s ease,border-color .2s ease}
+.fc-chatitem:hover{background:var(--panel);border-color:var(--border)}.fc-chatitem.active{background:var(--panel-strong);border-color:var(--border);transform:translateY(-1px)}
+.fc-avatar{width:36px;height:36px;border-radius:10px;background:var(--bubble-bot);display:flex;align-items:center;justify-content:center;font-weight:700}
+.fc-chatmeta{overflow:hidden}.fc-chatmeta__name{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.fc-chatmeta__sub{font-size:12px;color:var(--text-dim)}
+.fc-sidebar__bottom{padding:12px 10px;display:grid;gap:6px;border-top:1px solid var(--border)}.fc-ghost{background:transparent;color:var(--text);border:1px dashed var(--border);border-radius:10px;padding:10px 12px;cursor:pointer;transition:background .2s ease,border-color .2s ease}.fc-ghost:hover{background:var(--panel);border-color:var(--brand)}
+.fc-main{display:grid;grid-template-rows:auto 1fr auto;min-height:0}.fc-header{position:sticky;top:0;z-index:5;display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--border);background:linear-gradient(180deg,rgba(0,0,0,0.12),rgba(0,0,0,0)),transparent;backdrop-filter:blur(8px);contain:paint}
+.fc-header__left{display:flex;align-items:center;gap:12px}.fc-avatar--lg{width:44px;height:44px;border-radius:12px;background:var(--bubble-bot);display:flex;align-items:center;justify-content:center;font-weight:800}
+.fc-title{font-size:16px;font-weight:700}.fc-subtitle{font-size:12px;color:var(--text-dim)}.fc-header__right{display:flex;gap:8px}
+.fc-btn{padding:8px 12px;border:1px solid var(--border);border-radius:10px;cursor:pointer;color:var(--text);background:var(--panel);transition:transform .05s ease,background .2s ease,border-color .2s ease}.fc-btn:hover{background:var(--panel-strong);border-color:var(--brand);transform:translateY(-1px)}
+.fc-btn--primary{border-color:var(--brand)}.fc-btn--secondary{border-color:var(--text-dim)}.fc-btn--danger{border-color:var(--warn);color:#fff;background:linear-gradient(180deg,rgba(239,68,68,0.3),rgba(239,68,68,0.15))}
+.fc-messages{padding:16px 18px;overflow-y:auto;min-height:0;-webkit-overflow-scrolling:touch}.fc-placeholder{color:var(--text-dim);text-align:center;margin-top:18vh}.fc-thread{display:grid;gap:10px}
+.fc-bubble{max-width:min(72ch,80%);padding:12px 14px;border-radius:16px;line-height:1.45;box-shadow:var(--shadow);word-wrap:break-word}.fc-bubble--user{margin-left:auto;background:var(--bubble-user);color:#fff;border-top-right-radius:8px}.fc-bubble--bot{margin-right:auto;background:var(--bubble-bot);border-top-left-radius:8px;color:var(--text)}.fc-bubble__content strong{font-weight:800}
+.fc-composer{position:sticky;bottom:0;padding:12px 16px;border-top:1px solid var(--border);background:linear-gradient(0deg,rgba(0,0,0,0.12),rgba(0,0,0,0)),transparent;backdrop-filter:blur(8px);contain:paint}.fc-composer__inner{display:grid;grid-template-columns:42px 1fr 42px;gap:10px;align-items:center}
+.fc-input{width:100%;padding:12px 14px;border-radius:14px;border:1px solid var(--border);background:var(--panel);color:var(--text);outline:none}.fc-input::placeholder{color:var(--text-dim)}
+.fc-iconbtn{height:42px;border-radius:12px;border:1px solid var(--border);background:var(--panel);color:var(--text);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .2s ease,transform .05s ease,border-color .2s ease}.fc-iconbtn:hover{background:var(--panel-strong);border-color:var(--brand);transform:translateY(-1px)}
+.fc-spinner{width:18px;height:18px;border-radius:50%;border:2px solid rgba(255,255,255,0.35);border-top-color:#fff;animation:spin .8s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
+.fc-voice{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;height:65vh;gap:18px}.fc-voice__exit{position:absolute;top:0;right:0;border:1px solid var(--border);background:var(--panel);color:var(--text);border-radius:10px;padding:6px 10px;cursor:pointer}
+.fc-voice__circle{width:180px;height:180px;border-radius:50%;background:radial-gradient(80px 80px at 50% 50%,var(--brand),var(--brand-2));filter:drop-shadow(0 12px 30px rgba(0,0,0,0.25))}
+.fc-voice__circle.pulse{animation:pulse 1.5s ease-in-out infinite}.fc-voice__circle.vibrate{animation:vibrate 1s infinite}
+@keyframes pulse{0%{transform:scale(1)}50%{transform:scale(1.08)}100%{transform:scale(1)}}@keyframes vibrate{0%{transform:translate(0,0)}25%{transform:translate(2px,-2px)}50%{transform:translate(-2px,1px)}75%{transform:translate(2px,1px)}100%{transform:translate(0,0)}}
+.fc-voice__hint{color:var(--text-dim)}
+@media (max-width:980px){.fc-root{grid-template-columns:1fr}.fc-sidebar{display:none}.fc-main{grid-template-rows:auto 1fr auto}}
 `;
 
 export default FullChat;
