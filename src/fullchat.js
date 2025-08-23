@@ -386,10 +386,14 @@ function FullChat() {
   // Realtime (WebRTC) helpers
   // =======================
   async function startRealtimeCall() {
+    // ⬇️ Pass usertoken so backend injects the per-user prompt into the Realtime session
+    const usertoken = Cookies.get('testtoken');
+    if (!usertoken) throw new Error('Missing testtoken cookie.');
+
     const mint = await fetch(`${API_BASE}/realtime/session`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ voice: 'verse' }),
+      body: JSON.stringify({ voice: 'verse', usertoken }), // ✅ include usertoken
     });
     if (!mint.ok) {
       const txt = await mint.text().catch(()=> '');
