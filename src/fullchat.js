@@ -1,5 +1,5 @@
-// FullChat.jsx — text chat + press-to-talk (/flow) + realtime phone-call mode (WebRTC via /realtime/session)
-// Shows full history on first load & when switching chats. Audio playback happens ONLY in conversation mode.
+// FullChat.jsx — ALWAYS hydrate full history on load and when switching chats.
+// Also reconciles after every send, so you always see all messages immediately.
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Cookies from 'js-cookie';
 import { useNavigate } from 'react-router-dom';
@@ -10,10 +10,11 @@ function FullChat() {
   const [chats, setChats] = useState([]);
   const [selectedChat, setSelectedChat] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [sending, setSending] = useState(false);
   const [error, setError] = useState('');
   const [newMessage, setNewMessage] = useState('');
-  const [voiceChatMode, setVoiceChatMode] = useState(false);     // "phone call" mode
-  const [voicePhase, setVoicePhase] = useState('idle');          // 'idle' | 'connecting' | 'listening' | 'speaking' | 'thinking'
+  const [voiceChatMode, setVoiceChatMode] = useState(false);
+  const [voicePhase, setVoicePhase] = useState('idle'); // idle | connecting | listening | speaking | thinking
   const [theme, setTheme] = useState('dark');
   const [chatFilter, setChatFilter] = useState('');
   const [circleAnimation, setCircleAnimation] = useState('pulse');
@@ -39,9 +40,10 @@ function FullChat() {
   const remoteAudioRef = useRef(null);
 
   const username = Cookies.get('username') || '';
+  const usertoken = Cookies.get('testtoken') || '';
   const navigate = useNavigate();
 
-  const isHebrew = (t) => /[\u0590-\u05FF]/.test(t);
+  const isHebrew = (t) => /[\u0590-\u05FF]/.test(String(t || ''));
 
   const escapeHtml = (unsafe) =>
     (typeof unsafe === 'string' ? unsafe : '')
@@ -67,17 +69,23 @@ function FullChat() {
   };
 
   // =======================
-  // Fetch & hydrate helpers
+  // Conversation helpers
   // =======================
-  const pushConversation = useCallback((newConversation) => {
-    setSelectedChat((prevSel) => {
-      if (!prevSel) return prevSel;
-      const updated = { ...prevSel, conversation: newConversation || {} };
-      setChats((prev) => prev.map((c) => (c.convtoken === updated.convtoken ? updated : c)));
-      return updated;
-    });
+  // Merge a conversation object into state for a specific convtoken
+  const mergeConversationIntoList = useCallback((convtoken, conversation) => {
+    setChats((prev) =>
+      prev.map((c) =>
+        c.convtoken === convtoken ? { ...c, conversation: conversation || {} } : c
+      )
+    );
+    setSelectedChat((prev) =>
+      prev && prev.convtoken === convtoken
+        ? { ...prev, conversation: conversation || {} }
+        : prev
+    );
   }, []);
 
+  // Get full conversation for convtoken (requires backend route /fullconv)
   const fetchFullConversation = useCallback(
     async (convtoken) => {
       if (!username || !convtoken) return;
@@ -85,19 +93,38 @@ function FullChat() {
         const res = await fetch(
           `${API_BASE}/fullconv?username=${encodeURIComponent(username)}&convtoken=${encodeURIComponent(convtoken)}`
         );
-        if (!res.ok) return; // gracefully skip if endpoint not available yet
+        if (!res.ok) return; // if endpoint not present, skip silently
         const data = await res.json();
         if (data && data.conversation) {
-          pushConversation(data.conversation);
+          mergeConversationIntoList(convtoken, data.conversation);
         }
       } catch {
-        /* noop */
+        /* ignore */
       }
     },
-    [username, pushConversation]
+    [username, mergeConversationIntoList]
   );
 
-  // ------- initial chats (list + head); then hydrate the first selection -------
+  // Build array of message bubbles from a conversation object
+  const buildMessages = (conversation) => {
+    const msgs = [];
+    if (!conversation) return msgs;
+    let i = 1;
+    while (
+      Object.prototype.hasOwnProperty.call(conversation, 'question' + i) ||
+      Object.prototype.hasOwnProperty.call(conversation, 'answer' + i)
+    ) {
+      if (conversation['question' + i]) msgs.push({ text: conversation['question' + i], isUser: true });
+      if (conversation['answer' + i]) msgs.push({ text: conversation['answer' + i], isUser: false, idx: i });
+      i++;
+      if (i > 5000) break; // strong safety cap
+    }
+    return msgs;
+  };
+
+  // =======================
+  // Initial load (list + hydrate first chat)
+  // =======================
   useEffect(() => {
     if (!username) {
       setError('No username found in cookies.');
@@ -117,7 +144,10 @@ function FullChat() {
           setChats(sorted);
           const first = sorted[0] || null;
           setSelectedChat(first);
-          if (first?.convtoken) fetchFullConversation(first.convtoken);
+          if (first?.convtoken) {
+            // HYDRATE: fetch the full history immediately
+            fetchFullConversation(first.convtoken);
+          }
         } else {
           setChats([]);
           setSelectedChat(null);
@@ -130,87 +160,78 @@ function FullChat() {
     })();
   }, [username, fetchFullConversation]);
 
-  // When switching chats, hydrate that chat's full thread
-  useEffect(() => {
-    if (!selectedChat?.convtoken) return;
-    fetchFullConversation(selectedChat.convtoken);
-  }, [selectedChat?.convtoken, fetchFullConversation]);
+  // When switching chats from the sidebar, also hydrate that chat
+  const handleSelectChat = async (chat) => {
+    setSelectedChat(chat);
+    lastPlayedIndexRef.current = 0;
+    if (chat?.convtoken) fetchFullConversation(chat.convtoken);
+  };
 
-  // scroll bottom
+  // scroll bottom on selection or mode change
   const scrollRef = useRef(null);
   useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-    }
+    if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
   }, [selectedChat, voiceChatMode]);
 
-  // build thread from selectedChat.conversation
-  const buildMessages = useCallback(() => {
-    if (!selectedChat) return [];
-    const conv = selectedChat.conversation || {};
-    const msgs = [];
-    let i = 1;
-    while (typeof conv['question' + i] !== 'undefined' || typeof conv['answer' + i] !== 'undefined') {
-      if (conv['question' + i]) msgs.push({ text: conv['question' + i], isUser: true });
-      if (conv['answer' + i]) msgs.push({ text: conv['answer' + i], isUser: false, idx: i });
-      i++;
-      if (i > 2000) break; // safety cap
-    }
-    return msgs;
-  }, [selectedChat]);
-
-  const messages = buildMessages();
-  const filteredChats = chats.filter((c) => c.convtoken.toLowerCase().includes(chatFilter.trim().toLowerCase()));
-  const isTestChat = selectedChat && selectedChat.convtoken.toLowerCase() === 'testchat';
+  // Messages to render for the selected chat
+  const messages = buildMessages(selectedChat?.conversation || {});
+  const filteredChats = chats.filter((c) =>
+    c.convtoken.toLowerCase().includes(chatFilter.trim().toLowerCase())
+  );
+  const isTestChat =
+    selectedChat && selectedChat.convtoken && selectedChat.convtoken.toLowerCase() === 'testchat';
 
   // =======================
   // Send to /flow
   // =======================
   const handleSendMessage = async () => {
     if (!newMessage.trim()) return;
-    const usertoken = Cookies.get('testtoken');
     if (!usertoken) { setError('Missing testtoken cookie.'); return; }
-    setLoading(true);
+    setSending(true);
     try {
+      const convtoken = selectedChat?.convtoken || 'testchat';
       const r = await fetch(`${API_BASE}/flow`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          question: newMessage,
-          convtoken: selectedChat?.convtoken || 'testchat',
-          usertoken
-        })
+        body: JSON.stringify({ question: newMessage, convtoken, usertoken })
       });
       if (!r.ok) throw new Error('Server error');
       const data = await r.json();
-      pushConversation(data.conversation || {});
+
+      // The /flow response includes the entire conversation object: trust & merge.
+      mergeConversationIntoList(data.convtoken || convtoken, data.conversation || {});
+      // Extra safety: hydrate again to ensure we didn’t miss a row
+      fetchFullConversation(data.convtoken || convtoken);
+
+      // Voice playback only in voice mode
       if (voiceChatMode) {
-        if (data.audio_b64) {
-          await playAssistantAudioB64(data.audio_b64);
-        } else {
-          autoPlayLatestFromConversation(data.conversation);
-        }
+        if (data.audio_b64) await playAssistantAudioB64(data.audio_b64);
+        else autoPlayLatestFromConversation(data.conversation);
       }
       setNewMessage('');
     } catch {
       setError('Failed to send message.');
     } finally {
-      setLoading(false);
+      setSending(false);
     }
   };
 
   // ----- send recorded audio to /flow
   const sendAudioBlob = async (blob) => {
-    const usertoken = Cookies.get('testtoken');
     if (!usertoken) { setError('Missing testtoken cookie.'); return null; }
+    const convtoken = selectedChat?.convtoken || 'testchat';
     const form = new FormData();
     form.append('audio', new File([blob], 'audio.webm', { type: blob.type }));
-    form.append('convtoken', selectedChat?.convtoken || 'testchat');
+    form.append('convtoken', convtoken);
     form.append('usertoken', usertoken);
     const r = await fetch(`${API_BASE}/flow`, { method: 'POST', body: form });
     if (!r.ok) throw new Error('Voice send failed');
     const data = await r.json();
-    pushConversation(data.conversation || {});
+
+    mergeConversationIntoList(data.convtoken || convtoken, data.conversation || {});
+    // Safety hydrate
+    fetchFullConversation(data.convtoken || convtoken);
+
     return data;
   };
 
@@ -218,7 +239,7 @@ function FullChat() {
   // Local audio helpers (guarded by voiceChatMode)
   // =======================
   const playAssistantAudioB64 = async (b64) => {
-    if (!voiceChatMode) return; // 🔒 no playback if not in conversation mode
+    if (!voiceChatMode) return;
     try {
       const blob = base64ToBlob(b64, 'audio/mpeg');
       const url = URL.createObjectURL(blob);
@@ -232,17 +253,15 @@ function FullChat() {
         a.onended = () => { URL.revokeObjectURL(url); res(); };
         a.onerror = () => { URL.revokeObjectURL(url); res(); };
       });
-    } catch {
-      // ignore
-    } finally {
+    } catch {/* ignore */}
+    finally {
       setCircleAnimation('pulse');
       setVoicePhase('idle');
     }
   };
 
   const autoPlayLatestFromConversation = (conversationObj) => {
-    if (!voiceChatMode) return; // 🔒 guard
-    if (!conversationObj) return;
+    if (!voiceChatMode || !conversationObj) return;
     let maxN = 0;
     for (const k of Object.keys(conversationObj)) {
       if (k.startsWith('audio')) {
@@ -322,11 +341,8 @@ function FullChat() {
             const audioBlob = new Blob(audioChunksRef.current, { type: options.mimeType });
             const data = await sendAudioBlob(audioBlob);
             if (voiceChatMode) {
-              if (data?.audio_b64) {
-                await playAssistantAudioB64(data.audio_b64);
-              } else {
-                autoPlayLatestFromConversation(data?.conversation);
-              }
+              if (data?.audio_b64) await playAssistantAudioB64(data.audio_b64);
+              else autoPlayLatestFromConversation(data?.conversation);
             }
           } catch {
             setError('Voice send failed.');
@@ -392,21 +408,38 @@ function FullChat() {
   const handleMicButton = async () => {
     if (!isTestChat) return;
     if (!voiceChatMode) {
-      await startListening();           // one-shot in non-realtime mode
-      return;
+      startTalkingAtRef.current = performance.now(); // ensure duration calc starts
+      await startListening();                        // one-shot in non-realtime mode
     }
-    // In realtime mode, mic button is not used; the call is continuous
+  };
+
+  // =======================
+  // Clear conversation
+  // =======================
+  const handleClearConversation = async () => {
+    if (!usertoken) { setError('No user token found in cookies.'); return; }
+    try {
+      const convtoken = selectedChat?.convtoken || 'testchat';
+      const r = await fetch(
+        `${API_BASE}/del-conv?usertoken=${encodeURIComponent(usertoken)}&convtoken=${encodeURIComponent(convtoken)}`,
+        { method: 'DELETE' }
+      );
+      if (!r.ok) throw new Error('Failed to clear conversation');
+      mergeConversationIntoList(convtoken, {});
+      lastPlayedIndexRef.current = 0;
+    } catch {
+      setError('Error clearing conversation');
+    }
   };
 
   // =======================
   // Realtime (WebRTC) helpers
   // =======================
   async function startRealtimeCall() {
-    // 1) Ask backend for ephemeral key and let backend inject per-user botDefinition
     const mint = await fetch(`${API_BASE}/realtime/session`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ voice: 'verse', usertoken: Cookies.get('testtoken') || '' }),
+      body: JSON.stringify({ voice: 'verse', usertoken }),
     });
     if (!mint.ok) {
       const txt = await mint.text().catch(()=> '');
@@ -414,17 +447,14 @@ function FullChat() {
     }
     const { ephemeral_key, model } = await mint.json();
 
-    // 2) Mic
     const mic = await navigator.mediaDevices.getUserMedia({
       audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true }
     });
     rtcMicRef.current = mic;
 
-    // 3) PC
     const pc = new RTCPeerConnection({ iceServers: [] });
     pcRef.current = pc;
 
-    // 4) Remote sink
     pc.ontrack = (e) => {
       if (!remoteAudioRef.current) {
         const el = document.getElementById('realtime-audio');
@@ -434,12 +464,9 @@ function FullChat() {
       remoteAudioRef.current.srcObject = e.streams[0];
     };
 
-    // 5) Add mic tracks
     mic.getTracks().forEach(t => pc.addTrack(t, mic));
-    // Also explicitly request to receive audio back
     pc.addTransceiver('audio', { direction: 'recvonly' });
 
-    // Prefer Opus if available
     try {
       const senders = pc.getSenders().filter(s => s.track && s.track.kind === 'audio');
       if (senders[0]) {
@@ -455,11 +482,9 @@ function FullChat() {
       }
     } catch {}
 
-    // 6) SDP offer
     const offer = await pc.createOffer();
     await pc.setLocalDescription(offer);
 
-    // 7) POST SDP to OpenAI (need OpenAI-Beta header)
     const sdpResponse = await fetch(`https://api.openai.com/v1/realtime?model=${encodeURIComponent(model)}`, {
       method: 'POST',
       headers: {
@@ -499,7 +524,6 @@ function FullChat() {
       try { remoteAudioRef.current.pause(); } catch {}
       remoteAudioRef.current.srcObject = null;
     }
-    // Also stop any local MP3 playback from /flow
     if (audioPlayerRef.current) {
       try { audioPlayerRef.current.pause(); } catch {}
       audioPlayerRef.current.src = '';
@@ -535,8 +559,6 @@ function FullChat() {
   return (
     <div className={`fc-root ${theme === 'dark' ? 'theme-dark' : 'theme-light'}`}>
       <style>{globalStyles}</style>
-
-      {/* Hidden <audio> element for realtime stream */}
       <audio id="realtime-audio" style={{ display: 'none' }} />
 
       {/* Sidebar */}
@@ -567,11 +589,7 @@ function FullChat() {
               <button
                 key={chat.convtoken}
                 className={`fc-chatitem ${active ? 'active' : ''}`}
-                onClick={() => {
-                  setSelectedChat(chat);
-                  lastPlayedIndexRef.current = 0; // reset audio index for this thread
-                  fetchFullConversation(chat.convtoken); // hydrate full history on click
-                }}
+                onClick={() => handleSelectChat(chat)}
                 title={chat.convtoken}
               >
                 <div className="fc-avatar">{chat.convtoken.charAt(0).toUpperCase()}</div>
@@ -636,7 +654,12 @@ function FullChat() {
           ) : (
             <div className="fc-thread">
               {messages.map((m, i) => (
-                <MessageBubble key={`${m.isUser ? 'u' : 'b'}-${i}`} isUser={m.isUser} isHebrew={isHebrew(m.text)} html={renderFormattedText(m.text)} />
+                <MessageBubble
+                  key={`${m.isUser ? 'u' : 'b'}-${i}`}
+                  isUser={m.isUser}
+                  isHebrew={isHebrew(m.text)}
+                  html={renderFormattedText(m.text)}
+                />
               ))}
             </div>
           )}
@@ -645,8 +668,11 @@ function FullChat() {
         {isTestChat && (
           <footer className="fc-composer">
             <div className="fc-composer__inner">
-              <button className="fc-iconbtn" onClick={handleMicButton}
-                title={voicePhase === 'listening' ? 'Stop recording' : 'Record voice'}>
+              <button
+                className="fc-iconbtn"
+                onClick={handleMicButton}
+                title={voicePhase === 'listening' ? 'Stop recording' : 'Record voice'}
+              >
                 {voicePhase === 'listening' ? '⏹' : '🎙'}
               </button>
               <input
@@ -657,8 +683,13 @@ function FullChat() {
                 placeholder="Write a message… Use **bold** to emphasize"
                 dir="auto"
               />
-              <button className="fc-iconbtn" onClick={handleSendMessage} disabled={loading || !newMessage.trim()}>
-                {loading ? <span className="fc-spinner" /> : '➤'}
+              <button
+                className="fc-iconbtn"
+                onClick={handleSendMessage}
+                disabled={sending || !newMessage.trim()}
+                title="Send"
+              >
+                {sending ? <span className="fc-spinner" /> : '➤'}
               </button>
             </div>
           </footer>
@@ -697,7 +728,7 @@ function VoiceOverlay({ onExit, circleAnimation, phase }) {
 
 const globalStyles = `
 :root{--bg:#0f1420;--panel:rgba(255,255,255,0.06);--panel-strong:rgba(255,255,255,0.12);--text:#e8ecf3;--text-dim:#aab3c5;--brand:#6ea8fe;--brand-2:#8a7dff;--ok:#22c55e;--warn:#ef4444;--border:rgba(255,255,255,0.12);--shadow:0 8px 30px rgba(0,0,0,0.25);--bubble-user:linear-gradient(180deg,#4f9cff 0%,#6ea8fe 100%);--bubble-bot:#1b2232}
-.theme-light{--bg:#f3f6fb;--panel:#fff;--panel-strong:#fff;--text:#0f1420;--text-dim:#5b667a;--brand:#316bff;--brand-2:#6b5cff;--ok:#16a34a;--warn:#dc2626;--border:rgba(15,20,32,0.12);--shadow:0 10px 25px rgba(15,20,32,0.08);--bubble-user:linear-gradient(180deg,#316bff 0%,#6b5cff 100%);--bubble-bot:#e8ecf9}
+.theme-light{--bg:#f3f6fb;--panel:#fff;--panel-strong:#fff;--text:#0f1420;--text-dim:#5b667a;--brand:#316bff;--brand-2:#6b5cff;--ok:#16a34a;--warn:#dc2626;--border:rgba(15,20,32,0.12);--shadow:0 10px 25px rgba(0,0,0,0.08);--bubble-user:linear-gradient(180deg,#316bff 0%,#6b5cff 100%);--bubble-bot:#e8ecf9}
 *{box-sizing:border-box}html,body,#root{height:100%;overflow:hidden}body{margin:0;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial}
 .fc-root{display:grid;grid-template-columns:320px 1fr;height:100dvh;overflow:hidden;position:relative;background:radial-gradient(1200px 900px at -10% -20%,#1b2232 0%,var(--bg) 50%),var(--bg);color:var(--text)}
 .fc-sidebar{display:flex;flex-direction:column;border-right:1px solid var(--border);backdrop-filter:blur(10px);background:linear-gradient(180deg,rgba(255,255,255,0.06),rgba(255,255,255,0.03));min-height:0;overflow:hidden}
