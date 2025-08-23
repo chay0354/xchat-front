@@ -1,4 +1,5 @@
 // FullChat.jsx — text chat + press-to-talk (/flow) + realtime phone-call mode (WebRTC via /realtime/session)
+// Audio playback is ONLY allowed when voiceChatMode === true.
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Cookies from 'js-cookie';
 import { useNavigate } from 'react-router-dom';
@@ -29,7 +30,7 @@ function FullChat() {
   const lastSpeechMsRef = useRef(0);
   const vadActiveRef = useRef(false);
   const loopActiveRef = useRef(false);
-  const audioPlayerRef = useRef(null);
+  const audioPlayerRef = useRef(null);         // local MP3 playback (from /flow TTS)
   const lastPlayedIndexRef = useRef(0);
 
   // Realtime (WebRTC)
@@ -83,7 +84,10 @@ function FullChat() {
             return a.convtoken.localeCompare(b.convtoken);
           });
           setChats(sorted);
-          setSelectedChat(sorted[0]);
+          setSelectedChat(sorted[0] || null);
+        } else {
+          setChats([]);
+          setSelectedChat(null);
         }
       } catch {
         setError('Error fetching chat data.');
@@ -101,7 +105,7 @@ function FullChat() {
     }
   }, [selectedChat, voiceChatMode]);
 
-  // build thread
+  // build thread from selectedChat.conversation
   const buildMessages = useCallback(() => {
     if (!selectedChat) return [];
     const conv = selectedChat.conversation || {};
@@ -119,13 +123,17 @@ function FullChat() {
   const filteredChats = chats.filter((c) => c.convtoken.toLowerCase().includes(chatFilter.trim().toLowerCase()));
   const isTestChat = selectedChat && selectedChat.convtoken.toLowerCase() === 'testchat';
 
-  // Push updated conversation into state
+  // Replace selected chat's conversation safely and mirror into list (prevents UI desync)
   const pushConversation = useCallback((newConversation) => {
-    if (!selectedChat) return;
-    const updated = { ...selectedChat, conversation: newConversation };
-    setSelectedChat(updated);
-    setChats((prev) => prev.map((c) => (c.convtoken === updated.convtoken ? updated : c)));
-  }, [selectedChat]);
+    setSelectedChat((prevSel) => {
+      if (!prevSel) return prevSel;
+      const updated = { ...prevSel, conversation: newConversation || {} };
+      setChats((prev) =>
+        prev.map((c) => (c.convtoken === updated.convtoken ? updated : c))
+      );
+      return updated;
+    });
+  }, []);
 
   // ----- text send via /flow
   const handleSendMessage = async () => {
@@ -142,10 +150,13 @@ function FullChat() {
       if (!r.ok) throw new Error('Server error');
       const data = await r.json();
       pushConversation(data.conversation || {});
-      if (data.audio_b64) {
-        await playAssistantAudioB64(data.audio_b64);
-      } else {
-        autoPlayLatestFromConversation(data.conversation);
+      // 🔇 Only read aloud if in conversation mode
+      if (voiceChatMode) {
+        if (data.audio_b64) {
+          await playAssistantAudioB64(data.audio_b64);
+        } else {
+          autoPlayLatestFromConversation(data.conversation);
+        }
       }
       setNewMessage('');
     } catch {
@@ -170,8 +181,9 @@ function FullChat() {
     return data;
   };
 
-  // ----- play audio (mp3 b64)
+  // ----- play audio (mp3 b64) — guarded by voiceChatMode
   const playAssistantAudioB64 = async (b64) => {
+    if (!voiceChatMode) return; // 🔒 no playback if not in conversation mode
     try {
       const blob = base64ToBlob(b64, 'audio/mpeg');
       const url = URL.createObjectURL(blob);
@@ -186,7 +198,7 @@ function FullChat() {
         a.onerror = () => { URL.revokeObjectURL(url); res(); };
       });
     } catch {
-      // no-op
+      // ignore
     } finally {
       setCircleAnimation('pulse');
       setVoicePhase('idle');
@@ -194,6 +206,7 @@ function FullChat() {
   };
 
   const autoPlayLatestFromConversation = (conversationObj) => {
+    if (!voiceChatMode) return; // 🔒 guard
     if (!conversationObj) return;
     let maxN = 0;
     for (const k of Object.keys(conversationObj)) {
@@ -273,10 +286,13 @@ function FullChat() {
           try {
             const audioBlob = new Blob(audioChunksRef.current, { type: options.mimeType });
             const data = await sendAudioBlob(audioBlob);
-            if (data?.audio_b64) {
-              await playAssistantAudioB64(data.audio_b64);
-            } else {
-              autoPlayLatestFromConversation(data?.conversation);
+            // 🔇 Only read aloud if in conversation mode
+            if (voiceChatMode) {
+              if (data?.audio_b64) {
+                await playAssistantAudioB64(data.audio_b64);
+              } else {
+                autoPlayLatestFromConversation(data?.conversation);
+              }
             }
           } catch {
             setError('Voice send failed.');
@@ -336,7 +352,7 @@ function FullChat() {
       await stopListening();
       setVoicePhase('idle');
     }
-  }, [voicePhase, stopListening]);
+  }, [voicePhase, stopListening, voiceChatMode]);
 
   // Manual mic (press) for /flow
   const handleMicButton = async () => {
@@ -370,7 +386,6 @@ function FullChat() {
   // Realtime (WebRTC) helpers
   // =======================
   async function startRealtimeCall() {
-    // 1) Get ephemeral token from your backend
     const mint = await fetch(`${API_BASE}/realtime/session`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -382,17 +397,14 @@ function FullChat() {
     }
     const { ephemeral_key, model } = await mint.json();
 
-    // 2) Get mic stream
     const mic = await navigator.mediaDevices.getUserMedia({
       audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true }
     });
     rtcMicRef.current = mic;
 
-    // 3) Create RTCPeerConnection
     const pc = new RTCPeerConnection({ iceServers: [] });
     pcRef.current = pc;
 
-    // 4) Remote audio sink
     pc.ontrack = (e) => {
       if (!remoteAudioRef.current) {
         const el = document.getElementById('realtime-audio');
@@ -408,14 +420,11 @@ function FullChat() {
       remoteAudioRef.current.srcObject = e.streams[0];
     };
 
-    // 5) Add mic tracks
     mic.getTracks().forEach(t => pc.addTrack(t, mic));
 
-    // 6) Create offer
     const offer = await pc.createOffer({ offerToReceiveAudio: true, offerToReceiveVideo: false });
     await pc.setLocalDescription(offer);
 
-    // 7) Send SDP offer to OpenAI Realtime, receive answer
     const sdpResponse = await fetch(`https://api.openai.com/v1/realtime?model=${encodeURIComponent(model)}`, {
       method: 'POST',
       headers: {
@@ -431,7 +440,6 @@ function FullChat() {
     const answerSdp = await sdpResponse.text();
     await pc.setRemoteDescription({ type: 'answer', sdp: answerSdp });
 
-    // Optional: state callbacks
     pc.onconnectionstatechange = () => {
       const st = pc.connectionState;
       if (st === 'connected') {
@@ -455,6 +463,11 @@ function FullChat() {
       try { remoteAudioRef.current.pause(); } catch {}
       remoteAudioRef.current.srcObject = null;
     }
+    // Also stop any local MP3 playback from /flow
+    if (audioPlayerRef.current) {
+      try { audioPlayerRef.current.pause(); } catch {}
+      audioPlayerRef.current.src = '';
+    }
   }
 
   const handleVoiceToggle = async () => {
@@ -465,7 +478,6 @@ function FullChat() {
         setVoicePhase('connecting');
         setCircleAnimation('pulse');
         await startRealtimeCall();
-        // Connected → onconnectionstatechange will set 'listening'
       } catch (e) {
         setError(String(e.message || e));
         setVoiceChatMode(false);
@@ -516,7 +528,10 @@ function FullChat() {
               <button
                 key={chat.convtoken}
                 className={`fc-chatitem ${active ? 'active' : ''}`}
-                onClick={() => setSelectedChat(chat)}
+                onClick={() => {
+                  setSelectedChat(chat);
+                  lastPlayedIndexRef.current = 0; // reset audio index for this thread
+                }}
                 title={chat.convtoken}
               >
                 <div className="fc-avatar">{chat.convtoken.charAt(0).toUpperCase()}</div>
