@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
+// FullChat.jsx
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Cookies from 'js-cookie';
 import { useNavigate } from 'react-router-dom';
 
@@ -12,15 +13,21 @@ function FullChat() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [newMessage, setNewMessage] = useState('');
-  const [recording, setRecording] = useState(false);
   const [voiceChatMode, setVoiceChatMode] = useState(false);
-  const [circleAnimation, setCircleAnimation] = useState('vibrate');
-  const [lastPlayedAudioIndex, setLastPlayedAudioIndex] = useState(0);
+  const [voicePhase, setVoicePhase] = useState('idle'); // 'listening' | 'thinking' | 'speaking' | 'idle'
   const [theme, setTheme] = useState('dark');
   const [chatFilter, setChatFilter] = useState('');
+  const [circleAnimation, setCircleAnimation] = useState('pulse');
 
+  // Voice/recording management
   const mediaRecorderRef = useRef(null);
   const audioChunksRef = useRef([]);
+  const micStreamRef = useRef(null);
+  const audioPlayerRef = useRef(null);
+  const loopActiveRef = useRef(false); // keeps loop alive while Voice ON
+  const lastPlayedIndexRef = useRef(0);
+
+  // UI/scroll
   const scrollRef = useRef(null);
 
   const username = Cookies.get('username') || '';
@@ -51,144 +58,286 @@ function FullChat() {
     return new Blob([byteArray], { type: mime });
   };
 
-  // Fetch chats
+  // Fetch chats (left sidebar) and pick first (prefers "testchat")
   useEffect(() => {
     if (!username) {
       setError('No username found in cookies.');
-      setLoading(false);
       return;
     }
-    setLoading(true);
-    fetch(`${API_BASE}/fullchat?username=${encodeURIComponent(username)}`)
-      .then((res) => res.json())
-      .then((data) => {
+    (async () => {
+      try {
+        setLoading(true);
+        const res = await fetch(`${API_BASE}/fullchat?username=${encodeURIComponent(username)}`);
+        const data = await res.json();
         if (data.chats && data.chats.length > 0) {
           const sortedChats = data.chats.sort((a, b) => {
-            if (a.convtoken.toLowerCase() === 'testchat') return -1;
-            if (b.convtoken.toLowerCase() === 'testchat') return 1;
+            if (a.convtoken?.toLowerCase() === 'testchat') return -1;
+            if (b.convtoken?.toLowerCase() === 'testchat') return 1;
             return a.convtoken.localeCompare(b.convtoken);
           });
           setChats(sortedChats);
           setSelectedChat(sortedChats[0]);
         }
-      })
-      .catch((err) => {
-        console.error('Error fetching chats:', err);
+      } catch (e) {
+        console.error('Error fetching chats:', e);
         setError('Error fetching chat data.');
-      })
-      .finally(() => setLoading(false));
+      } finally {
+        setLoading(false);
+      }
+    })();
   }, [username]);
 
-  // Auto-play audio for new answers
-  useEffect(() => {
-    if (selectedChat && selectedChat.conversation) {
-      let maxIndex = 0;
-      Object.keys(selectedChat.conversation).forEach((key) => {
-        if (key.startsWith('question')) {
-          const num = parseInt(key.replace('question', ''));
-          if (num > maxIndex) maxIndex = num;
-        }
-      });
-      if (maxIndex > lastPlayedAudioIndex) {
-        const audioKey = 'audio' + maxIndex;
-        const audioData = selectedChat.conversation[audioKey];
-        if (audioData) {
-          const blob = base64ToBlob(audioData, 'audio/mpeg');
-          const url = URL.createObjectURL(blob);
-          const audioElement = new Audio(url);
-          audioElement.play().catch((err) => console.error('Error playing audio:', err));
-          setLastPlayedAudioIndex(maxIndex);
-          setCircleAnimation('vibrate');
-        }
-      }
-    }
-  }, [selectedChat, lastPlayedAudioIndex]);
-
-  // Auto-scroll to bottom
+  // Auto-scroll
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   }, [selectedChat, voiceChatMode]);
 
-  // Send text
+  // Build messages out of {questionN, answerN}
+  const buildMessages = useCallback(() => {
+    if (!selectedChat) return [];
+    const conv = selectedChat.conversation || {};
+    const messages = [];
+    let i = 1;
+    while (conv['question' + i] || conv['answer' + i]) {
+      if (conv['question' + i]) messages.push({ text: conv['question' + i], isUser: true });
+      if (conv['answer' + i]) messages.push({ text: conv['answer' + i], isUser: false, idx: i });
+      i++;
+    }
+    return messages;
+  }, [selectedChat]);
+
+  const messages = buildMessages();
+
+  const filteredChats = chats.filter((c) =>
+    c.convtoken.toLowerCase().includes(chatFilter.trim().toLowerCase())
+  );
+  const isTestChat = selectedChat && selectedChat.convtoken.toLowerCase() === 'testchat';
+
+  // ---- CHAT ACTIONS ----
+
+  const pushNewConversationState = useCallback((newConversation) => {
+    if (!selectedChat) return;
+    const updatedChat = { ...selectedChat, conversation: newConversation };
+    setSelectedChat(updatedChat);
+    setChats((prev) => prev.map((c) => (c.convtoken === updatedChat.convtoken ? updatedChat : c)));
+  }, [selectedChat]);
+
   const handleSendMessage = async () => {
     if (!newMessage.trim()) return;
-    setLoading(true);
     const usertoken = Cookies.get('testtoken');
-    const requestData = { question: newMessage, convtoken: 'testchat', usertoken };
-
+    if (!usertoken) {
+      setError('Missing testtoken cookie.');
+      return;
+    }
+    setLoading(true);
     try {
       const response = await fetch(`${API_BASE}/flow`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(requestData),
+        body: JSON.stringify({ question: newMessage, convtoken: 'testchat', usertoken }),
       });
       if (!response.ok) throw new Error('Error sending message to server');
       const data = await response.json();
-      const updatedChat = { ...selectedChat, conversation: data.conversation };
-      setSelectedChat(updatedChat);
-      setChats(chats.map((c) => (c.convtoken === 'testchat' ? updatedChat : c)));
+      pushNewConversationState(data.conversation || {});
+      // play immediate audio if present
+      if (data.audio_b64) {
+        await playAssistantAudioB64(data.audio_b64);
+      } else {
+        // fall back to last message audioN
+        autoPlayLatestFromConversation(data.conversation);
+      }
       setNewMessage('');
     } catch (err) {
       console.error('Error in sending message:', err);
+      setError('Failed to send message.');
     } finally {
       setLoading(false);
     }
   };
 
-  // Send recorded audio
   const sendAudioBlob = async (blob) => {
-    setLoading(true);
     const usertoken = Cookies.get('testtoken');
+    if (!usertoken) {
+      setError('Missing testtoken cookie.');
+      return null;
+    }
     const formData = new FormData();
     const file = new File([blob], 'audio.webm', { type: blob.type });
     formData.append('audio', file);
     formData.append('convtoken', 'testchat');
     formData.append('usertoken', usertoken);
+
+    const res = await fetch(`${API_BASE}/flow`, { method: 'POST', body: formData });
+    if (!res.ok) throw new Error('Error sending audio to server');
+    const data = await res.json();
+    pushNewConversationState(data.conversation || {});
+    return data;
+  };
+
+  // ---- AUDIO PLAYBACK ----
+
+  const playAssistantAudioB64 = async (b64) => {
     try {
-      const response = await fetch(`${API_BASE}/flow`, { method: 'POST', body: formData });
-      if (!response.ok) throw new Error('Error sending audio to server');
-      const data = await response.json();
-      const updatedChat = { ...selectedChat, conversation: data.conversation };
-      setSelectedChat(updatedChat);
-      setChats(chats.map((c) => (c.convtoken === 'testchat' ? updatedChat : c)));
-    } catch (err) {
-      console.error('Error in sending audio:', err);
+      const blob = base64ToBlob(b64, 'audio/mpeg');
+      const url = URL.createObjectURL(blob);
+      if (!audioPlayerRef.current) {
+        audioPlayerRef.current = new Audio();
+      }
+      const audioEl = audioPlayerRef.current;
+      audioEl.src = url;
+      setVoicePhase('speaking');
+      setCircleAnimation('vibrate');
+      await audioEl.play();
+      await new Promise((resolve) => {
+        audioEl.onended = () => {
+          URL.revokeObjectURL(url);
+          resolve();
+        };
+        audioEl.onerror = () => {
+          console.warn('Audio playback error');
+          URL.revokeObjectURL(url);
+          resolve();
+        };
+      });
+    } catch (e) {
+      console.error('Error playing audio', e);
     } finally {
-      setLoading(false);
+      setCircleAnimation('pulse');
+      setVoicePhase('idle');
     }
   };
 
-  // Mic toggle
-  const handleMicButton = async () => {
-    if (!recording) {
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        const options = { mimeType: 'audio/webm' };
-        const mediaRecorder = new MediaRecorder(stream, options);
-        audioChunksRef.current = [];
-        mediaRecorder.ondataavailable = (event) => {
-          if (event.data && event.data.size > 0) audioChunksRef.current.push(event.data);
-        };
-        mediaRecorder.onstop = () => {
-          const audioBlob = new Blob(audioChunksRef.current, { type: options.mimeType });
-          sendAudioBlob(audioBlob);
-        };
-        mediaRecorder.start();
-        mediaRecorderRef.current = mediaRecorder;
-        setRecording(true);
-        setVoiceChatMode(true);
-        setCircleAnimation('vibrate');
-      } catch (err) {
-        console.error('Error accessing microphone:', err);
+  const autoPlayLatestFromConversation = (conversationObj) => {
+    if (!conversationObj) return;
+    // find highest N where audioN exists
+    let maxN = 0;
+    for (const key of Object.keys(conversationObj)) {
+      if (key.startsWith('audio')) {
+        const n = parseInt(key.replace('audio', ''), 10);
+        if (n > maxN) maxN = n;
       }
-    } else {
+    }
+    if (maxN && maxN > lastPlayedIndexRef.current) {
+      const b64 = conversationObj['audio' + maxN];
+      lastPlayedIndexRef.current = maxN;
+      if (b64) {
+        playAssistantAudioB64(b64);
+      }
+    }
+  };
+
+  // ---- VOICE LOOP (Listen → Send → Speak → Listen) ----
+
+  const startListening = useCallback(async () => {
+    try {
+      // stop any existing
+      await stopListening();
+
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      micStreamRef.current = stream;
+
+      const options = { mimeType: 'audio/webm' };
+      const mediaRecorder = new MediaRecorder(stream, options);
+      mediaRecorderRef.current = mediaRecorder;
+
+      audioChunksRef.current = [];
+      mediaRecorder.ondataavailable = (e) => {
+        if (e.data && e.data.size > 0) audioChunksRef.current.push(e.data);
+      };
+      mediaRecorder.onstop = async () => {
+        const audioBlob = new Blob(audioChunksRef.current, { type: options.mimeType });
+        setVoicePhase('thinking');
+        try {
+          const data = await sendAudioBlob(audioBlob);
+          // If server returned instant audio
+          if (data?.audio_b64) {
+            await playAssistantAudioB64(data.audio_b64);
+          } else {
+            autoPlayLatestFromConversation(data?.conversation);
+          }
+        } catch (e) {
+          console.error('sendAudioBlob failed', e);
+          setError('Voice send failed.');
+        } finally {
+          if (loopActiveRef.current) {
+            // resume listening
+            await startListening();
+          } else {
+            setVoicePhase('idle');
+          }
+        }
+      };
+
+      setVoicePhase('listening');
+      setCircleAnimation('vibrate');
+      mediaRecorder.start();
+    } catch (err) {
+      console.error('Error accessing microphone:', err);
+      setError('Microphone access failed. Check permissions.');
+      setVoicePhase('idle');
+      setCircleAnimation('pulse');
+    }
+  }, []);
+
+  const stopListening = useCallback(async () => {
+    try {
       if (mediaRecorderRef.current) {
-        mediaRecorderRef.current.stop();
-        setRecording(false);
-        setCircleAnimation('loading');
+        const mr = mediaRecorderRef.current;
+        if (mr.state !== 'inactive') {
+          mr.stop();
+        }
+        mediaRecorderRef.current = null;
       }
+      if (micStreamRef.current) {
+        micStreamRef.current.getTracks().forEach((t) => t.stop());
+        micStreamRef.current = null;
+      }
+    } catch {
+      // ignore
+    } finally {
+      setCircleAnimation('pulse');
+    }
+  }, []);
+
+  const handleVoiceToggle = async () => {
+    if (!isTestChat) return;
+    if (!voiceChatMode) {
+      // turn ON
+      setVoiceChatMode(true);
+      loopActiveRef.current = true;
+      lastPlayedIndexRef.current = 0;
+      await startListening();
+    } else {
+      // turn OFF
+      loopActiveRef.current = false;
+      setVoiceChatMode(false);
+      setVoicePhase('idle');
+      await stopListening();
+      if (audioPlayerRef.current) {
+        try { audioPlayerRef.current.pause(); } catch {}
+      }
+    }
+  };
+
+  // Manual mic button (one-shot record/stop inside voice mode)
+  const handleMicButton = async () => {
+    if (!isTestChat) return;
+    if (!voiceChatMode) {
+      // one-shot (not looping)
+      loopActiveRef.current = false;
+      await startListening();
+      // user must press again to stop
+      return;
+    }
+    // in voice loop: stop now → it will send immediately and then resume if loopActiveRef still true
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
+      mediaRecorderRef.current.stop();
+      setVoicePhase('thinking');
+      setCircleAnimation('pulse');
+    } else {
+      await startListening();
     }
   };
 
@@ -205,36 +354,17 @@ function FullChat() {
         { method: 'DELETE' }
       );
       if (!response.ok) throw new Error('Failed to clear conversation');
-
       if (selectedChat) {
         const updatedChat = { ...selectedChat, conversation: {} };
         setSelectedChat(updatedChat);
         setChats(chats.map((c) => (c.convtoken === selectedChat.convtoken ? updatedChat : c)));
       }
+      lastPlayedIndexRef.current = 0;
     } catch (error) {
       console.error('Error clearing conversation:', error);
       setError('Error clearing conversation');
     }
   };
-
-  const buildMessages = () => {
-    if (!selectedChat) return [];
-    const conv = selectedChat.conversation || {};
-    const messages = [];
-    let i = 1;
-    while (conv['question' + i] || conv['answer' + i]) {
-      if (conv['question' + i]) messages.push({ text: conv['question' + i], isUser: true });
-      if (conv['answer' + i]) messages.push({ text: conv['answer' + i], isUser: false });
-      i++;
-    }
-    return messages;
-  };
-
-  const messages = buildMessages();
-  const filteredChats = chats.filter((c) =>
-    c.convtoken.toLowerCase().includes(chatFilter.trim().toLowerCase())
-  );
-  const isTestChat = selectedChat && selectedChat.convtoken.toLowerCase() === 'testchat';
 
   return (
     <div className={`fc-root ${theme === 'dark' ? 'theme-dark' : 'theme-light'}`}>
@@ -315,10 +445,12 @@ function FullChat() {
                 </button>
                 <button
                   className={`fc-btn ${voiceChatMode ? 'fc-btn--secondary' : 'fc-btn--primary'}`}
-                  onClick={() => setVoiceChatMode(!voiceChatMode)}
+                  onClick={handleVoiceToggle}
                   title="Toggle voice mode"
                 >
-                  {voiceChatMode ? '🎧 Voice ON' : '🎤 Voice OFF'}
+                  {voiceChatMode ? (voicePhase === 'listening' ? '🎧 Listening' :
+                    voicePhase === 'speaking' ? '🔊 Speaking' :
+                    voicePhase === 'thinking' ? '💭 Thinking' : '🎧 Voice ON') : '🎤 Voice OFF'}
                 </button>
               </>
             )}
@@ -328,7 +460,11 @@ function FullChat() {
         {/* Messages */}
         <section className="fc-messages" ref={scrollRef}>
           {voiceChatMode ? (
-            <VoiceOverlay onExit={() => setVoiceChatMode(false)} circleAnimation={circleAnimation} />
+            <VoiceOverlay
+              onExit={handleVoiceToggle}
+              circleAnimation={circleAnimation}
+              phase={voicePhase}
+            />
           ) : messages.length === 0 ? (
             <div className="fc-placeholder">No messages yet. Say hi 👋</div>
           ) : (
@@ -352,10 +488,9 @@ function FullChat() {
               <button
                 className="fc-iconbtn"
                 onClick={handleMicButton}
-                disabled={loading}
-                title={recording ? 'Stop recording' : 'Record voice'}
+                title={voicePhase === 'listening' ? 'Stop recording' : 'Record voice'}
               >
-                {recording ? '⏹' : '🎙'}
+                {voicePhase === 'listening' ? '⏹' : '🎙'}
               </button>
 
               <input
@@ -396,19 +531,24 @@ function MessageBubble({ isUser, isHebrew, html }) {
   );
 }
 
-function VoiceOverlay({ onExit, circleAnimation }) {
+function VoiceOverlay({ onExit, circleAnimation, phase }) {
   return (
     <div className="fc-voice">
       <button className="fc-voice__exit" onClick={onExit} title="Close">✕</button>
       <div className={`fc-voice__circle ${circleAnimation === 'vibrate' ? 'vibrate' : 'pulse'}`} />
-      <div className="fc-voice__hint">Listening… speak now</div>
+      <div className="fc-voice__hint">
+        {phase === 'listening' && 'Listening… speak now'}
+        {phase === 'thinking' && 'Thinking…'}
+        {phase === 'speaking' && 'Speaking…'}
+        {phase === 'idle' && 'Voice ready'}
+      </div>
     </div>
   );
 }
 
 /* ---------------- Styles ---------------- */
 
-const globalStyles = `/* (unchanged CSS from your file) */ 
+const globalStyles = `
 :root {
   --bg: #0f1420;
   --panel: rgba(255,255,255,0.06);
