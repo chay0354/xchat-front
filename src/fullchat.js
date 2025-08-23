@@ -1,5 +1,5 @@
 // FullChat.jsx — text chat + press-to-talk (/flow) + realtime phone-call mode (WebRTC via /realtime/session)
-// Audio playback is ONLY allowed when voiceChatMode === true.
+// Shows full history on first load & when switching chats. Audio playback happens ONLY in conversation mode.
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Cookies from 'js-cookie';
 import { useNavigate } from 'react-router-dom';
@@ -44,7 +44,7 @@ function FullChat() {
   const isHebrew = (t) => /[\u0590-\u05FF]/.test(t);
 
   const escapeHtml = (unsafe) =>
-    (unsafe || '')
+    (typeof unsafe === 'string' ? unsafe : '')
       .replace(/&/g, '&amp;')
       .replace(/</g, '&lt;')
       .replace(/>/g, '&gt;')
@@ -66,7 +66,38 @@ function FullChat() {
     return new Blob([byteArray], { type: mime });
   };
 
-  // ------- initial chats
+  // =======================
+  // Fetch & hydrate helpers
+  // =======================
+  const pushConversation = useCallback((newConversation) => {
+    setSelectedChat((prevSel) => {
+      if (!prevSel) return prevSel;
+      const updated = { ...prevSel, conversation: newConversation || {} };
+      setChats((prev) => prev.map((c) => (c.convtoken === updated.convtoken ? updated : c)));
+      return updated;
+    });
+  }, []);
+
+  const fetchFullConversation = useCallback(
+    async (convtoken) => {
+      if (!username || !convtoken) return;
+      try {
+        const res = await fetch(
+          `${API_BASE}/fullconv?username=${encodeURIComponent(username)}&convtoken=${encodeURIComponent(convtoken)}`
+        );
+        if (!res.ok) return; // gracefully skip if endpoint not available yet
+        const data = await res.json();
+        if (data && data.conversation) {
+          pushConversation(data.conversation);
+        }
+      } catch {
+        /* noop */
+      }
+    },
+    [username, pushConversation]
+  );
+
+  // ------- initial chats (list + head); then hydrate the first selection -------
   useEffect(() => {
     if (!username) {
       setError('No username found in cookies.');
@@ -84,7 +115,9 @@ function FullChat() {
             return a.convtoken.localeCompare(b.convtoken);
           });
           setChats(sorted);
-          setSelectedChat(sorted[0] || null);
+          const first = sorted[0] || null;
+          setSelectedChat(first);
+          if (first?.convtoken) fetchFullConversation(first.convtoken);
         } else {
           setChats([]);
           setSelectedChat(null);
@@ -95,7 +128,13 @@ function FullChat() {
         setLoading(false);
       }
     })();
-  }, [username]);
+  }, [username, fetchFullConversation]);
+
+  // When switching chats, hydrate that chat's full thread
+  useEffect(() => {
+    if (!selectedChat?.convtoken) return;
+    fetchFullConversation(selectedChat.convtoken);
+  }, [selectedChat?.convtoken, fetchFullConversation]);
 
   // scroll bottom
   const scrollRef = useRef(null);
@@ -111,10 +150,11 @@ function FullChat() {
     const conv = selectedChat.conversation || {};
     const msgs = [];
     let i = 1;
-    while (conv['question' + i] || conv['answer' + i]) {
+    while (typeof conv['question' + i] !== 'undefined' || typeof conv['answer' + i] !== 'undefined') {
       if (conv['question' + i]) msgs.push({ text: conv['question' + i], isUser: true });
       if (conv['answer' + i]) msgs.push({ text: conv['answer' + i], isUser: false, idx: i });
       i++;
+      if (i > 2000) break; // safety cap
     }
     return msgs;
   }, [selectedChat]);
@@ -123,17 +163,9 @@ function FullChat() {
   const filteredChats = chats.filter((c) => c.convtoken.toLowerCase().includes(chatFilter.trim().toLowerCase()));
   const isTestChat = selectedChat && selectedChat.convtoken.toLowerCase() === 'testchat';
 
-  // Replace selected chat's conversation safely and mirror into list (prevents UI desync)
-  const pushConversation = useCallback((newConversation) => {
-    setSelectedChat((prevSel) => {
-      if (!prevSel) return prevSel;
-      const updated = { ...prevSel, conversation: newConversation || {} };
-      setChats((prev) => prev.map((c) => (c.convtoken === updated.convtoken ? updated : c)));
-      return updated;
-    });
-  }, []);
-
-  // ----- text send via /flow
+  // =======================
+  // Send to /flow
+  // =======================
   const handleSendMessage = async () => {
     if (!newMessage.trim()) return;
     const usertoken = Cookies.get('testtoken');
@@ -143,12 +175,15 @@ function FullChat() {
       const r = await fetch(`${API_BASE}/flow`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ question: newMessage, convtoken: 'testchat', usertoken })
+        body: JSON.stringify({
+          question: newMessage,
+          convtoken: selectedChat?.convtoken || 'testchat',
+          usertoken
+        })
       });
       if (!r.ok) throw new Error('Server error');
       const data = await r.json();
       pushConversation(data.conversation || {});
-      // 🔇 Only read aloud if in conversation mode
       if (voiceChatMode) {
         if (data.audio_b64) {
           await playAssistantAudioB64(data.audio_b64);
@@ -170,7 +205,7 @@ function FullChat() {
     if (!usertoken) { setError('Missing testtoken cookie.'); return null; }
     const form = new FormData();
     form.append('audio', new File([blob], 'audio.webm', { type: blob.type }));
-    form.append('convtoken', 'testchat');
+    form.append('convtoken', selectedChat?.convtoken || 'testchat');
     form.append('usertoken', usertoken);
     const r = await fetch(`${API_BASE}/flow`, { method: 'POST', body: form });
     if (!r.ok) throw new Error('Voice send failed');
@@ -179,7 +214,9 @@ function FullChat() {
     return data;
   };
 
-  // ----- play audio (mp3 b64) — guarded by voiceChatMode
+  // =======================
+  // Local audio helpers (guarded by voiceChatMode)
+  // =======================
   const playAssistantAudioB64 = async (b64) => {
     if (!voiceChatMode) return; // 🔒 no playback if not in conversation mode
     try {
@@ -284,7 +321,6 @@ function FullChat() {
           try {
             const audioBlob = new Blob(audioChunksRef.current, { type: options.mimeType });
             const data = await sendAudioBlob(audioBlob);
-            // 🔇 Only read aloud if in conversation mode
             if (voiceChatMode) {
               if (data?.audio_b64) {
                 await playAssistantAudioB64(data.audio_b64);
@@ -362,24 +398,6 @@ function FullChat() {
     // In realtime mode, mic button is not used; the call is continuous
   };
 
-  // Clear conversation
-  const handleClearConversation = async () => {
-    const usertoken = Cookies.get('testtoken');
-    if (!usertoken) { setError('No user token found in cookies.'); return; }
-    try {
-      const r = await fetch(`${API_BASE}/del-conv?usertoken=${encodeURIComponent(usertoken)}&convtoken=testchat`, { method: 'DELETE' });
-      if (!r.ok) throw new Error('Failed to clear conversation');
-      if (selectedChat) {
-        const updated = { ...selectedChat, conversation: {} };
-        setSelectedChat(updated);
-        setChats((prev) => prev.map((c) => (c.convtoken === selectedChat.convtoken ? updated : c)));
-      }
-      lastPlayedIndexRef.current = 0;
-    } catch {
-      setError('Error clearing conversation');
-    }
-  };
-
   // =======================
   // Realtime (WebRTC) helpers
   // =======================
@@ -418,11 +436,10 @@ function FullChat() {
 
     // 5) Add mic tracks
     mic.getTracks().forEach(t => pc.addTrack(t, mic));
-
-    // 6) Ask to receive audio back
+    // Also explicitly request to receive audio back
     pc.addTransceiver('audio', { direction: 'recvonly' });
 
-    // Prefer Opus
+    // Prefer Opus if available
     try {
       const senders = pc.getSenders().filter(s => s.track && s.track.kind === 'audio');
       if (senders[0]) {
@@ -438,11 +455,11 @@ function FullChat() {
       }
     } catch {}
 
-    // 7) SDP offer
+    // 6) SDP offer
     const offer = await pc.createOffer();
     await pc.setLocalDescription(offer);
 
-    // 8) POST SDP to OpenAI (need OpenAI-Beta: realtime=v1)
+    // 7) POST SDP to OpenAI (need OpenAI-Beta header)
     const sdpResponse = await fetch(`https://api.openai.com/v1/realtime?model=${encodeURIComponent(model)}`, {
       method: 'POST',
       headers: {
@@ -512,6 +529,9 @@ function FullChat() {
     }
   };
 
+  // =======================
+  // UI
+  // =======================
   return (
     <div className={`fc-root ${theme === 'dark' ? 'theme-dark' : 'theme-light'}`}>
       <style>{globalStyles}</style>
@@ -550,6 +570,7 @@ function FullChat() {
                 onClick={() => {
                   setSelectedChat(chat);
                   lastPlayedIndexRef.current = 0; // reset audio index for this thread
+                  fetchFullConversation(chat.convtoken); // hydrate full history on click
                 }}
                 title={chat.convtoken}
               >
@@ -615,7 +636,7 @@ function FullChat() {
           ) : (
             <div className="fc-thread">
               {messages.map((m, i) => (
-                <MessageBubble key={i} isUser={m.isUser} isHebrew={isHebrew(m.text)} html={renderFormattedText(m.text)} />
+                <MessageBubble key={`${m.isUser ? 'u' : 'b'}-${i}`} isUser={m.isUser} isHebrew={isHebrew(m.text)} html={renderFormattedText(m.text)} />
               ))}
             </div>
           )}
