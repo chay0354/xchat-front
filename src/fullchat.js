@@ -12,8 +12,8 @@ function FullChat() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [newMessage, setNewMessage] = useState('');
-  const [voiceChatMode, setVoiceChatMode] = useState(false);          // Realtime "phone call" mode
-  const [voicePhase, setVoicePhase] = useState('idle');               // 'idle' | 'connecting' | 'listening' | 'speaking' | 'thinking'
+  const [voiceChatMode, setVoiceChatMode] = useState(false);     // "phone call" mode
+  const [voicePhase, setVoicePhase] = useState('idle');          // 'idle' | 'connecting' | 'listening' | 'speaking' | 'thinking'
   const [theme, setTheme] = useState('dark');
   const [chatFilter, setChatFilter] = useState('');
   const [circleAnimation, setCircleAnimation] = useState('pulse');
@@ -128,9 +128,7 @@ function FullChat() {
     setSelectedChat((prevSel) => {
       if (!prevSel) return prevSel;
       const updated = { ...prevSel, conversation: newConversation || {} };
-      setChats((prev) =>
-        prev.map((c) => (c.convtoken === updated.convtoken ? updated : c))
-      );
+      setChats((prev) => prev.map((c) => (c.convtoken === updated.convtoken ? updated : c)));
       return updated;
     });
   }, []);
@@ -386,14 +384,11 @@ function FullChat() {
   // Realtime (WebRTC) helpers
   // =======================
   async function startRealtimeCall() {
-    // ⬇️ Pass usertoken so backend injects the per-user prompt into the Realtime session
-    const usertoken = Cookies.get('testtoken');
-    if (!usertoken) throw new Error('Missing testtoken cookie.');
-
+    // 1) Ask backend for ephemeral key and let backend inject per-user botDefinition
     const mint = await fetch(`${API_BASE}/realtime/session`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ voice: 'verse', usertoken }), // ✅ include usertoken
+      body: JSON.stringify({ voice: 'verse', usertoken: Cookies.get('testtoken') || '' }),
     });
     if (!mint.ok) {
       const txt = await mint.text().catch(()=> '');
@@ -401,39 +396,59 @@ function FullChat() {
     }
     const { ephemeral_key, model } = await mint.json();
 
+    // 2) Mic
     const mic = await navigator.mediaDevices.getUserMedia({
       audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true }
     });
     rtcMicRef.current = mic;
 
+    // 3) PC
     const pc = new RTCPeerConnection({ iceServers: [] });
     pcRef.current = pc;
 
+    // 4) Remote sink
     pc.ontrack = (e) => {
       if (!remoteAudioRef.current) {
         const el = document.getElementById('realtime-audio');
-        if (el) {
-          el.autoplay = true;
-          remoteAudioRef.current = el;
-        } else {
-          const fallback = new Audio();
-          fallback.autoplay = true;
-          remoteAudioRef.current = fallback;
-        }
+        if (el) { el.autoplay = true; remoteAudioRef.current = el; }
+        else { const fallback = new Audio(); fallback.autoplay = true; remoteAudioRef.current = fallback; }
       }
       remoteAudioRef.current.srcObject = e.streams[0];
     };
 
+    // 5) Add mic tracks
     mic.getTracks().forEach(t => pc.addTrack(t, mic));
 
-    const offer = await pc.createOffer({ offerToReceiveAudio: true, offerToReceiveVideo: false });
+    // 6) Ask to receive audio back
+    pc.addTransceiver('audio', { direction: 'recvonly' });
+
+    // Prefer Opus
+    try {
+      const senders = pc.getSenders().filter(s => s.track && s.track.kind === 'audio');
+      if (senders[0]) {
+        const caps = RTCRtpSender.getCapabilities('audio');
+        if (caps?.codecs) {
+          const opusFirst = [...caps.codecs].sort((a, b) => {
+            const ao = /opus/i.test(a.mimeType) ? -1 : 1;
+            const bo = /opus/i.test(b.mimeType) ? -1 : 1;
+            return ao - bo;
+          });
+          senders[0].setCodecPreferences?.(opusFirst);
+        }
+      }
+    } catch {}
+
+    // 7) SDP offer
+    const offer = await pc.createOffer();
     await pc.setLocalDescription(offer);
 
+    // 8) POST SDP to OpenAI (need OpenAI-Beta: realtime=v1)
     const sdpResponse = await fetch(`https://api.openai.com/v1/realtime?model=${encodeURIComponent(model)}`, {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${ephemeral_key}`,
-        'Content-Type': 'application/sdp'
+        'Content-Type': 'application/sdp',
+        'OpenAI-Beta': 'realtime=v1'
       },
       body: offer.sdp
     });
