@@ -51,48 +51,19 @@ function FullChat() {
     return new Blob([byteArray], { type: mime });
   };
 
-  // Fetch chats and load full conversation for the first chat
-  useEffect(() => {
-    if (!username) {
-      setError('No username found in cookies.');
-      setLoading(false);
-      return;
-    }
-    setLoading(true);
-    fetch(`${API_BASE}/fullchat?username=${encodeURIComponent(username)}`)
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.chats && data.chats.length > 0) {
-          const sortedChats = data.chats.sort((a, b) => {
-            if (a.convtoken.toLowerCase() === 'testchat') return -1;
-            if (b.convtoken.toLowerCase() === 'testchat') return 1;
-            return a.convtoken.localeCompare(b.convtoken);
-          });
-          setChats(sortedChats);
-          setSelectedChat(sortedChats[0]);
-          
-          // Load full conversation for the first chat
-          if (sortedChats[0] && sortedChats[0].convtoken) {
-            loadFullConversation(sortedChats[0].convtoken);
-          }
-        }
-      })
-      .catch((err) => {
-        console.error('Error fetching chats:', err);
-        setError('Error fetching chat data.');
-      })
-      .finally(() => setLoading(false));
-  }, [username]);
-
   // Function to load full conversation for a specific chat
   const loadFullConversation = async (convtoken) => {
+    console.log('Loading full conversation for:', convtoken);
     try {
       const response = await fetch(
-        `${API_BASE}/fullchat?username=${encodeURIComponent(username)}&convtoken=${encodeURIComponent(convtoken)}`
+        `${API_BASE}/conversation?username=${encodeURIComponent(username)}&convtoken=${encodeURIComponent(convtoken)}`
       );
+      console.log('Response status:', response.status);
       if (response.ok) {
         const data = await response.json();
+        console.log('Full conversation data:', data);
         if (data && data.conversation) {
+          console.log('Conversation loaded:', data.conversation);
           // Update the selected chat with full conversation
           setSelectedChat(prev => ({
             ...prev,
@@ -104,12 +75,58 @@ function FullChat() {
               ? { ...chat, conversation: data.conversation }
               : chat
           ));
+        } else {
+          console.log('No conversation data found');
         }
+      } else {
+        console.log('Response not ok:', response.status);
       }
     } catch (err) {
       console.error('Error loading full conversation:', err);
     }
   };
+
+  // Fetch chats and load full conversation for the first chat
+  useEffect(() => {
+    if (!username) {
+      setError('No username found in cookies.');
+      setLoading(false);
+      return;
+    }
+    console.log('Fetching chats for username:', username);
+    setLoading(true);
+    fetch(`${API_BASE}/fullchat?username=${encodeURIComponent(username)}`)
+      .then((res) => {
+        console.log('Initial fetch response status:', res.status);
+        return res.json();
+      })
+      .then((data) => {
+        console.log('Initial fetch data:', data);
+        if (data.chats && data.chats.length > 0) {
+          const sortedChats = data.chats.sort((a, b) => {
+            if (a.convtoken.toLowerCase() === 'testchat') return -1;
+            if (b.convtoken.toLowerCase() === 'testchat') return 1;
+            return a.convtoken.localeCompare(b.convtoken);
+          });
+          console.log('Sorted chats:', sortedChats);
+          setChats(sortedChats);
+          setSelectedChat(sortedChats[0]);
+          
+          // Load full conversation for the first chat
+          if (sortedChats[0] && sortedChats[0].convtoken) {
+            console.log('Loading conversation for first chat:', sortedChats[0].convtoken);
+            loadFullConversation(sortedChats[0].convtoken);
+          }
+        } else {
+          console.log('No chats found in data');
+        }
+      })
+      .catch((err) => {
+        console.error('Error fetching chats:', err);
+        setError('Error fetching chat data.');
+      })
+      .finally(() => setLoading(false));
+  }, [username]);
 
   // Auto-play audio for new answers
   useEffect(() => {
