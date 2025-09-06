@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import Cookies from 'js-cookie';
 import { useNavigate } from 'react-router-dom';
+import config from './config';
 
 // 🔗 Backend base URL (EC2 behind Nginx/Certbot)
-const API_BASE = 'https://xchatback123.xyz';
+const API_BASE = config.apiUrl;
 
 const designTokens = `
 :root {
@@ -213,7 +214,7 @@ function Register() {
 
   const pythonExample = `import requests
 
-url = "https://xchatback123.xyz/flow"
+url = "${API_BASE}/flow"
 payload = {
     "question": "Your question here",
     "usertoken": "${userToken}"
@@ -221,7 +222,7 @@ payload = {
 response = requests.post(url, json=payload)
 print(response.json())`;
 
-  const jsExample = `fetch("https://xchatback123.xyz/flow", {
+  const jsExample = `fetch("${API_BASE}/flow", {
   method: "POST",
   headers: { "Content-Type": "application/json" },
   body: JSON.stringify({
@@ -383,7 +384,7 @@ print(response.json())`;
         </div>
 
         <div className="label">
-          Send a <code>POST</code> to <code>https://xchatback123.xyz/flow</code> with <code>question</code> and <code>usertoken</code>.
+          Send a <code>POST</code> to <code>{API_BASE}/flow</code> with <code>question</code> and <code>usertoken</code>.
           Optionally include <code>convtoken</code> to continue a conversation.
         </div>
 

@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Cookies from 'js-cookie';
 import { useNavigate } from 'react-router-dom';
+import config from './config';
 
 // 🔗 Backend base URL (EC2 behind Nginx/Certbot)
-const API_BASE = 'https://xchatback123.xyz';
-// or: const API_BASE = import.meta.env.VITE_API_BASE || 'https://xchatback123.xyz';
+const API_BASE = config.apiUrl;
 
 function FullChat() {
   const [chats, setChats] = useState([]);

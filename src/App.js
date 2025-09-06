@@ -4,6 +4,7 @@ import Cookies from 'js-cookie';
 import Register from './register';
 import FullChat from './fullchat';
 import EditUserInfo from './edituserinfo';
+import config from './config';
 
 /* ---------------- Shared Design Tokens ---------------- */
 const designTokens = `
@@ -187,9 +188,9 @@ function Login() {
     try {
       Cookies.set('username', usernameInput, { expires: 1, path: '/', sameSite: 'Lax' });
 
-      // ✅ Backend call proxied through Nginx
+      // ✅ Backend call using config
       const authRes = await fetch(
-        `/api/auth?username=${encodeURIComponent(usernameInput)}&password=${encodeURIComponent(passwordInput)}`
+        `${config.apiUrl}/auth?username=${encodeURIComponent(usernameInput)}&password=${encodeURIComponent(passwordInput)}`
       );
       if (!authRes.ok) {
         setError('Incorrect username or password.');
@@ -197,7 +198,7 @@ function Login() {
       }
 
       const tokenRes = await fetch(
-        `/api/get-token?username=${encodeURIComponent(usernameInput)}`
+        `${config.apiUrl}/get-token?username=${encodeURIComponent(usernameInput)}`
       );
       if (!tokenRes.ok) throw new Error('Failed to fetch token');
       const data = await tokenRes.json();

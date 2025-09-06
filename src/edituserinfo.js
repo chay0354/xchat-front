@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import Cookies from 'js-cookie';
 import { useNavigate } from 'react-router-dom';
+import config from './config';
 
 // Point frontend → EC2 backend (HTTPS behind Nginx/Certbot)
-const API_BASE = 'https://xchatback123.xyz';
-// If you want env-based config instead, use:
-// const API_BASE = import.meta.env.VITE_API_BASE || 'https://xchatback123.xyz';
+const API_BASE = config.apiUrl;
 
 function EditUserInfo() {
   const [calendarToken, setCalendarToken] = useState('');
