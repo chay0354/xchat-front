@@ -7,9 +7,9 @@ frontend:
         - nvm use 20
         - node -v
         # Check that Amplify injected your env (prints YES/NO)
-        - echo "Has REACT_APP_API_URL? ${REACT_APP_API_URL:+YES}${REACT_APP_API_URL:-NO}"
+        - 'echo "Has REACT_APP_API_URL? ${REACT_APP_API_URL:+YES}${REACT_APP_API_URL:-NO}"'
         # Fail early if it's missing so you get a clear error
-        - test -n "$REACT_APP_API_URL" || (echo "ERROR: REACT_APP_API_URL not set in Amplify env vars" && exit 1)
+        - 'test -n "$REACT_APP_API_URL" || (echo "ERROR: REACT_APP_API_URL not set in Amplify env vars" && exit 1)'
         # Install deps (use legacy flag only if your deps are picky)
         - npm ci --cache .npm --prefer-offline
         # - npm ci --cache .npm --prefer-offline --legacy-peer-deps
