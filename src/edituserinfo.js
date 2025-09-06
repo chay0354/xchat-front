@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Cookies from 'js-cookie';
-import { useNavigate } from 'react-router-dom';
+// import { useNavigate } from 'react-router-dom'; // Removed unused import
 import config from './config';
 
 // Point frontend → EC2 backend (HTTPS behind Nginx/Certbot)
@@ -13,7 +13,7 @@ function EditUserInfo() {
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
-  const navigate = useNavigate();
+  // const navigate = useNavigate(); // Removed unused variable
 
   const containerStyle = {
     display: 'flex',

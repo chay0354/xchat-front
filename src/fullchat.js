@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Cookies from 'js-cookie';
 import { useNavigate } from 'react-router-dom';
 import config from './config';
@@ -52,7 +52,7 @@ function FullChat() {
   };
 
   // Function to load full conversation for a specific chat
-  const loadFullConversation = async (convtoken) => {
+  const loadFullConversation = useCallback(async (convtoken) => {
     console.log('Loading full conversation for:', convtoken);
     try {
       const response = await fetch(
@@ -84,7 +84,7 @@ function FullChat() {
     } catch (err) {
       console.error('Error loading full conversation:', err);
     }
-  };
+  }, [username]);
 
   // Fetch chats and load full conversation for the first chat
   useEffect(() => {
@@ -126,7 +126,7 @@ function FullChat() {
         setError('Error fetching chat data.');
       })
       .finally(() => setLoading(false));
-  }, [username]);
+  }, [username, loadFullConversation]);
 
   // Auto-play audio for new answers
   useEffect(() => {
