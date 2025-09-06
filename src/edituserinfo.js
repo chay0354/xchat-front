@@ -107,11 +107,11 @@ function EditUserInfo() {
       });
 
       if (res.ok) {
-        setSuccessMessage('User info updated successfully.');
+      setSuccessMessage('User info updated successfully.');
         setErrorMessage('');
       } else {
         setSuccessMessage('');
-        setErrorMessage('Failed to update user info.');
+      setErrorMessage('Failed to update user info.');
       }
     } catch (err) {
       console.error(err);
@@ -159,42 +159,42 @@ function EditUserInfo() {
 
           <div style={{ marginBottom: '15px', width: '100%' }}>
             <label style={labelStyle}>Calendar Token:</label>
-            <input
-              type="text"
+                  <input
+                    type="text"
               placeholder="Calendar Token"
               style={inputStyle}
-              value={calendarToken}
-              onChange={(e) => setCalendarToken(e.target.value)}
-            />
-          </div>
+                    value={calendarToken}
+                    onChange={(e) => setCalendarToken(e.target.value)}
+                  />
+                </div>
 
           <div style={{ marginBottom: '15px', width: '100%' }}>
             <label style={labelStyle}>Password:</label>
-            <input
-              type="password"
+                  <input
+                    type="password"
               placeholder="Password"
               style={inputStyle}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              autoComplete="new-password"
-            />
-          </div>
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    autoComplete="new-password"
+                  />
+                </div>
 
           <div style={{ marginBottom: '15px', width: '100%' }}>
             <label style={labelStyle}>Bot Definition:</label>
-            <textarea
+                  <textarea
               placeholder="Enter bot definition..."
               style={{ ...inputStyle, height: '150px', resize: 'vertical' }}
-              value={botDefinition}
-              onChange={(e) => setBotDefinition(e.target.value)}
-            />
-          </div>
+                    value={botDefinition}
+                    onChange={(e) => setBotDefinition(e.target.value)}
+                  />
+                </div>
 
           <button onClick={handleSave} style={buttonStyle}>
             Save
-          </button>
-        </div>
-      </div>
+                  </button>
+                </div>
+              </div>
     </div>
   );
 }

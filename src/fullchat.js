@@ -51,7 +51,7 @@ function FullChat() {
     return new Blob([byteArray], { type: mime });
   };
 
-  // Fetch chats
+  // Fetch chats and load full conversation for the first chat
   useEffect(() => {
     if (!username) {
       setError('No username found in cookies.');
@@ -70,6 +70,11 @@ function FullChat() {
           });
           setChats(sortedChats);
           setSelectedChat(sortedChats[0]);
+          
+          // Load full conversation for the first chat
+          if (sortedChats[0] && sortedChats[0].convtoken) {
+            loadFullConversation(sortedChats[0].convtoken);
+          }
         }
       })
       .catch((err) => {
@@ -78,6 +83,33 @@ function FullChat() {
       })
       .finally(() => setLoading(false));
   }, [username]);
+
+  // Function to load full conversation for a specific chat
+  const loadFullConversation = async (convtoken) => {
+    try {
+      const response = await fetch(
+        `${API_BASE}/fullchat?username=${encodeURIComponent(username)}&convtoken=${encodeURIComponent(convtoken)}`
+      );
+      if (response.ok) {
+        const data = await response.json();
+        if (data && data.conversation) {
+          // Update the selected chat with full conversation
+          setSelectedChat(prev => ({
+            ...prev,
+            conversation: data.conversation
+          }));
+          // Update the chat in the chats list
+          setChats(prev => prev.map(chat => 
+            chat.convtoken === convtoken 
+              ? { ...chat, conversation: data.conversation }
+              : chat
+          ));
+        }
+      }
+    } catch (err) {
+      console.error('Error loading full conversation:', err);
+    }
+  };
 
   // Auto-play audio for new answers
   useEffect(() => {
@@ -268,7 +300,13 @@ function FullChat() {
               <button
                 key={chat.convtoken}
                 className={`fc-chatitem ${active ? 'active' : ''}`}
-                onClick={() => setSelectedChat(chat)}
+                onClick={() => {
+                  setSelectedChat(chat);
+                  // Load full conversation when clicking on a chat
+                  if (chat.convtoken) {
+                    loadFullConversation(chat.convtoken);
+                  }
+                }}
                 title={chat.convtoken}
               >
                 <div className="fc-avatar">{chat.convtoken.charAt(0).toUpperCase()}</div>
