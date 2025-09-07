@@ -3,7 +3,6 @@ import Cookies from 'js-cookie';
 import { useNavigate } from 'react-router-dom';
 import config from './config';
 
-// 🔗 Backend base URL (EC2 behind Nginx/Certbot)
 const API_BASE = config.apiUrl;
 
 function FullChat() {
@@ -13,9 +12,8 @@ function FullChat() {
   const [error, setError] = useState('');
   const [newMessage, setNewMessage] = useState('');
   const [recording, setRecording] = useState(false);
-  const [voiceChatMode, setVoiceChatMode] = useState(false);
-  const [circleAnimation, setCircleAnimation] = useState('vibrate');
-  const [lastPlayedAudioIndex, setLastPlayedAudioIndex] = useState(0);
+  const [chatMode, setChatMode] = useState('text'); // 'text' or 'voice'
+  const [isProcessing, setIsProcessing] = useState(false);
   const [theme, setTheme] = useState('dark');
   const [chatFilter, setChatFilter] = useState('');
 
@@ -51,121 +49,87 @@ function FullChat() {
     return new Blob([byteArray], { type: mime });
   };
 
-  // Function to load full conversation for a specific chat
-  const loadFullConversation = useCallback(async (convtoken) => {
-    console.log('Loading full conversation for:', convtoken);
+  // Load full conversation for a specific chat
+  const loadFullConversation = useCallback(async (chat) => {
+    if (!chat) return;
+    
     try {
+      const usertoken = Cookies.get('testtoken');
+      if (!usertoken) {
+        setError('No user token found in cookies.');
+        return;
+      }
+
       const response = await fetch(
-        `${API_BASE}/conversation?username=${encodeURIComponent(username)}&convtoken=${encodeURIComponent(convtoken)}`
+        `${API_BASE}/conversation?usertoken=${encodeURIComponent(usertoken)}&convtoken=${encodeURIComponent(chat.convtoken)}`
       );
-      console.log('Response status:', response.status);
-      if (response.ok) {
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      const updatedChat = { ...chat, conversation: data.conversation };
+      setSelectedChat(updatedChat);
+      setChats(prevChats => 
+        prevChats.map(c => c.convtoken === chat.convtoken ? updatedChat : c)
+      );
+    } catch (error) {
+      console.error('Error loading conversation:', error);
+      setError('Failed to load conversation');
+    }
+  }, []);
+
+  // Load chats on component mount
+  useEffect(() => {
+    const loadChats = async () => {
+      const usertoken = Cookies.get('testtoken');
+      if (!usertoken) {
+        setError('No user token found in cookies.');
+        return;
+      }
+
+      try {
+        const response = await fetch(`${API_BASE}/fullchat?usertoken=${encodeURIComponent(usertoken)}`);
+        if (!response.ok) throw new Error('Failed to load chats');
         const data = await response.json();
-        console.log('Full conversation data:', data);
-        if (data && data.conversation) {
-          console.log('Conversation loaded:', data.conversation);
-          // Update the selected chat with full conversation
-          setSelectedChat(prev => ({
-            ...prev,
-            conversation: data.conversation
-          }));
-          // Update the chat in the chats list
-          setChats(prev => prev.map(chat => 
-            chat.convtoken === convtoken 
-              ? { ...chat, conversation: data.conversation }
-              : chat
-          ));
-        } else {
-          console.log('No conversation data found');
+        setChats(data.chats || []);
+        
+        // Auto-select test chat if available
+        const testChat = data.chats?.find(chat => chat.convtoken === 'testchat');
+        if (testChat) {
+          setSelectedChat(testChat);
+          loadFullConversation(testChat);
         }
-      } else {
-        console.log('Response not ok:', response.status);
+      } catch (error) {
+        console.error('Error loading chats:', error);
+        setError('Failed to load chats');
       }
-    } catch (err) {
-      console.error('Error loading full conversation:', err);
-    }
-  }, [username]);
+    };
 
-  // Fetch chats and load full conversation for the first chat
-  useEffect(() => {
-    if (!username) {
-      setError('No username found in cookies.');
-      setLoading(false);
-      return;
-    }
-    console.log('Fetching chats for username:', username);
-    setLoading(true);
-    fetch(`${API_BASE}/fullchat?username=${encodeURIComponent(username)}`)
-      .then((res) => {
-        console.log('Initial fetch response status:', res.status);
-        return res.json();
-      })
-      .then((data) => {
-        console.log('Initial fetch data:', data);
-        if (data.chats && data.chats.length > 0) {
-          const sortedChats = data.chats.sort((a, b) => {
-            if (a.convtoken.toLowerCase() === 'testchat') return -1;
-            if (b.convtoken.toLowerCase() === 'testchat') return 1;
-            return a.convtoken.localeCompare(b.convtoken);
-          });
-          console.log('Sorted chats:', sortedChats);
-          setChats(sortedChats);
-          setSelectedChat(sortedChats[0]);
-          
-          // Load full conversation for the first chat
-          if (sortedChats[0] && sortedChats[0].convtoken) {
-            console.log('Loading conversation for first chat:', sortedChats[0].convtoken);
-            loadFullConversation(sortedChats[0].convtoken);
-          }
-        } else {
-          console.log('No chats found in data');
-        }
-      })
-      .catch((err) => {
-        console.error('Error fetching chats:', err);
-        setError('Error fetching chat data.');
-      })
-      .finally(() => setLoading(false));
-  }, [username, loadFullConversation]);
-
-  // Auto-play audio for new answers
-  useEffect(() => {
-    if (selectedChat && selectedChat.conversation) {
-      let maxIndex = 0;
-      Object.keys(selectedChat.conversation).forEach((key) => {
-        if (key.startsWith('question')) {
-          const num = parseInt(key.replace('question', ''));
-          if (num > maxIndex) maxIndex = num;
-        }
-      });
-      if (maxIndex > lastPlayedAudioIndex) {
-        const audioKey = 'audio' + maxIndex;
-        const audioData = selectedChat.conversation[audioKey];
-        if (audioData) {
-          const blob = base64ToBlob(audioData, 'audio/mpeg');
-          const url = URL.createObjectURL(blob);
-          const audioElement = new Audio(url);
-          audioElement.play().catch((err) => console.error('Error playing audio:', err));
-          setLastPlayedAudioIndex(maxIndex);
-          setCircleAnimation('vibrate');
-        }
-      }
-    }
-  }, [selectedChat, lastPlayedAudioIndex]);
+    loadChats();
+  }, [loadFullConversation]);
 
   // Auto-scroll to bottom
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
-  }, [selectedChat, voiceChatMode]);
+  }, [selectedChat]);
 
-  // Send text
+  // Send text message
   const handleSendMessage = async () => {
     if (!newMessage.trim()) return;
+    
     setLoading(true);
+    setIsProcessing(true);
     const usertoken = Cookies.get('testtoken');
-    const requestData = { question: newMessage, convtoken: 'testchat', usertoken };
+    const requestData = { 
+      question: newMessage, 
+      convtoken: 'testchat', 
+      usertoken,
+      voice_mode: chatMode === 'voice' // Tell backend if this is voice mode
+    };
 
     try {
       const response = await fetch(`${API_BASE}/flow`, {
@@ -173,43 +137,68 @@ function FullChat() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(requestData),
       });
+      
       if (!response.ok) throw new Error('Error sending message to server');
+      
       const data = await response.json();
       const updatedChat = { ...selectedChat, conversation: data.conversation };
       setSelectedChat(updatedChat);
       setChats(chats.map((c) => (c.convtoken === 'testchat' ? updatedChat : c)));
       setNewMessage('');
+      
+      // Auto-play audio ONLY in voice mode
+      if (chatMode === 'voice' && data.audio_b64) {
+        const audioBlob = base64ToBlob(data.audio_b64, 'audio/mpeg');
+        const audioUrl = URL.createObjectURL(audioBlob);
+        const audioElement = new Audio(audioUrl);
+        audioElement.play().catch((err) => console.error('Error playing audio:', err));
+      }
     } catch (err) {
       console.error('Error in sending message:', err);
+      setError('Failed to send message');
     } finally {
       setLoading(false);
+      setIsProcessing(false);
     }
   };
 
-  // Send recorded audio
-  const sendAudioBlob = async (blob) => {
+  // Send voice message
+  const sendVoiceMessage = async (audioBlob) => {
     setLoading(true);
+    setIsProcessing(true);
     const usertoken = Cookies.get('testtoken');
     const formData = new FormData();
-    const file = new File([blob], 'audio.webm', { type: blob.type });
+    const file = new File([audioBlob], 'audio.webm', { type: audioBlob.type });
     formData.append('audio', file);
     formData.append('convtoken', 'testchat');
     formData.append('usertoken', usertoken);
+
     try {
       const response = await fetch(`${API_BASE}/flow`, { method: 'POST', body: formData });
       if (!response.ok) throw new Error('Error sending audio to server');
+      
       const data = await response.json();
       const updatedChat = { ...selectedChat, conversation: data.conversation };
       setSelectedChat(updatedChat);
       setChats(chats.map((c) => (c.convtoken === 'testchat' ? updatedChat : c)));
+      
+      // Auto-play audio response
+      if (data.audio_b64) {
+        const audioBlob = base64ToBlob(data.audio_b64, 'audio/mpeg');
+        const audioUrl = URL.createObjectURL(audioBlob);
+        const audioElement = new Audio(audioUrl);
+        audioElement.play().catch((err) => console.error('Error playing audio:', err));
+      }
     } catch (err) {
       console.error('Error in sending audio:', err);
+      setError('Failed to send voice message');
     } finally {
       setLoading(false);
+      setIsProcessing(false);
     }
   };
 
-  // Mic toggle
+  // Handle microphone button
   const handleMicButton = async () => {
     if (!recording) {
       try {
@@ -217,26 +206,31 @@ function FullChat() {
         const options = { mimeType: 'audio/webm' };
         const mediaRecorder = new MediaRecorder(stream, options);
         audioChunksRef.current = [];
+        
         mediaRecorder.ondataavailable = (event) => {
-          if (event.data && event.data.size > 0) audioChunksRef.current.push(event.data);
+          if (event.data && event.data.size > 0) {
+            audioChunksRef.current.push(event.data);
+          }
         };
+        
         mediaRecorder.onstop = () => {
           const audioBlob = new Blob(audioChunksRef.current, { type: options.mimeType });
-          sendAudioBlob(audioBlob);
+          sendVoiceMessage(audioBlob);
+          // Stop all tracks to release microphone
+          stream.getTracks().forEach(track => track.stop());
         };
+        
         mediaRecorder.start();
         mediaRecorderRef.current = mediaRecorder;
         setRecording(true);
-        setVoiceChatMode(true);
-        setCircleAnimation('vibrate');
       } catch (err) {
         console.error('Error accessing microphone:', err);
+        setError('Microphone access denied. Please allow microphone access and try again.');
       }
     } else {
       if (mediaRecorderRef.current) {
         mediaRecorderRef.current.stop();
         setRecording(false);
-        setCircleAnimation('loading');
       }
     }
   };
@@ -248,11 +242,13 @@ function FullChat() {
       setError('No user token found in cookies.');
       return;
     }
+    
     try {
       const response = await fetch(
         `${API_BASE}/del-conv?usertoken=${encodeURIComponent(usertoken)}&convtoken=testchat`,
         { method: 'DELETE' }
       );
+      
       if (!response.ok) throw new Error('Failed to clear conversation');
 
       if (selectedChat) {
@@ -266,6 +262,7 @@ function FullChat() {
     }
   };
 
+  // Build messages from conversation
   const buildMessages = () => {
     if (!selectedChat) return [];
     const conv = selectedChat.conversation || {};
@@ -299,7 +296,7 @@ function FullChat() {
           <div className="fc-search">
             <input
               type="text"
-              placeholder="Search chats…"
+              placeholder="Search chats..."
               value={chatFilter}
               onChange={(e) => setChatFilter(e.target.value)}
             />
@@ -308,34 +305,28 @@ function FullChat() {
 
         <div className="fc-chatlist">
           {error && <div className="fc-error">{error}</div>}
-          {loading && <div className="fc-skel">Loading chats…</div>}
-          {!loading && filteredChats.length === 0 && <div className="fc-empty">No chats</div>}
-
-          {filteredChats.map((chat) => {
-            const active = selectedChat && selectedChat.convtoken === chat.convtoken;
-            return (
+          {filteredChats.length === 0 ? (
+            <div className="fc-empty">No chats found</div>
+          ) : (
+            filteredChats.map((chat) => (
               <button
                 key={chat.convtoken}
-                className={`fc-chatitem ${active ? 'active' : ''}`}
+                className={`fc-chatitem ${selectedChat?.convtoken === chat.convtoken ? 'active' : ''}`}
                 onClick={() => {
                   setSelectedChat(chat);
-                  // Load full conversation when clicking on a chat
-                  if (chat.convtoken) {
-                    loadFullConversation(chat.convtoken);
-                  }
+                  loadFullConversation(chat);
                 }}
-                title={chat.convtoken}
               >
                 <div className="fc-avatar">{chat.convtoken.charAt(0).toUpperCase()}</div>
                 <div className="fc-chatmeta">
                   <div className="fc-chatmeta__name">{chat.convtoken}</div>
                   <div className="fc-chatmeta__sub">
-                    {chat.convtoken.toLowerCase() === 'testchat' ? 'Test session' : 'Conversation'}
+                    {Object.keys(chat.conversation || {}).length} messages
                   </div>
                 </div>
               </button>
-            );
-          })}
+            ))
+          )}
         </div>
 
         <div className="fc-sidebar__bottom">
@@ -369,11 +360,11 @@ function FullChat() {
                   🗑 Clear
                 </button>
                 <button
-                  className={`fc-btn ${voiceChatMode ? 'fc-btn--secondary' : 'fc-btn--primary'}`}
-                  onClick={() => setVoiceChatMode(!voiceChatMode)}
-                  title="Toggle voice mode"
+                  className={`fc-btn ${chatMode === 'voice' ? 'fc-btn--primary' : 'fc-btn--secondary'}`}
+                  onClick={() => setChatMode(chatMode === 'text' ? 'voice' : 'text')}
+                  title={`Switch to ${chatMode === 'text' ? 'voice' : 'text'} mode`}
                 >
-                  {voiceChatMode ? '🎧 Voice ON' : '🎤 Voice OFF'}
+                  {chatMode === 'voice' ? '🎧 Voice Mode' : '💬 Text Mode'}
                 </button>
               </>
             )}
@@ -382,10 +373,10 @@ function FullChat() {
 
         {/* Messages */}
         <section className="fc-messages" ref={scrollRef}>
-          {voiceChatMode ? (
-            <VoiceOverlay onExit={() => setVoiceChatMode(false)} circleAnimation={circleAnimation} />
-          ) : messages.length === 0 ? (
-            <div className="fc-placeholder">No messages yet. Say hi 👋</div>
+          {messages.length === 0 ? (
+            <div className="fc-placeholder">
+              {chatMode === 'voice' ? 'Tap the microphone to start talking 🎤' : 'No messages yet. Say hi 👋'}
+            </div>
           ) : (
             <div className="fc-thread">
               {messages.map((msg, idx) => (
@@ -404,32 +395,51 @@ function FullChat() {
         {isTestChat && (
           <footer className="fc-composer">
             <div className="fc-composer__inner">
-              <button
-                className="fc-iconbtn"
-                onClick={handleMicButton}
-                disabled={loading}
-                title={recording ? 'Stop recording' : 'Record voice'}
-              >
-                {recording ? '⏹' : '🎙'}
-              </button>
+              {chatMode === 'voice' ? (
+                <button
+                  className={`fc-mic-btn ${recording ? 'recording' : ''}`}
+                  onClick={handleMicButton}
+                  disabled={loading}
+                  title={recording ? 'Stop recording' : 'Start recording'}
+                >
+                  {recording ? '⏹' : '🎙'}
+                </button>
+              ) : (
+                <>
+                  <button
+                    className="fc-iconbtn"
+                    onClick={handleMicButton}
+                    disabled={loading}
+                    title="Record voice"
+                  >
+                    🎙
+                  </button>
 
-              <input
-                className="fc-input"
-                type="text"
-                value={newMessage}
-                onChange={(e) => setNewMessage(e.target.value)}
-                placeholder="Write a message… Use **bold** to emphasize"
-                dir="auto"
-              />
+                  <input
+                    className="fc-input"
+                    type="text"
+                    value={newMessage}
+                    onChange={(e) => setNewMessage(e.target.value)}
+                    placeholder="Write a message… Use **bold** to emphasize"
+                    dir="auto"
+                    onKeyPress={(e) => {
+                      if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        handleSendMessage();
+                      }
+                    }}
+                  />
 
-              <button
-                className="fc-iconbtn"
-                onClick={handleSendMessage}
-                disabled={loading || !newMessage.trim()}
-                title="Send"
-              >
-                {loading ? <span className="fc-spinner" /> : '➤'}
-              </button>
+                  <button
+                    className="fc-iconbtn"
+                    onClick={handleSendMessage}
+                    disabled={loading || !newMessage.trim()}
+                    title="Send"
+                  >
+                    {loading ? <span className="fc-spinner" /> : '➤'}
+                  </button>
+                </>
+              )}
             </div>
           </footer>
         )}
@@ -442,28 +452,15 @@ function FullChat() {
 
 function MessageBubble({ isUser, isHebrew, html }) {
   return (
-    <div
-      className={`fc-bubble ${isUser ? 'fc-bubble--user' : 'fc-bubble--bot'}`}
-      style={{ direction: isHebrew ? 'rtl' : 'ltr', unicodeBidi: isHebrew ? 'embed' : 'normal' }}
-    >
+    <div className={`fc-bubble ${isUser ? 'fc-bubble--user' : 'fc-bubble--bot'}`}>
       <div className="fc-bubble__content" dangerouslySetInnerHTML={html} />
-    </div>
-  );
-}
-
-function VoiceOverlay({ onExit, circleAnimation }) {
-  return (
-    <div className="fc-voice">
-      <button className="fc-voice__exit" onClick={onExit} title="Close">✕</button>
-      <div className={`fc-voice__circle ${circleAnimation === 'vibrate' ? 'vibrate' : 'pulse'}`} />
-      <div className="fc-voice__hint">Listening… speak now</div>
     </div>
   );
 }
 
 /* ---------------- Styles ---------------- */
 
-const globalStyles = `/* (unchanged CSS from your file) */ 
+const globalStyles = `
 :root {
   --bg: #0f1420;
   --panel: rgba(255,255,255,0.06);
@@ -479,6 +476,7 @@ const globalStyles = `/* (unchanged CSS from your file) */
   --bubble-user: linear-gradient(180deg, #4f9cff 0%, #6ea8fe 100%);
   --bubble-bot: #1b2232;
 }
+
 .theme-light {
   --bg: #f3f6fb;
   --panel: #ffffff;
@@ -494,11 +492,31 @@ const globalStyles = `/* (unchanged CSS from your file) */
   --bubble-user: linear-gradient(180deg, #316bff 0%, #6b5cff 100%);
   --bubble-bot: #e8ecf9;
 }
+
 * { box-sizing: border-box; }
 html, body, #root { height: 100%; overflow: hidden; }
 body { margin: 0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial; }
-.fc-root { display: grid; grid-template-columns: 320px 1fr; height: 100dvh; overflow: hidden; position: relative; background: radial-gradient(1200px 900px at -10% -20%, #1b2232 0%, var(--bg) 50%), var(--bg); color: var(--text); }
-.fc-sidebar { display: flex; flex-direction: column; border-right: 1px solid var(--border); backdrop-filter: blur(10px); background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.03)); min-height: 0; overflow: hidden; }
+
+.fc-root { 
+  display: grid; 
+  grid-template-columns: 320px 1fr; 
+  height: 100dvh; 
+  overflow: hidden; 
+  position: relative; 
+  background: radial-gradient(1200px 900px at -10% -20%, #1b2232 0%, var(--bg) 50%), var(--bg); 
+  color: var(--text); 
+}
+
+.fc-sidebar { 
+  display: flex; 
+  flex-direction: column; 
+  border-right: 1px solid var(--border); 
+  backdrop-filter: blur(10px); 
+  background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.03)); 
+  min-height: 0; 
+  overflow: hidden; 
+}
+
 .fc-sidebar__top { padding: 18px 16px 8px; }
 .fc-logo { display: flex; align-items: center; gap: 10px; font-weight: 700; letter-spacing: 0.2px; }
 .fc-logo__dot { width: 10px; height: 10px; border-radius: 50%; background: linear-gradient(135deg, var(--brand), var(--brand-2)); box-shadow: 0 0 12px var(--brand); }
@@ -517,6 +535,7 @@ body { margin: 0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI
 .fc-sidebar__bottom { padding: 12px 10px; display: grid; gap: 6px; border-top: 1px solid var(--border); }
 .fc-ghost { background: transparent; color: var(--text); border: 1px dashed var(--border); border-radius: 10px; padding: 10px 12px; cursor: pointer; transition: background .2s ease, border-color .2s ease; }
 .fc-ghost:hover { background: var(--panel); border-color: var(--brand); }
+
 .fc-main { display: grid; grid-template-rows: auto 1fr auto; min-height: 0; }
 .fc-header { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; border-bottom: 1px solid var(--border); background: linear-gradient(180deg, rgba(0,0,0,0.12), rgba(0,0,0,0)) , transparent; backdrop-filter: blur(8px); contain: paint; }
 .fc-header__left { display: flex; align-items: center; gap: 12px; }
@@ -529,6 +548,7 @@ body { margin: 0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI
 .fc-btn--primary { border-color: var(--brand); }
 .fc-btn--secondary { border-color: var(--text-dim); }
 .fc-btn--danger { border-color: var(--warn); color: #fff; background: linear-gradient(180deg, rgba(239,68,68,0.3), rgba(239,68,68,0.15)); }
+
 .fc-messages { padding: 16px 18px; overflow-y: auto; min-height: 0; -webkit-overflow-scrolling: touch; }
 .fc-placeholder { color: var(--text-dim); text-align: center; margin-top: 18vh; }
 .fc-thread { display: grid; gap: 10px; }
@@ -536,22 +556,39 @@ body { margin: 0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI
 .fc-bubble--user { margin-left: auto; background: var(--bubble-user); color: #fff; border-top-right-radius: 8px; }
 .fc-bubble--bot { margin-right: auto; background: var(--bubble-bot); border-top-left-radius: 8px; color: var(--text); }
 .fc-bubble__content strong { font-weight: 800; }
+
 .fc-composer { position: sticky; bottom: 0; padding: 12px 16px; border-top: 1px solid var(--border); background: linear-gradient(0deg, rgba(0,0,0,0.12), rgba(0,0,0,0)) , transparent; backdrop-filter: blur(8px); contain: paint; }
 .fc-composer__inner { display: grid; grid-template-columns: 42px 1fr 42px; gap: 10px; align-items: center; }
+.fc-composer__inner:has(.fc-mic-btn) { grid-template-columns: 1fr; justify-items: center; }
 .fc-input { width: 100%; padding: 12px 14px; border-radius: 14px; border: 1px solid var(--border); background: var(--panel); color: var(--text); outline: none; }
 .fc-input::placeholder { color: var(--text-dim); }
 .fc-iconbtn { height: 42px; border-radius: 12px; border: 1px solid var(--border); background: var(--panel); color: var(--text); cursor: pointer; display:flex; align-items:center; justify-content:center; transition: background .2s ease, transform .05s ease, border-color .2s ease; }
 .fc-iconbtn:hover { background: var(--panel-strong); border-color: var(--brand); transform: translateY(-1px); }
+.fc-mic-btn { 
+  width: 80px; 
+  height: 80px; 
+  border-radius: 50%; 
+  border: 3px solid var(--border); 
+  background: var(--panel); 
+  color: var(--text); 
+  cursor: pointer; 
+  display: flex; 
+  align-items: center; 
+  justify-content: center; 
+  font-size: 24px;
+  transition: all .2s ease; 
+}
+.fc-mic-btn:hover { background: var(--panel-strong); border-color: var(--brand); transform: translateY(-2px); }
+.fc-mic-btn.recording { 
+  background: var(--warn); 
+  border-color: var(--warn); 
+  color: white; 
+  animation: pulse 1s infinite; 
+}
 .fc-spinner { width: 18px; height: 18px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.35); border-top-color: #fff; animation: spin 0.8s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
-.fc-voice { position: relative; display:flex; flex-direction: column; align-items:center; justify-content:center; height: 65vh; gap: 18px; }
-.fc-voice__exit { position: absolute; top: 0; right: 0; border: 1px solid var(--border); background: var(--panel); color: var(--text); border-radius: 10px; padding: 6px 10px; cursor: pointer; }
-.fc-voice__circle { width: 180px; height: 180px; border-radius: 50%; background: radial-gradient(80px 80px at 50% 50%, var(--brand), var(--brand-2)); filter: drop-shadow(0 12px 30px rgba(0,0,0,0.25)); }
-.fc-voice__circle.pulse { animation: pulse 1.5s ease-in-out infinite; }
-.fc-voice__circle.vibrate { animation: vibrate 1s infinite; }
-@keyframes pulse { 0%{ transform: scale(1);} 50%{ transform: scale(1.08);} 100%{ transform: scale(1);} }
-@keyframes vibrate { 0% { transform: translate(0,0); } 25% { transform: translate(2px, -2px); } 50% { transform: translate(-2px, 1px); } 75% { transform: translate(2px, 1px); } 100% { transform: translate(0,0); } }
-.fc-voice__hint { color: var(--text-dim); }
+@keyframes pulse { 0%{ transform: scale(1);} 50%{ transform: scale(1.05);} 100%{ transform: scale(1);} }
+
 @media (max-width: 980px) {
   .fc-root { grid-template-columns: 1fr; }
   .fc-sidebar { display: none; }
