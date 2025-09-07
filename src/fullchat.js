@@ -92,7 +92,26 @@ function FullChat() {
       console.log('Loading chats with token:', usertoken.substring(0, 8) + '***');
 
       try {
-        const response = await fetch(`${API_BASE}/fullchat?usertoken=${encodeURIComponent(usertoken)}`);
+        // Try with usertoken first (new version)
+        let response = await fetch(`${API_BASE}/fullchat?usertoken=${encodeURIComponent(usertoken)}`);
+        
+        // If that fails with "No username provided", try with username parameter (old version)
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          if (errorData.error === 'No username provided') {
+            console.log('Trying with username parameter for compatibility...');
+            // Get username from token by calling get-user-info first
+            const userInfoResponse = await fetch(`${API_BASE}/get-user-info?usertoken=${encodeURIComponent(usertoken)}`);
+            if (userInfoResponse.ok) {
+              const userData = await userInfoResponse.json();
+              const username = userData[0]?.username;
+              if (username) {
+                response = await fetch(`${API_BASE}/fullchat?username=${encodeURIComponent(username)}`);
+              }
+            }
+          }
+        }
+        
         if (!response.ok) {
           console.error('Fullchat response error:', response.status, response.statusText);
           const errorData = await response.json().catch(() => ({}));
