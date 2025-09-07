@@ -322,8 +322,8 @@ function FullChat() {
                 type="text"
                 value={newMessage}
                 onChange={(e) => setNewMessage(e.target.value)}
-                placeholder="Write a message… Use **bold** to emphasize"
-                dir="auto"
+                placeholder="Write a message… Use **bold** to emphasize | כתוב הודעה... השתמש ב**מודגש** להדגשה"
+                dir={isHebrew(newMessage) ? 'rtl' : 'ltr'}
                 onKeyPress={(e) => {
                   if (e.key === 'Enter' && !e.shiftKey) {
                     e.preventDefault();
@@ -353,7 +353,11 @@ function FullChat() {
 function MessageBubble({ isUser, isHebrew, html }) {
   return (
     <div className={`fc-bubble ${isUser ? 'fc-bubble--user' : 'fc-bubble--bot'}`}>
-      <div className="fc-bubble__content" dangerouslySetInnerHTML={html} />
+      <div 
+        className="fc-bubble__content" 
+        dir={isHebrew ? 'rtl' : 'ltr'}
+        dangerouslySetInnerHTML={html} 
+      />
     </div>
   );
 }
@@ -456,12 +460,14 @@ body { margin: 0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI
 .fc-bubble--user { margin-left: auto; background: var(--bubble-user); color: #fff; border-top-right-radius: 8px; }
 .fc-bubble--bot { margin-right: auto; background: var(--bubble-bot); border-top-left-radius: 8px; color: var(--text); }
 .fc-bubble__content strong { font-weight: 800; }
+.fc-bubble__content[dir="rtl"] { text-align: right; }
+.fc-bubble__content[dir="ltr"] { text-align: left; }
 
 .fc-composer { position: sticky; bottom: 0; padding: 12px 16px; border-top: 1px solid var(--border); background: linear-gradient(0deg, rgba(0,0,0,0.12), rgba(0,0,0,0)) , transparent; backdrop-filter: blur(8px); contain: paint; }
-.fc-composer__inner { display: grid; grid-template-columns: 42px 1fr 42px; gap: 10px; align-items: center; }
-.fc-input { width: 100%; padding: 12px 14px; border-radius: 14px; border: 1px solid var(--border); background: var(--panel); color: var(--text); outline: none; }
+.fc-composer__inner { display: grid; grid-template-columns: 1fr 60px; gap: 10px; align-items: center; }
+.fc-input { width: 100%; padding: 12px 14px; border-radius: 14px; border: 1px solid var(--border); background: var(--panel); color: var(--text); outline: none; text-align: start; }
 .fc-input::placeholder { color: var(--text-dim); }
-.fc-iconbtn { height: 42px; border-radius: 12px; border: 1px solid var(--border); background: var(--panel); color: var(--text); cursor: pointer; display:flex; align-items:center; justify-content:center; transition: background .2s ease, transform .05s ease, border-color .2s ease; }
+.fc-iconbtn { height: 50px; width: 60px; border-radius: 12px; border: 1px solid var(--border); background: var(--panel); color: var(--text); cursor: pointer; display:flex; align-items:center; justify-content:center; transition: background .2s ease, transform .05s ease, border-color .2s ease; }
 .fc-iconbtn:hover { background: var(--panel-strong); border-color: var(--brand); transform: translateY(-1px); }
 .fc-spinner { width: 18px; height: 18px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.35); border-top-color: #fff; animation: spin 0.8s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
