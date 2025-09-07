@@ -114,17 +114,11 @@ const pageStyles = `
 .codehead { display:flex; align-items:center; justify-content:space-between; margin-bottom: 8px; color: var(--text-dim); }
 .copy { border: 1px solid var(--border); background: var(--panel); color: var(--text); padding: 6px 10px; border-radius: 8px; cursor: pointer; }
 .copy:hover { border-color: var(--brand); background: var(--panel-strong); }
-.reg-footer { 
-  padding: 10px 16px; border-top: 1px solid var(--border); 
-  display:flex; align-items:center; justify-content: flex-end; gap: 10px; 
-  flex-shrink: 0; background: rgba(255,255,255,0.02);
-}
 
 @media (max-width: 768px) {
   .reg-root { padding: 10px; }
   .reg-card { width: 100%; max-height: 95vh; }
   .reg-content { padding: 10px; }
-  .reg-footer { padding: 8px 14px; }
   .section { gap: 8px; }
 }
 `;
@@ -448,19 +442,6 @@ print(response.json())`;
         </div>
 
         <div className="reg-content">{renderStageContent()}</div>
-
-        <div className="reg-footer">
-          {currentStage > 1 && (
-            <button className="btn" onClick={() => setCurrentStage((s) => Math.max(1, s - 1))}>
-              ← Back
-            </button>
-          )}
-          {currentStage < 3 && (
-            <button className="btn btn--primary" onClick={() => setCurrentStage((s) => Math.min(3, s + 1))} title="Skip ahead">
-              Skip
-            </button>
-          )}
-        </div>
       </div>
     </div>
   );
