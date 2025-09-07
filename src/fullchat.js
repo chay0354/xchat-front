@@ -86,8 +86,8 @@ function FullChat() {
       const usertoken = Cookies.get('testtoken');
       if (!usertoken) {
         setError('No user token found in cookies.');
-        return;
-      }
+      return;
+    }
 
       try {
         const response = await fetch(`${API_BASE}/fullchat?usertoken=${encodeURIComponent(usertoken)}`);
@@ -203,10 +203,10 @@ function FullChat() {
     if (!recording) {
       try {
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        const options = { mimeType: 'audio/webm' };
+      const options = { mimeType: 'audio/webm' };
         const mediaRecorder = new MediaRecorder(stream, options);
-        audioChunksRef.current = [];
-        
+      audioChunksRef.current = [];
+
         mediaRecorder.ondataavailable = (event) => {
           if (event.data && event.data.size > 0) {
             audioChunksRef.current.push(event.data);
@@ -229,7 +229,7 @@ function FullChat() {
       }
     } else {
       if (mediaRecorderRef.current) {
-        mediaRecorderRef.current.stop();
+              mediaRecorderRef.current.stop();
         setRecording(false);
       }
     }
@@ -406,22 +406,22 @@ function FullChat() {
                 </button>
               ) : (
                 <>
-                  <button
-                    className="fc-iconbtn"
-                    onClick={handleMicButton}
+              <button
+                className="fc-iconbtn"
+                onClick={handleMicButton}
                     disabled={loading}
                     title="Record voice"
-                  >
+              >
                     🎙
-                  </button>
+              </button>
 
-                  <input
-                    className="fc-input"
-                    type="text"
-                    value={newMessage}
-                    onChange={(e) => setNewMessage(e.target.value)}
-                    placeholder="Write a message… Use **bold** to emphasize"
-                    dir="auto"
+              <input
+                className="fc-input"
+                type="text"
+                value={newMessage}
+                onChange={(e) => setNewMessage(e.target.value)}
+                placeholder="Write a message… Use **bold** to emphasize"
+                dir="auto"
                     onKeyPress={(e) => {
                       if (e.key === 'Enter' && !e.shiftKey) {
                         e.preventDefault();
@@ -430,14 +430,14 @@ function FullChat() {
                     }}
                   />
 
-                  <button
-                    className="fc-iconbtn"
-                    onClick={handleSendMessage}
+              <button
+                className="fc-iconbtn"
+                onClick={handleSendMessage}
                     disabled={loading || !newMessage.trim()}
-                    title="Send"
-                  >
+                title="Send"
+              >
                     {loading ? <span className="fc-spinner" /> : '➤'}
-                  </button>
+              </button>
                 </>
               )}
             </div>
