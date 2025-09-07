@@ -11,14 +11,9 @@ function FullChat() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [newMessage, setNewMessage] = useState('');
-  const [recording, setRecording] = useState(false);
-  const [chatMode, setChatMode] = useState('text'); // 'text' or 'voice'
-  const [isProcessing, setIsProcessing] = useState(false);
   const [theme, setTheme] = useState('dark');
   const [chatFilter, setChatFilter] = useState('');
 
-  const mediaRecorderRef = useRef(null);
-  const audioChunksRef = useRef([]);
   const scrollRef = useRef(null);
 
   const username = Cookies.get('username') || '';
@@ -41,13 +36,6 @@ function FullChat() {
     return { __html: html };
   };
 
-  const base64ToBlob = (base64, mime) => {
-    const byteCharacters = atob(base64);
-    const byteNumbers = new Array(byteCharacters.length);
-    for (let i = 0; i < byteCharacters.length; i++) byteNumbers[i] = byteCharacters.charCodeAt(i);
-    const byteArray = new Uint8Array(byteNumbers);
-    return new Blob([byteArray], { type: mime });
-  };
 
   // Load full conversation for a specific chat
   const loadFullConversation = useCallback(async (chat) => {
@@ -153,8 +141,7 @@ function FullChat() {
     const requestData = { 
       question: newMessage, 
       convtoken: 'testchat', 
-      usertoken,
-      voice_mode: chatMode === 'voice' // Tell backend if this is voice mode
+      usertoken
     };
 
     try {
@@ -171,14 +158,6 @@ function FullChat() {
       setSelectedChat(updatedChat);
       setChats(chats.map((c) => (c.convtoken === 'testchat' ? updatedChat : c)));
       setNewMessage('');
-      
-      // Auto-play audio ONLY in voice mode
-      if (chatMode === 'voice' && data.audio_b64) {
-        const audioBlob = base64ToBlob(data.audio_b64, 'audio/mpeg');
-        const audioUrl = URL.createObjectURL(audioBlob);
-        const audioElement = new Audio(audioUrl);
-        audioElement.play().catch((err) => console.error('Error playing audio:', err));
-      }
     } catch (err) {
       console.error('Error in sending message:', err);
       setError('Failed to send message');
@@ -188,78 +167,6 @@ function FullChat() {
     }
   };
 
-  // Send voice message
-  const sendVoiceMessage = async (audioBlob) => {
-    setLoading(true);
-    setIsProcessing(true);
-    const usertoken = Cookies.get('testtoken');
-    const formData = new FormData();
-    const file = new File([audioBlob], 'audio.webm', { type: audioBlob.type });
-    formData.append('audio', file);
-    formData.append('convtoken', 'testchat');
-    formData.append('usertoken', usertoken);
-
-    try {
-      const response = await fetch(`${API_BASE}/flow`, { method: 'POST', body: formData });
-      if (!response.ok) throw new Error('Error sending audio to server');
-      
-      const data = await response.json();
-      const updatedChat = { ...selectedChat, conversation: data.conversation };
-      setSelectedChat(updatedChat);
-      setChats(chats.map((c) => (c.convtoken === 'testchat' ? updatedChat : c)));
-      
-      // Auto-play audio response
-      if (data.audio_b64) {
-        const audioBlob = base64ToBlob(data.audio_b64, 'audio/mpeg');
-        const audioUrl = URL.createObjectURL(audioBlob);
-        const audioElement = new Audio(audioUrl);
-        audioElement.play().catch((err) => console.error('Error playing audio:', err));
-      }
-    } catch (err) {
-      console.error('Error in sending audio:', err);
-      setError('Failed to send voice message');
-    } finally {
-      setLoading(false);
-      setIsProcessing(false);
-    }
-  };
-
-  // Handle microphone button
-  const handleMicButton = async () => {
-    if (!recording) {
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const options = { mimeType: 'audio/webm' };
-        const mediaRecorder = new MediaRecorder(stream, options);
-      audioChunksRef.current = [];
-
-        mediaRecorder.ondataavailable = (event) => {
-          if (event.data && event.data.size > 0) {
-            audioChunksRef.current.push(event.data);
-          }
-        };
-        
-        mediaRecorder.onstop = () => {
-          const audioBlob = new Blob(audioChunksRef.current, { type: options.mimeType });
-          sendVoiceMessage(audioBlob);
-          // Stop all tracks to release microphone
-          stream.getTracks().forEach(track => track.stop());
-        };
-        
-        mediaRecorder.start();
-        mediaRecorderRef.current = mediaRecorder;
-        setRecording(true);
-      } catch (err) {
-        console.error('Error accessing microphone:', err);
-        setError('Microphone access denied. Please allow microphone access and try again.');
-      }
-    } else {
-      if (mediaRecorderRef.current) {
-              mediaRecorderRef.current.stop();
-        setRecording(false);
-      }
-    }
-  };
 
   // Clear conversation
   const handleClearConversation = async () => {
@@ -381,18 +288,9 @@ function FullChat() {
           </div>
           <div className="fc-header__right">
             {isTestChat && (
-              <>
-                <button className="fc-btn fc-btn--danger" onClick={handleClearConversation} title="Clear chat">
-                  🗑 Clear
-                </button>
-                <button
-                  className={`fc-btn ${chatMode === 'voice' ? 'fc-btn--primary' : 'fc-btn--secondary'}`}
-                  onClick={() => setChatMode(chatMode === 'text' ? 'voice' : 'text')}
-                  title={`Switch to ${chatMode === 'text' ? 'voice' : 'text'} mode`}
-                >
-                  {chatMode === 'voice' ? '🎧 Voice Mode' : '💬 Text Mode'}
-                </button>
-              </>
+              <button className="fc-btn fc-btn--danger" onClick={handleClearConversation} title="Clear chat">
+                🗑 Clear
+              </button>
             )}
           </div>
         </header>
@@ -401,7 +299,7 @@ function FullChat() {
         <section className="fc-messages" ref={scrollRef}>
           {messages.length === 0 ? (
             <div className="fc-placeholder">
-              {chatMode === 'voice' ? 'Tap the microphone to start talking 🎤' : 'No messages yet. Say hi 👋'}
+              No messages yet. Say hi 👋
             </div>
           ) : (
             <div className="fc-thread">
@@ -421,26 +319,6 @@ function FullChat() {
         {isTestChat && (
           <footer className="fc-composer">
             <div className="fc-composer__inner">
-              {chatMode === 'voice' ? (
-                <button
-                  className={`fc-mic-btn ${recording ? 'recording' : ''}`}
-                  onClick={handleMicButton}
-                  disabled={loading}
-                  title={recording ? 'Stop recording' : 'Start recording'}
-                >
-                  {recording ? '⏹' : '🎙'}
-                </button>
-              ) : (
-                <>
-              <button
-                className="fc-iconbtn"
-                onClick={handleMicButton}
-                    disabled={loading}
-                    title="Record voice"
-              >
-                    🎙
-              </button>
-
               <input
                 className="fc-input"
                 type="text"
@@ -448,24 +326,22 @@ function FullChat() {
                 onChange={(e) => setNewMessage(e.target.value)}
                 placeholder="Write a message… Use **bold** to emphasize"
                 dir="auto"
-                    onKeyPress={(e) => {
-                      if (e.key === 'Enter' && !e.shiftKey) {
-                        e.preventDefault();
-                        handleSendMessage();
-                      }
-                    }}
-                  />
+                onKeyPress={(e) => {
+                  if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    handleSendMessage();
+                  }
+                }}
+              />
 
               <button
                 className="fc-iconbtn"
                 onClick={handleSendMessage}
-                    disabled={loading || !newMessage.trim()}
+                disabled={loading || !newMessage.trim()}
                 title="Send"
               >
-                    {loading ? <span className="fc-spinner" /> : '➤'}
+                {loading ? <span className="fc-spinner" /> : '➤'}
               </button>
-                </>
-              )}
             </div>
           </footer>
         )}
@@ -585,35 +461,12 @@ body { margin: 0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI
 
 .fc-composer { position: sticky; bottom: 0; padding: 12px 16px; border-top: 1px solid var(--border); background: linear-gradient(0deg, rgba(0,0,0,0.12), rgba(0,0,0,0)) , transparent; backdrop-filter: blur(8px); contain: paint; }
 .fc-composer__inner { display: grid; grid-template-columns: 42px 1fr 42px; gap: 10px; align-items: center; }
-.fc-composer__inner:has(.fc-mic-btn) { grid-template-columns: 1fr; justify-items: center; }
 .fc-input { width: 100%; padding: 12px 14px; border-radius: 14px; border: 1px solid var(--border); background: var(--panel); color: var(--text); outline: none; }
 .fc-input::placeholder { color: var(--text-dim); }
 .fc-iconbtn { height: 42px; border-radius: 12px; border: 1px solid var(--border); background: var(--panel); color: var(--text); cursor: pointer; display:flex; align-items:center; justify-content:center; transition: background .2s ease, transform .05s ease, border-color .2s ease; }
 .fc-iconbtn:hover { background: var(--panel-strong); border-color: var(--brand); transform: translateY(-1px); }
-.fc-mic-btn { 
-  width: 80px; 
-  height: 80px; 
-  border-radius: 50%; 
-  border: 3px solid var(--border); 
-  background: var(--panel); 
-  color: var(--text); 
-  cursor: pointer; 
-  display: flex; 
-  align-items: center; 
-  justify-content: center; 
-  font-size: 24px;
-  transition: all .2s ease; 
-}
-.fc-mic-btn:hover { background: var(--panel-strong); border-color: var(--brand); transform: translateY(-2px); }
-.fc-mic-btn.recording { 
-  background: var(--warn); 
-  border-color: var(--warn); 
-  color: white; 
-  animation: pulse 1s infinite; 
-}
 .fc-spinner { width: 18px; height: 18px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.35); border-top-color: #fff; animation: spin 0.8s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
-@keyframes pulse { 0%{ transform: scale(1);} 50%{ transform: scale(1.05);} 100%{ transform: scale(1);} }
 
 @media (max-width: 980px) {
   .fc-root { grid-template-columns: 1fr; }
