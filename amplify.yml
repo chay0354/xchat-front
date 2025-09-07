@@ -10,7 +10,7 @@ frontend:
         # Check that environment variables are available
         - echo "Has REACT_APP_API_URL? ${REACT_APP_API_URL:+YES}${REACT_APP_API_URL:-NO}"
         # Install dependencies
-        - npm ci
+        - npm install --verbose
     build:
       commands:
         - npm run build
