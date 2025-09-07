@@ -86,12 +86,19 @@ function FullChat() {
       const usertoken = Cookies.get('testtoken');
       if (!usertoken) {
         setError('No user token found in cookies.');
-      return;
-    }
+        return;
+      }
+
+      console.log('Loading chats with token:', usertoken.substring(0, 8) + '***');
 
       try {
         const response = await fetch(`${API_BASE}/fullchat?usertoken=${encodeURIComponent(usertoken)}`);
-        if (!response.ok) throw new Error('Failed to load chats');
+        if (!response.ok) {
+          console.error('Fullchat response error:', response.status, response.statusText);
+          const errorData = await response.json().catch(() => ({}));
+          console.error('Error details:', errorData);
+          throw new Error(`Failed to load chats: ${response.status} ${response.statusText}`);
+        }
         const data = await response.json();
         setChats(data.chats || []);
         
