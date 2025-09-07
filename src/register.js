@@ -114,6 +114,14 @@ const pageStyles = `
 .codehead { display:flex; align-items:center; justify-content:space-between; margin-bottom: 8px; color: var(--text-dim); }
 .copy { border: 1px solid var(--border); background: var(--panel); color: var(--text); padding: 6px 10px; border-radius: 8px; cursor: pointer; }
 .copy:hover { border-color: var(--brand); background: var(--panel-strong); }
+.spinner { 
+  width: 16px; height: 16px; border-radius: 50%; 
+  border: 2px solid rgba(255,255,255,0.35); 
+  border-top-color: #fff; 
+  animation: spin 0.8s linear infinite; 
+  display: inline-block;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
 
 @media (max-width: 768px) {
   .reg-root { padding: 10px; }
@@ -135,6 +143,7 @@ function Register() {
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const [selectedLanguage, setSelectedLanguage] = useState('python');
+  const [isDefining, setIsDefining] = useState(false);
 
   const navigate = useNavigate();
 
@@ -169,6 +178,7 @@ function Register() {
       return;
     }
     setErrorMessage('');
+    setIsDefining(true);
     fetch(`${API_BASE}/chat`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -183,7 +193,8 @@ function Register() {
           setErrorMessage(data.error || 'Failed to get bot definition.');
         }
       })
-      .catch(() => setErrorMessage('Error sending request to server.'));
+      .catch(() => setErrorMessage('Error sending request to server.'))
+      .finally(() => setIsDefining(false));
   };
 
   const handleStage2Next = () => {
@@ -342,7 +353,16 @@ print(response.json())`;
 
           <div className="actions">
             <button className="btn" onClick={handleStage2Back}>Back</button>
-            <button className="btn" onClick={handleDefine}>Define</button>
+            <button className="btn" onClick={handleDefine} disabled={isDefining}>
+              {isDefining ? (
+                <>
+                  <span className="spinner" style={{marginRight: '8px'}}></span>
+                  Defining...
+                </>
+              ) : (
+                'Define'
+              )}
+            </button>
             <button className="btn btn--primary" onClick={handleStage2Next}>Next</button>
           </div>
         </div>
