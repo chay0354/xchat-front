@@ -136,7 +136,6 @@ function FullChat() {
     if (!newMessage.trim()) return;
     
     setLoading(true);
-    setIsProcessing(true);
     const usertoken = Cookies.get('testtoken');
     const requestData = { 
       question: newMessage, 
@@ -163,7 +162,6 @@ function FullChat() {
       setError('Failed to send message');
     } finally {
       setLoading(false);
-      setIsProcessing(false);
     }
   };
 
