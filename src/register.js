@@ -130,7 +130,7 @@ const pageStyles = `
 `;
 
 function Register() {
-  const [theme, setTheme] = useState('dark');
+  const [theme, setTheme] = useState('light');
   const [currentStage, setCurrentStage] = useState(1);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -220,7 +220,7 @@ function Register() {
 
   const handleStage3Next = () => {
     if (!botDefinition) {
-      setErrorMessage('Bot definition is empty. Please define your bot first.');
+      setErrorMessage('צריך קודם ללחוץ על "הגדר" כדי לקבל הגדרות לבוט');
       setSuccessMessage('');
       return;
     }
@@ -284,12 +284,12 @@ print(response.json())`;
     if (currentStage === 1) {
       return (
         <div className="section">
-          <h2>Stage 1 · Account Info</h2>
+          <h2>שלב 1 · פרטי חשבון</h2>
           {!!errorMessage && <div className="alert">{errorMessage}</div>}
           {!!successMessage && <div className="success">{successMessage}</div>}
 
           <div>
-            <div className="label">Username</div>
+            <div className="label">שם משתמש</div>
             <input
               className="input"
               type="text"
@@ -301,11 +301,11 @@ print(response.json())`;
           </div>
 
           <div>
-            <div className="label">Password</div>
+            <div className="label">סיסמה</div>
             <input
               className="input"
               type="password"
-              placeholder="••••••••"
+              placeholder=""
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               autoComplete="new-password"
@@ -313,11 +313,11 @@ print(response.json())`;
           </div>
 
           <div>
-            <div className="label">Confirm Password</div>
+            <div className="label">וודא סיסמה</div>
             <input
               className="input"
               type="password"
-              placeholder="••••••••"
+              placeholder=""
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               autoComplete="new-password"
@@ -325,7 +325,7 @@ print(response.json())`;
           </div>
 
           <div className="actions">
-            <button className="btn btn--primary btn--wide" onClick={handleStage1Next}>Next</button>
+            <button className="btn btn--primary btn--wide" onClick={handleStage1Next}>המשך</button>
           </div>
         </div>
       );
@@ -334,7 +334,7 @@ print(response.json())`;
     if (currentStage === 2) {
       return (
         <div className="section">
-          <h2>Stage 2 · Choose Your Plan</h2>
+          <h2>שלב 2 · בחר את התוכנית שלך</h2>
           {!!errorMessage && <div className="alert">{errorMessage}</div>}
           {!!successMessage && <div className="success">{successMessage}</div>}
 
@@ -351,25 +351,25 @@ print(response.json())`;
               }}
               onClick={() => setSelectedPlan('test')}
             >
-              <h3 style={{margin: '0 0 8px 0', fontSize: '1.3rem', fontWeight: '700'}}>Test Plan</h3>
-              <div style={{fontSize: '2rem', fontWeight: '900', color: 'var(--brand)', margin: '0 0 8px 0'}}>Free</div>
-              <p style={{color: 'var(--text-dim)', margin: '0 0 20px 0'}}>Perfect for testing</p>
+              <h3 style={{margin: '0 0 8px 0', fontSize: '1.3rem', fontWeight: '700'}}>חינם ל-14 יום</h3>
+              <div style={{fontSize: '2rem', fontWeight: '900', color: 'var(--brand)', margin: '0 0 8px 0'}}>חינם ל-14 יום, אח״כ רק 15₪ לחודש</div>
+              <p style={{color: 'var(--text-dim)', margin: '0 0 20px 0'}}>אין צורך בכרטיס אשראי</p>
               <ul style={{listStyle: 'none', padding: 0, margin: 0, textAlign: 'left'}}>
                 <li style={{padding: '4px 0', color: 'var(--text-dim)', display: 'flex', alignItems: 'center', gap: '8px'}}>
                   <span style={{color: 'var(--ok)', fontWeight: '800'}}>✓</span>
-                  1 AI Bot
+                  בוט אחד
                 </li>
                 <li style={{padding: '4px 0', color: 'var(--text-dim)', display: 'flex', alignItems: 'center', gap: '8px'}}>
                   <span style={{color: 'var(--ok)', fontWeight: '800'}}>✓</span>
-                  1 Website Domain
+                  מערכת ניהול הגדרות בוט
                 </li>
                 <li style={{padding: '4px 0', color: 'var(--text-dim)', display: 'flex', alignItems: 'center', gap: '8px'}}>
                   <span style={{color: 'var(--ok)', fontWeight: '800'}}>✓</span>
-                  100 queries per month
+                  100 שאילתות בחודש
                 </li>
                 <li style={{padding: '4px 0', color: 'var(--text-dim)', display: 'flex', alignItems: 'center', gap: '8px'}}>
                   <span style={{color: 'var(--ok)', fontWeight: '800'}}>✓</span>
-                  API Access
+                  גישה ל-API
                 </li>
               </ul>
             </div>
@@ -386,12 +386,12 @@ print(response.json())`;
     if (currentStage === 3) {
       return (
         <div className="section">
-          <h2>Stage 3 · Define Your Bot</h2>
+          <h2>שלב 3 · הגדר את הבוט שלך</h2>
           {!!errorMessage && <div className="alert">{errorMessage}</div>}
           {!!successMessage && <div className="success">{successMessage}</div>}
 
           <div>
-            <div className="label">Website URL (AI will crawl/define)</div>
+            <div className="label">כתובת האתר שלך (הבוט יחלץ/יגדיר)</div>
             <input
               className="input"
               type="text"
@@ -402,39 +402,39 @@ print(response.json())`;
           </div>
 
           <div>
-            <div className="label">Google Calendar API Token (optional)</div>
+            <div className="label">API של Google Calendar (אופציונלי)</div>
             <input
               className="input"
               type="text"
-              placeholder="Paste your token (if any)"
+              // placeholder=""
               value={googleCalendarToken}
               onChange={(e) => setGoogleCalendarToken(e.target.value)}
             />
           </div>
 
           <div>
-            <div className="label">Manual Definition / Edit</div>
+            <div className="label">הגדרות ידניות</div>
             <textarea
               className="textarea"
-              placeholder="Enter manual bot definition here..."
+              placeholder="כאן אפשר להוסיף הנחיות נוספות לבוט. אפשר לשנות את זה אחר-כך"
               value={botDefinition}
               onChange={(e) => setBotDefinition(e.target.value)}
             />
           </div>
 
           <div className="actions">
-            <button className="btn" onClick={handleStage3Back}>Back</button>
+            <button className="btn" onClick={handleStage3Back}>חזור</button>
             <button className="btn" onClick={handleDefine} disabled={isDefining}>
               {isDefining ? (
                 <>
                   <span className="spinner" style={{marginRight: '8px'}}></span>
-                  Defining...
+                  מגדיר...
                 </>
               ) : (
-                'Define'
+                'הגדר'
               )}
             </button>
-            <button className="btn btn--primary" onClick={handleStage3Next}>Next</button>
+            <button className="btn btn--primary" onClick={handleStage3Next}>הבא</button>
           </div>
         </div>
       );
@@ -448,17 +448,17 @@ print(response.json())`;
         {!!successMessage && <div className="success">{successMessage}</div>}
 
         <div>
-          <div className="label">Your usertoken</div>
+          <div className="label">הטוקן שלך</div>
           <div className="codebox" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <code style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', marginRight: 10 }}>
               {userToken}
             </code>
-            <button className="copy" onClick={() => copy(userToken)}>Copy</button>
+            <button className="copy" onClick={() => copy(userToken)}>העתק</button>
           </div>
         </div>
 
         <div style={{ display: 'grid', gap: 10 }}>
-          <div className="label">Language</div>
+          <div className="label">שפת פיתוח</div>
           <select className="select" value={selectedLanguage} onChange={(e) => setSelectedLanguage(e.target.value)}>
             <option value="python">Python</option>
             <option value="javascript">JavaScript</option>
@@ -467,12 +467,12 @@ print(response.json())`;
 
         <div>
           <div className="codehead">
-            <div>Example request</div>
+            <div>קוד להטמעה</div>
             <button
               className="copy"
               onClick={() => copy(selectedLanguage === 'python' ? pythonExample : jsExample)}
             >
-              Copy
+              העתק
             </button>
           </div>
           <pre className="codebox">
@@ -486,7 +486,7 @@ print(response.json())`;
         </div>
 
         <div className="actions">
-          <button className="btn btn--primary btn--wide" onClick={() => navigate('/', { replace: true })}>Finish</button>
+          <button className="btn btn--primary btn--wide" onClick={() => navigate('/', { replace: true })}>סיום</button>
         </div>
       </div>
     );
@@ -501,7 +501,7 @@ print(response.json())`;
         <div className="reg-header">
           <div className="reg-brand">
             <div className="reg-dot" />
-            <div>FlowChat · Onboarding</div>
+            <div>בוא נתחיל...</div>
           </div>
           <button className="theme-toggle" onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}>
             {theme === 'dark' ? '☀️ Light' : '🌙 Dark'}
@@ -512,29 +512,29 @@ print(response.json())`;
           <div className={`step ${currentStage === 1 ? 'active' : ''}`}>
             <div className="step-num">1</div>
             <div>
-              <div className="step-title">Account</div>
-              <div style={{ fontSize: 12, color: 'var(--text-dim)' }}>Username & password</div>
+              <div className="step-title">חשבון</div>
+              <div style={{ fontSize: 12, color: 'var(--text-dim)' }}>שם משתמש וסיסמה</div>
             </div>
           </div>
           <div className={`step ${currentStage === 2 ? 'active' : ''}`}>
             <div className="step-num">2</div>
             <div>
-              <div className="step-title">Plan</div>
-              <div style={{ fontSize: 12, color: 'var(--text-dim)' }}>Choose your plan</div>
+              <div className="step-title">תכנית</div>
+              <div style={{ fontSize: 12, color: 'var(--text-dim)' }}>בחר את התוכנית שלך</div>
             </div>
           </div>
           <div className={`step ${currentStage === 3 ? 'active' : ''}`}>
             <div className="step-num">3</div>
             <div>
-              <div className="step-title">Bot Setup</div>
-              <div style={{ fontSize: 12, color: 'var(--text-dim)' }}>Website, calendar, definition</div>
+              <div className="step-title">הגדר את הבוט שלך</div>
+              <div style={{ fontSize: 12, color: 'var(--text-dim)' }}>אתר, לוח שנה, הגדרות</div>
             </div>
           </div>
           <div className={`step ${currentStage === 4 ? 'active' : ''}`}>
             <div className="step-num">4</div>
             <div>
               <div className="step-title">API</div>
-              <div style={{ fontSize: 12, color: 'var(--text-dim)' }}>Token & examples</div>
+              <div style={{ fontSize: 12, color: 'var(--text-dim)' }}>טוקן ודוגמאות</div>
             </div>
           </div>
         </div>

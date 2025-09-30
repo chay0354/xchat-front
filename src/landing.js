@@ -66,9 +66,10 @@ const landingStyles = `
   right: 0;
   z-index: 100;
   padding: 20px 0;
-  background: rgba(15,20,32,0.95);
+  background: rgba(10, 19, 40, 0.95);
   backdrop-filter: blur(20px);
   border-bottom: 1px solid rgba(255,255,255,0.1);
+  color: white;
 }
 
 .landing-nav {
@@ -198,6 +199,7 @@ const landingStyles = `
 
 /* Features Section */
 .landing-features {
+  direction: rtl !important;
   padding: 80px 24px;
   max-width: 100%;
   margin: 0 auto;
@@ -481,7 +483,7 @@ const landingStyles = `
 `;
 
 function Landing() {
-  const [theme, setTheme] = useState('dark');
+  const [theme, setTheme] = useState('light');
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [username, setUsername] = useState('');
   const [activeSection, setActiveSection] = useState('home');
@@ -520,13 +522,10 @@ function Landing() {
     }
   };
 
-  const handleGetStarted = () => {
-    navigate('/register');
-  };
-
-  const handleLogin = () => {
-    navigate('/login');
-  };
+  const handleGetStarted = () => { navigate('/register') };
+  const handleLogin = () => { navigate('/login') };
+  const handleSelectPlan = (planName) => { navigate('/register', { state: { selectedPlan: planName } }) };
+  const handleCreateBot = () => { navigate('/register', { state: { selectedPlan: 'test', skipToBot: true } }) };
 
   const handleLogout = () => {
     Cookies.remove('testtoken');
@@ -538,13 +537,6 @@ function Landing() {
     setActiveSection('home');
   };
 
-  const handleSelectPlan = (planName) => {
-    navigate('/register', { state: { selectedPlan: planName } });
-  };
-
-  const handleCreateBot = () => {
-    navigate('/register', { state: { selectedPlan: 'test', skipToBot: true } });
-  };
 
   return (
     <div className={`landing-root ${theme === 'dark' ? 'theme-dark' : 'theme-light'}`}>
@@ -561,32 +553,32 @@ function Landing() {
           <div className="landing-actions">
             {isLoggedIn ? (
               <>
-                <button 
+                <button
                   className={`btn ${activeSection === 'home' ? 'btn--primary' : ''}`}
                   onClick={() => setActiveSection('home')}
                 >
-                  Home
+                  בית
                 </button>
-                <button 
+                <button
                   className={`btn ${activeSection === 'bots' ? 'btn--primary' : ''}`}
                   onClick={() => setActiveSection('bots')}
                 >
-                  Bots
+                  הבוטים שלך
                 </button>
-                <div style={{display: 'flex', alignItems: 'center', gap: '8px', marginLeft: '8px'}}>
-                  <span style={{fontSize: '14px', color: 'var(--text-dim)'}}>Hi, {username}</span>
-                  <button className="btn" onClick={handleLogout} style={{padding: '6px 12px', fontSize: '12px'}}>
-                    Logout
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginLeft: '8px' }}>
+                  <span style={{ fontSize: '14px', color: 'var(--text-dim)' }}>Hi, {username}</span>
+                  <button className="btn" onClick={handleLogout} style={{ padding: '6px 12px', fontSize: '12px' }}>
+                    התנתק
                   </button>
                 </div>
               </>
             ) : (
               <>
                 <button className="btn" onClick={handleLogin}>
-                  Login
+                  התחבר
                 </button>
                 <button className="btn btn--primary" onClick={handleGetStarted}>
-                  Get Started
+                  התחל עכשיו
                 </button>
               </>
             )}
@@ -607,40 +599,39 @@ function Landing() {
           {/* Hero Section */}
           <section className="landing-hero">
             <h1 className="landing-hero__title">
-              {isLoggedIn ? `Welcome back, ${username}!` : 'Create AI Bots in 40 Seconds'}
+              {isLoggedIn ? `ברוך השב, ${username}!` : 'צור בוט תוך 40 שניות!'}
             </h1>
             <p className="landing-hero__subtitle">
-              {isLoggedIn 
-                ? 'Manage your AI bots and create new ones to automate your customer support.'
-                : 'Give us your website URL, and we\'ll automatically build a smart chatbot that knows everything about your business. Zero setup, instant results.'
+              {isLoggedIn
+                ? 'נהל את הבוטים שלך או צור חדשים בלוח המחוונים הפשוט שלנו.'
+                : 'תן לנו את כתובת האתר שלך, ואנחנו נבנה אוטומטית צ\'אט-בוט חכם שיודע הכל על העסק שלך. אפס הגדרה, תוצאות מיידיות.'
               }
             </p>
-            
+
             {/* Statistics */}
             {!isLoggedIn && (
               <div style={{
                 display: 'grid',
                 gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))',
                 gap: '32px',
-                margin: '48px 0',
                 maxWidth: '600px',
                 margin: '48px auto'
               }}>
-                <div style={{textAlign: 'center'}}>
-                  <div style={{fontSize: '2.5rem', fontWeight: '800', color: 'var(--brand)', marginBottom: '8px'}}>40s</div>
-                  <div style={{color: 'var(--text-dim)', fontSize: '0.9rem', fontWeight: '500'}}>Setup Time</div>
+                <div style={{ textAlign: 'center' }}>
+                  <div style={{ fontSize: '2.5rem', fontWeight: '800', color: 'var(--brand)', marginBottom: '8px' }}>40s</div>
+                  <div style={{ color: 'var(--text-dim)', fontSize: '0.9rem', fontWeight: '500' }}>Setup Time</div>
                 </div>
-                <div style={{textAlign: 'center'}}>
-                  <div style={{fontSize: '2.5rem', fontWeight: '800', color: 'var(--brand)', marginBottom: '8px'}}>99.9%</div>
-                  <div style={{color: 'var(--text-dim)', fontSize: '0.9rem', fontWeight: '500'}}>Uptime</div>
+                <div style={{ textAlign: 'center' }}>
+                  <div style={{ fontSize: '2.5rem', fontWeight: '800', color: 'var(--brand)', marginBottom: '8px' }}>99.9%</div>
+                  <div style={{ color: 'var(--text-dim)', fontSize: '0.9rem', fontWeight: '500' }}>Uptime</div>
                 </div>
-                <div style={{textAlign: 'center'}}>
-                  <div style={{fontSize: '2.5rem', fontWeight: '800', color: 'var(--brand)', marginBottom: '8px'}}>10K+</div>
-                  <div style={{color: 'var(--text-dim)', fontSize: '0.9rem', fontWeight: '500'}}>Queries/Month</div>
+                <div style={{ textAlign: 'center' }}>
+                  <div style={{ fontSize: '2.5rem', fontWeight: '800', color: 'var(--brand)', marginBottom: '8px' }}>10K+</div>
+                  <div style={{ color: 'var(--text-dim)', fontSize: '0.9rem', fontWeight: '500' }}>Queries/Month</div>
                 </div>
-                <div style={{textAlign: 'center'}}>
-                  <div style={{fontSize: '2.5rem', fontWeight: '800', color: 'var(--brand)', marginBottom: '8px'}}>24/7</div>
-                  <div style={{color: 'var(--text-dim)', fontSize: '0.9rem', fontWeight: '500'}}>Support</div>
+                <div style={{ textAlign: 'center' }}>
+                  <div style={{ fontSize: '2.5rem', fontWeight: '800', color: 'var(--brand)', marginBottom: '8px' }}>24/7</div>
+                  <div style={{ color: 'var(--text-dim)', fontSize: '0.9rem', fontWeight: '500' }}>Support</div>
                 </div>
               </div>
             )}
@@ -649,19 +640,19 @@ function Landing() {
               {isLoggedIn ? (
                 <>
                   <button className="btn btn--primary" onClick={() => setActiveSection('bots')}>
-                    Manage Bots
+                    ניהול הבוטים שלך
                   </button>
                   <button className="btn" onClick={() => navigate('/fullchat')}>
-                    Go to Chat
+                    לעבור לצ'אט
                   </button>
                 </>
               ) : (
                 <>
                   <button className="btn btn--primary" onClick={handleGetStarted}>
-                    Start Building Bots
+                    התחל עכשיו
                   </button>
                   <button className="btn" onClick={() => document.getElementById('how-it-works').scrollIntoView({ behavior: 'smooth' })}>
-                    See How It Works
+                    איך זה עובד
                   </button>
                 </>
               )}
@@ -670,12 +661,12 @@ function Landing() {
 
           {/* Features Section */}
           <section className="landing-features">
-            <div style={{maxWidth: '1200px', margin: '0 auto', padding: '0 24px'}}>
-              <h2 className="landing-section__title">Why Choose FlowChat?</h2>
+            <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 24px' }}>
+              <h2 className="landing-section__title">הכח של FlowChat</h2>
               <p className="landing-section__subtitle">
-                The fastest way to create intelligent, context-aware chatbots
+                הדרך המהירה ביותר ליצור צ'אט-בוטים אינטליגנטיים ומודעים להקשר
               </p>
-              
+
               <div className="features-grid">
                 <div className="feature-card">
                   <div className="feature-icon">⚡</div>
@@ -684,31 +675,31 @@ function Landing() {
                     From website URL to working chatbot in under 60 seconds. No manual training or data uploads required.
                   </p>
                 </div>
-                
+
                 <div className="feature-card">
                   <div className="feature-icon">🧠</div>
-                  <h3 className="feature-title">AI-Powered Intelligence</h3>
+                  <h3 className="feature-title">תוכן מונע AI</h3>
                   <p className="feature-desc">
-                    Advanced language models understand context and provide accurate, helpful responses based on your content.
+                    מודלים מתקדמים של שפה מבינים הקשר ומספקים תגובות מדויקות ומועילות בהתבסס על התוכן שלך.
                   </p>
                 </div>
-                
+
                 <div className="feature-card">
                   <div className="feature-icon">🔗</div>
-                  <h3 className="feature-title">Universal Integration</h3>
+                  <h3 className="feature-title">מתחבר להכל</h3>
                   <p className="feature-desc">
-                    Works everywhere: websites, WhatsApp, Slack, mobile apps, CRM systems. One API, infinite possibilities.
+                    websites, WhatsApp, Slack, mobile apps, CRM systems. One API, infinite possibilities.
                   </p>
                 </div>
-                
+
                 <div className="feature-card">
                   <div className="feature-icon">🎯</div>
-                  <h3 className="feature-title">Context-Aware</h3>
+                  <h3 className="feature-title">הקשר מודע</h3>
                   <p className="feature-desc">
-                    Bots only answer based on your website content, reducing hallucinations and ensuring brand consistency.
+                    הבוט עונה על סמך תוכן האתר שלך, מה שמפחית הזיות ומבטיח עקביות במותג.
                   </p>
                 </div>
-                
+
                 <div className="feature-card">
                   <div className="feature-icon">📈</div>
                   <h3 className="feature-title">Scalable Infrastructure</h3>
@@ -716,7 +707,7 @@ function Landing() {
                     Handle thousands of queries per minute with our robust, cloud-based infrastructure built for scale.
                   </p>
                 </div>
-                
+
                 <div className="feature-card">
                   <div className="feature-icon">🛡️</div>
                   <h3 className="feature-title">Secure & Reliable</h3>
@@ -729,14 +720,14 @@ function Landing() {
           </section>
 
           {/* Chat Examples Section */}
-          <section style={{background: 'var(--panel)', padding: '100px 0', margin: '100px 0'}}>
-            <div style={{maxWidth: '1200px', margin: '0 auto', padding: '0 24px'}}>
-              <h2 className="landing-section__title">See FlowChat in Action</h2>
+          <section style={{ background: 'var(--panel)', padding: '100px 0', margin: '100px 0' }}>
+            <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 24px' }}>
+              <h2 className="landing-section__title">ככה זה נראה</h2>
               <p className="landing-section__subtitle">
-                Real conversations from businesses using FlowChat to automate their customer support
+                כך נראה הצ׳אט אחרי שהוטמע באתרי לקוחות
               </p>
-              
-              <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(450px, 1fr))', gap: '32px', marginTop: '60px', maxWidth: '1000px', margin: '60px auto 0'}}>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(450px, 1fr))', gap: '32px', marginTop: '60px', maxWidth: '1000px', margin: '60px auto 0' }}>
                 {/* E-commerce Chat Example */}
                 <div style={{
                   background: 'var(--panel-strong)',
@@ -753,8 +744,8 @@ function Landing() {
                   }}>
                     🛒 E-commerce Store - TechGear.com
                   </div>
-                  <div style={{padding: '20px', height: '300px', overflowY: 'auto'}}>
-                    <div style={{marginBottom: '16px'}}>
+                  <div style={{ padding: '20px', height: '300px', overflowY: 'auto' }}>
+                    <div style={{ marginBottom: '16px' }}>
                       <div style={{
                         background: 'var(--brand)',
                         color: 'white',
@@ -767,12 +758,12 @@ function Landing() {
                       }}>
                         Hi! I'm looking to buy a laptop for programming. What would you recommend?
                       </div>
-                      <div style={{fontSize: '12px', color: 'var(--text-dim)', textAlign: 'right', marginTop: '4px'}}>
+                      <div style={{ fontSize: '12px', color: 'var(--text-dim)', textAlign: 'right', marginTop: '4px' }}>
                         Customer • 2:34 PM
                       </div>
                     </div>
-                    
-                    <div style={{marginBottom: '16px'}}>
+
+                    <div style={{ marginBottom: '16px' }}>
                       <div style={{
                         background: 'var(--panel)',
                         color: 'var(--text)',
@@ -785,12 +776,12 @@ function Landing() {
                       }}>
                         Great choice! For programming, I'd recommend our MacBook Pro M2 or Dell XPS 15. Both have excellent performance for coding. What's your budget range?
                       </div>
-                      <div style={{fontSize: '12px', color: 'var(--text-dim)', marginTop: '4px'}}>
+                      <div style={{ fontSize: '12px', color: 'var(--text-dim)', marginTop: '4px' }}>
                         AI Assistant • 2:34 PM
                       </div>
                     </div>
-                    
-                    <div style={{marginBottom: '16px'}}>
+
+                    <div style={{ marginBottom: '16px' }}>
                       <div style={{
                         background: 'var(--brand)',
                         color: 'white',
@@ -803,12 +794,12 @@ function Landing() {
                       }}>
                         Around $1500-2000. I need something that can handle multiple monitors.
                       </div>
-                      <div style={{fontSize: '12px', color: 'var(--text-dim)', textAlign: 'right', marginTop: '4px'}}>
+                      <div style={{ fontSize: '12px', color: 'var(--text-dim)', textAlign: 'right', marginTop: '4px' }}>
                         Customer • 2:35 PM
                       </div>
                     </div>
-                    
-                    <div style={{marginBottom: '16px'}}>
+
+                    <div style={{ marginBottom: '16px' }}>
                       <div style={{
                         background: 'var(--panel)',
                         color: 'var(--text)',
@@ -821,7 +812,7 @@ function Landing() {
                       }}>
                         Perfect! The MacBook Pro M2 14" ($1,999) supports up to 2 external displays. We also have the Dell XPS 15 ($1,799) with similar capabilities. Both come with 16GB RAM and 512GB SSD. Would you like to see the detailed specs?
                       </div>
-                      <div style={{fontSize: '12px', color: 'var(--text-dim)', marginTop: '4px'}}>
+                      <div style={{ fontSize: '12px', color: 'var(--text-dim)', marginTop: '4px' }}>
                         AI Assistant • 2:35 PM
                       </div>
                     </div>
@@ -845,8 +836,8 @@ function Landing() {
                   }}>
                     🏥 Healthcare - MedCenter
                   </div>
-                  <div style={{padding: '20px', height: '300px', overflowY: 'auto'}}>
-                    <div style={{marginBottom: '16px'}}>
+                  <div style={{ padding: '20px', height: '300px', overflowY: 'auto' }}>
+                    <div style={{ marginBottom: '16px' }}>
                       <div style={{
                         background: 'var(--brand)',
                         color: 'white',
@@ -859,12 +850,12 @@ function Landing() {
                       }}>
                         I need to schedule an appointment with Dr. Smith. What are the available times?
                       </div>
-                      <div style={{fontSize: '12px', color: 'var(--text-dim)', textAlign: 'right', marginTop: '4px'}}>
+                      <div style={{ fontSize: '12px', color: 'var(--text-dim)', textAlign: 'right', marginTop: '4px' }}>
                         Patient • 1:45 PM
                       </div>
                     </div>
-                    
-                    <div style={{marginBottom: '16px'}}>
+
+                    <div style={{ marginBottom: '16px' }}>
                       <div style={{
                         background: 'var(--panel)',
                         color: 'var(--text)',
@@ -876,20 +867,20 @@ function Landing() {
                         border: '1px solid var(--border)'
                       }}>
                         Dr. Smith has the following available appointments this week:
-                        <br/><br/>
+                        <br /><br />
                         • Tuesday 2:30 PM
                         • Wednesday 10:00 AM
                         • Thursday 3:15 PM
                         • Friday 9:30 AM
-                        <br/><br/>
+                        <br /><br />
                         What type of appointment do you need?
                       </div>
-                      <div style={{fontSize: '12px', color: 'var(--text-dim)', marginTop: '4px'}}>
+                      <div style={{ fontSize: '12px', color: 'var(--text-dim)', marginTop: '4px' }}>
                         AI Assistant • 1:45 PM
                       </div>
                     </div>
-                    
-                    <div style={{marginBottom: '16px'}}>
+
+                    <div style={{ marginBottom: '16px' }}>
                       <div style={{
                         background: 'var(--brand)',
                         color: 'white',
@@ -902,12 +893,12 @@ function Landing() {
                       }}>
                         It's for a routine checkup. Tuesday at 2:30 PM works for me.
                       </div>
-                      <div style={{fontSize: '12px', color: 'var(--text-dim)', textAlign: 'right', marginTop: '4px'}}>
+                      <div style={{ fontSize: '12px', color: 'var(--text-dim)', textAlign: 'right', marginTop: '4px' }}>
                         Patient • 1:46 PM
                       </div>
                     </div>
-                    
-                    <div style={{marginBottom: '16px'}}>
+
+                    <div style={{ marginBottom: '16px' }}>
                       <div style={{
                         background: 'var(--panel)',
                         color: 'var(--text)',
@@ -919,10 +910,10 @@ function Landing() {
                         border: '1px solid var(--border)'
                       }}>
                         Perfect! I've reserved Tuesday 2:30 PM with Dr. Smith for your routine checkup. You'll receive a confirmation email shortly.
-                        <br/><br/>
+                        <br /><br />
                         Please arrive 15 minutes early and bring your insurance card and ID. Any questions about the appointment?
                       </div>
-                      <div style={{fontSize: '12px', color: 'var(--text-dim)', marginTop: '4px'}}>
+                      <div style={{ fontSize: '12px', color: 'var(--text-dim)', marginTop: '4px' }}>
                         AI Assistant • 1:46 PM
                       </div>
                     </div>
@@ -933,94 +924,94 @@ function Landing() {
           </section>
 
 
-      {/* Integration Showcase */}
-      <section className="landing-features">
-        <h2 className="landing-section__title">Works Everywhere</h2>
-        <p className="landing-section__subtitle">
-          One API, infinite possibilities. Integrate with your favorite platforms
-        </p>
-        
-        <div className="features-grid">
-          <div className="feature-card">
-            <div className="feature-icon">💬</div>
-            <h3 className="feature-title">WhatsApp Business</h3>
-            <p className="feature-desc">
-              Reach customers where they are. Send automated responses to WhatsApp messages using our simple webhook integration.
+          {/* Integration Showcase */}
+          <section className="landing-features">
+            <h2 className="landing-section__title">מתחבר להכל</h2>
+            <p className="landing-section__subtitle">
+              API אחד, אפשרויות אינסופיות. חבר את הצ׳אט למערכות שלך
             </p>
-          </div>
-          
-          <div className="feature-card">
-            <div className="feature-icon">💼</div>
-            <h3 className="feature-title">Slack & Teams</h3>
-            <p className="feature-desc">
-              Internal knowledge bots for your team. Answer questions about company policies, procedures, and documentation instantly.
-            </p>
-          </div>
-          
-          <div className="feature-card">
-            <div className="feature-icon">🌐</div>
-            <h3 className="feature-title">Website Widget</h3>
-            <p className="feature-desc">
-              Beautiful, customizable chat widget that matches your brand. Easy one-line JavaScript integration.
-            </p>
-          </div>
-          
-          <div className="feature-card">
-            <div className="feature-icon">📱</div>
-            <h3 className="feature-title">Mobile Apps</h3>
-            <p className="feature-desc">
-              Native iOS and Android support. Use our REST API to power in-app chat features and customer support.
-            </p>
-          </div>
-          
-          <div className="feature-card">
-            <div className="feature-icon">🔗</div>
-            <h3 className="feature-title">CRM Integration</h3>
-            <p className="feature-desc">
-              Connect with Salesforce, HubSpot, or any CRM. Automatically log conversations and update customer records.
-            </p>
-          </div>
-          
-          <div className="feature-card">
-            <div className="feature-icon">⚡</div>
-            <h3 className="feature-title">Custom Solutions</h3>
-            <p className="feature-desc">
-              Full API access for custom integrations. Webhooks, SDKs, and comprehensive documentation for developers.
-            </p>
-          </div>
-        </div>
-      </section>
+
+            <div className="features-grid">
+              <div className="feature-card">
+                <div className="feature-icon">💬</div>
+                <h3 className="feature-title">וואצאפ</h3>
+                <p className="feature-desc">
+                  הגיעו ללקוחות היכן שהם נמצאים. שלחו תגובות אוטומטיות להודעות וואצאפ באמצעות ההטמעה הפשוטה שלנו.
+                </p>
+              </div>
+
+              <div className="feature-card">
+                <div className="feature-icon">💼</div>
+                <h3 className="feature-title">צאט פנים ארגוני</h3>
+                <p className="feature-desc">
+                  בוטים פנימיים לצוות שלך. ענו על שאלות לגבי מדיניות החברה, נהלים ודוקומנטציה מיידית.
+                </p>
+              </div>
+
+              <div className="feature-card">
+                <div className="feature-icon">🌐</div>
+                <h3 className="feature-title">וידג׳ט צ׳אט</h3>
+                <p className="feature-desc">
+                  ווידג׳ט צ׳אט יפהפה שניתן להתאמה אישית שמתאים למותג שלך. הטמעה קלה בשורת JavaScript אחת.
+                </p>
+              </div>
+
+              <div className="feature-card">
+                <div className="feature-icon">📱</div>
+                <h3 className="feature-title">אפליקציות מובייל</h3>
+                <p className="feature-desc">
+                  תמיכה ב-iOS ואנדרואיד. השתמשו ב-REST API שלנו כדי להפעיל תכונות צ'אט בתוך האפליקציה ותמיכה בלקוחות.
+                </p>
+              </div>
+
+              <div className="feature-card">
+                <div className="feature-icon">🔗</div>
+                <h3 className="feature-title">שילוב עם CRM</h3>
+                <p className="feature-desc">
+                  התחברו עם Salesforce, HubSpot, או כל CRM אחר. רשמו שיחות אוטומטית ועדכנו רישומי לקוחות.
+                </p>
+              </div>
+
+              <div className="feature-card">
+                <div className="feature-icon">⚡</div>
+                <h3 className="feature-title">פתרונות מותאמים אישית</h3>
+                <p className="feature-desc">
+                  גישה מלאה ל-API עבור אינטגרציות מותאמות אישית. Webhooks, SDKs, ותיעוד מקיף למפתחים.
+                </p>
+              </div>
+            </div>
+          </section>
 
           {/* How It Works Section */}
           <section className="landing-how" id="how-it-works">
-            <div style={{maxWidth: '1200px', margin: '0 auto', padding: '0 24px'}}>
-              <h2 className="landing-section__title">How It Works</h2>
+            <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 24px' }}>
+              <h2 className="landing-section__title">איך זה עובד</h2>
               <p className="landing-section__subtitle">
-                Three simple steps to your intelligent chatbot
+                שלושה צעדים פשוטים לצ'אטבוט החכם שלך
               </p>
-              
+
               <div className="steps-grid">
                 <div className="step-card">
                   <div className="step-number">1</div>
-                  <h3 className="step-title">Provide Your Website</h3>
+                  <h3 className="step-title">הכנס את כתובת האתר שלך</h3>
                   <p className="step-desc">
-                    Simply enter your website URL. Our AI will automatically crawl and analyze your content.
+                    פשוט הכנס את כתובת האתר שלך. המערכת שלנו תסרוק את האתר שלך ותבנה בסיס ידע.
                   </p>
                 </div>
-                
+
                 <div className="step-card">
                   <div className="step-number">2</div>
-                  <h3 className="step-title">AI Processing</h3>
+                  <h3 className="step-title">עיבוד AI</h3>
                   <p className="step-desc">
-                    We extract, clean, and transform your content into a knowledge base using advanced vector embeddings.
+                    אנו שולפים, מנקים ומעבדים את התוכן שלך לבסיס ידע באמצעות הטמעות וקטוריות מתקדמות.
                   </p>
                 </div>
-                
+
                 <div className="step-card">
                   <div className="step-number">3</div>
-                  <h3 className="step-title">Get Your API</h3>
+                  <h3 className="step-title">קבל את ה-API שלך</h3>
                   <p className="step-desc">
-                    Receive a ready-to-use API endpoint that powers your chatbot across any platform or integration.
+                    קבל נקודת קצה API מוכנה לשימוש שמניעה את הצ'אטבוט שלך בכל פלטפורמה או אינטגרציה.
                   </p>
                 </div>
               </div>
@@ -1028,15 +1019,15 @@ function Landing() {
           </section>
 
           {/* Testimonials Section */}
-          <section className="landing-features" style={{background: 'var(--panel)', margin: '80px 0'}}>
+          {/* <section className="landing-features" style={{ background: 'var(--panel)', margin: '80px 0' }}>
             <h2 className="landing-section__title">What Our Customers Say</h2>
             <p className="landing-section__subtitle">
               Join thousands of businesses already using FlowChat
             </p>
-            
+
             <div className="features-grid">
               <div className="feature-card">
-                <div style={{display: 'flex', alignItems: 'center', marginBottom: '16px'}}>
+                <div style={{ display: 'flex', alignItems: 'center', marginBottom: '16px' }}>
                   <div style={{
                     width: '48px',
                     height: '48px',
@@ -1049,17 +1040,17 @@ function Landing() {
                     fontSize: '20px'
                   }}>👨‍💼</div>
                   <div>
-                    <div style={{fontWeight: '700', fontSize: '1rem'}}>Sarah Chen</div>
-                    <div style={{color: 'var(--text-dim)', fontSize: '0.9rem'}}>CTO, TechStart Inc.</div>
+                    <div style={{ fontWeight: '700', fontSize: '1rem' }}>Sarah Chen</div>
+                    <div style={{ color: 'var(--text-dim)', fontSize: '0.9rem' }}>CTO, TechStart Inc.</div>
                   </div>
                 </div>
-                <p className="feature-desc" style={{fontStyle: 'italic'}}>
+                <p className="feature-desc" style={{ fontStyle: 'italic' }}>
                   "FlowChat reduced our support tickets by 75% in just one week. The setup was incredibly simple - just gave them our website URL and we had a working bot in minutes."
                 </p>
               </div>
-              
+
               <div className="feature-card">
-                <div style={{display: 'flex', alignItems: 'center', marginBottom: '16px'}}>
+                <div style={{ display: 'flex', alignItems: 'center', marginBottom: '16px' }}>
                   <div style={{
                     width: '48px',
                     height: '48px',
@@ -1072,17 +1063,17 @@ function Landing() {
                     fontSize: '20px'
                   }}>👩‍💻</div>
                   <div>
-                    <div style={{fontWeight: '700', fontSize: '1rem'}}>Marcus Rodriguez</div>
-                    <div style={{color: 'var(--text-dim)', fontSize: '0.9rem'}}>Founder, E-commerce Plus</div>
+                    <div style={{ fontWeight: '700', fontSize: '1rem' }}>Marcus Rodriguez</div>
+                    <div style={{ color: 'var(--text-dim)', fontSize: '0.9rem' }}>Founder, E-commerce Plus</div>
                   </div>
                 </div>
-                <p className="feature-desc" style={{fontStyle: 'italic'}}>
+                <p className="feature-desc" style={{ fontStyle: 'italic' }}>
                   "Our customers love the instant responses. The bot knows our entire product catalog and can answer complex questions about shipping, returns, and product compatibility."
                 </p>
               </div>
-              
+
               <div className="feature-card">
-                <div style={{display: 'flex', alignItems: 'center', marginBottom: '16px'}}>
+                <div style={{ display: 'flex', alignItems: 'center', marginBottom: '16px' }}>
                   <div style={{
                     width: '48px',
                     height: '48px',
@@ -1095,89 +1086,89 @@ function Landing() {
                     fontSize: '20px'
                   }}>👨‍🏫</div>
                   <div>
-                    <div style={{fontWeight: '700', fontSize: '1rem'}}>Dr. Emily Watson</div>
-                    <div style={{color: 'var(--text-dim)', fontSize: '0.9rem'}}>Director, University Health</div>
+                    <div style={{ fontWeight: '700', fontSize: '1rem' }}>Dr. Emily Watson</div>
+                    <div style={{ color: 'var(--text-dim)', fontSize: '0.9rem' }}>Director, University Health</div>
                   </div>
                 </div>
-                <p className="feature-desc" style={{fontStyle: 'italic'}}>
+                <p className="feature-desc" style={{ fontStyle: 'italic' }}>
                   "We use FlowChat for our patient portal. It handles appointment scheduling, insurance questions, and general inquiries 24/7. Our staff can focus on patient care."
                 </p>
               </div>
             </div>
-          </section>
+          </section> */}
 
           {/* FAQ Section */}
           <section className="landing-features">
-            <h2 className="landing-section__title">Frequently Asked Questions</h2>
+            <h2 className="landing-section__title">שאלות נפוצות</h2>
             <p className="landing-section__subtitle">
-              Everything you need to know about FlowChat
+              כל מה שצריך לדעת על FlowChat
             </p>
-            
-            <div style={{maxWidth: '100%', margin: '0 auto', textAlign: 'left', width: '100%', padding: '0 20px'}}>
-              <div style={{marginBottom: '24px'}}>
-                <h3 style={{fontSize: '1.2rem', fontWeight: '700', marginBottom: '8px', color: 'var(--text)'}}>
-                  How long does it take to set up a bot?
+
+            <div style={{ maxWidth: '100%', margin: '0 auto', textAlign: 'right', width: '100%', padding: '0 20px' }} dir="rtl">
+              <div style={{ marginBottom: '24px' }}>
+                <h3 style={{ fontSize: '1.2rem', fontWeight: '700', marginBottom: '8px', color: 'var(--text)' }}>
+                  כמה זמן לוקח להקים בוט?
                 </h3>
-                <p style={{color: 'var(--text-dim)', lineHeight: '1.6'}}>
-                  Typically 40-60 seconds. Just provide your website URL, and our AI automatically crawls, processes, and creates your bot. No manual training required.
+                <p style={{ color: 'var(--text-dim)', lineHeight: '1.6' }}>
+                  בדרך כלל 40-60 שניות. פשוט ספק את כתובת האתר שלך, וה-AI שלנו סורק, מעבד ומייצר את הבוט שלך באופן אוטומטי. אין צורך בהכשרה ידנית.
                 </p>
               </div>
-              
-              <div style={{marginBottom: '24px'}}>
-                <h3 style={{fontSize: '1.2rem', fontWeight: '700', marginBottom: '8px', color: 'var(--text)'}}>
-                  What types of websites work best?
+
+              <div style={{ marginBottom: '24px' }}>
+                <h3 style={{ fontSize: '1.2rem', fontWeight: '700', marginBottom: '8px', color: 'var(--text)' }}>
+                  איזה סוגי אתרים עובדים הכי טוב?
                 </h3>
-                <p style={{color: 'var(--text-dim)', lineHeight: '1.6'}}>
-                  Any website with text content works great! E-commerce sites, SaaS platforms, healthcare providers, educational institutions, and service businesses all see excellent results.
+                <p style={{ color: 'var(--text-dim)', lineHeight: '1.6' }}>
+                  כל אתר עם תוכן טקסטואלי עובד מצוין! אתרי מסחר אלקטרוני, פלטפורמות SaaS, ספקי שירותי בריאות, מוסדות חינוך ועסקי שירותים רואים כולם תוצאות מצוינות.
                 </p>
               </div>
-              
-              <div style={{marginBottom: '24px'}}>
-                <h3 style={{fontSize: '1.2rem', fontWeight: '700', marginBottom: '8px', color: 'var(--text)'}}>
-                  Can I customize the bot's responses?
+
+              <div style={{ marginBottom: '24px' }}>
+                <h3 style={{ fontSize: '1.2rem', fontWeight: '700', marginBottom: '8px', color: 'var(--text)' }}>
+                  האם אני יכול להתאים אישית את התגובות של הבוט?
                 </h3>
-                <p style={{color: 'var(--text-dim)', lineHeight: '1.6'}}>
-                  Yes! You can customize the bot's personality, add specific instructions, and even provide additional training data to improve responses for your specific use case.
+                <p style={{ color: 'var(--text-dim)', lineHeight: '1.6' }}>
+                  כן! אתה יכול להתאים אישית את האישיות של הבוט, להוסיף הוראות ספציפיות ואפילו לספק נתוני הכשרה נוספים כדי לשפר את התגובות למקרה השימוש הספציפי שלך.
                 </p>
               </div>
-              
-              <div style={{marginBottom: '24px'}}>
-                <h3 style={{fontSize: '1.2rem', fontWeight: '700', marginBottom: '8px', color: 'var(--text)'}}>
-                  Is my data secure?
+
+              <div style={{ marginBottom: '24px' }}>
+                <h3 style={{ fontSize: '1.2rem', fontWeight: '700', marginBottom: '8px', color: 'var(--text)' }}>
+                  האם הנתונים שלי מאובטחים?
                 </h3>
-                <p style={{color: 'var(--text-dim)', lineHeight: '1.6'}}>
-                  Absolutely. We use enterprise-grade encryption, never share your data with third parties, and comply with GDPR, CCPA, and other privacy regulations.
+                <p style={{ color: 'var(--text-dim)', lineHeight: '1.6' }}>
+                  בהחלט. אנו משתמשים בהצפנה ברמה ארגונית, לעולם לא משתפים את הנתונים שלך עם צדדים שלישיים, ועומדים בדרישות GDPR, CCPA ורגולציות פרטיות אחרות.
                 </p>
               </div>
-              
-              <div style={{marginBottom: '24px'}}>
-                <h3 style={{fontSize: '1.2rem', fontWeight: '700', marginBottom: '8px', color: 'var(--text)'}}>
-                  What if the bot doesn't know an answer?
+
+              <div style={{ marginBottom: '24px' }}>
+                <h3 style={{ fontSize: '1.2rem', fontWeight: '700', marginBottom: '8px', color: 'var(--text)' }}>
+                  מה קורה אם הבוט לא יודע את התשובה?
                 </h3>
-                <p style={{color: 'var(--text-dim)', lineHeight: '1.6'}}>
-                  The bot will politely say it doesn't have that information and can either escalate to human support or ask for clarification. You can also set up fallback responses.
+                <p style={{ color: 'var(--text-dim)', lineHeight: '1.6' }}>
+                  הבוט יגיד בנימוס שאין לו את המידע הזה ויכול להעלות את זה לתמיכה אנושית או לבקש הבהרה. אתה יכול גם להגדיר תגובות חלופיות.
                 </p>
               </div>
-              
-              <div style={{marginBottom: '24px'}}>
-                <h3 style={{fontSize: '1.2rem', fontWeight: '700', marginBottom: '8px', color: 'var(--text)'}}>
-                  Can I integrate with my existing tools?
+
+              <div style={{ marginBottom: '24px' }}>
+                <h3 style={{ fontSize: '1.2rem', fontWeight: '700', marginBottom: '8px', color: 'var(--text)' }}>
+                  האם אני יכול לשלב עם הכלים הקיימים שלי?
                 </h3>
-                <p style={{color: 'var(--text-dim)', lineHeight: '1.6'}}>
-                  Yes! We provide APIs, webhooks, and pre-built integrations for popular platforms like Slack, WhatsApp, Salesforce, and more. Custom integrations are also supported.
+                <p style={{ color: 'var(--text-dim)', lineHeight: '1.6' }}>
+                  כן! אנו מספקים APIs, webhooks, ואינטגרציות מוכנות לפלטפורמות פופולריות כמו Slack, WhatsApp, Salesforce ועוד. אינטגרציות מותאמות אישית נתמכות גם הן.
                 </p>
               </div>
             </div>
           </section>
 
           {/* Comparison Table */}
-          <section className="landing-features" style={{background: 'var(--panel)', margin: '80px 0'}}>
+          {/* <section className="landing-features" style={{ background: 'var(--panel)', margin: '80px 0' }}>
             <h2 className="landing-section__title">FlowChat vs. Competitors</h2>
             <p className="landing-section__subtitle">
               See why thousands choose FlowChat over traditional chatbot solutions
             </p>
-            
-            <div style={{maxWidth: '100%', margin: '0 auto', overflowX: 'auto', textAlign: 'center', width: '100%'}}>
+
+            <div style={{ maxWidth: '100%', margin: '0 auto', overflowX: 'auto', textAlign: 'center', width: '100%' }}>
               <table style={{
                 width: '100%',
                 maxWidth: '1200px',
@@ -1189,85 +1180,85 @@ function Landing() {
                 margin: '0 auto'
               }}>
                 <thead>
-                  <tr style={{background: 'var(--gradient)'}}>
-                    <th style={{padding: '20px', textAlign: 'left', color: 'white', fontWeight: '700'}}>Feature</th>
-                    <th style={{padding: '20px', textAlign: 'center', color: 'white', fontWeight: '700'}}>FlowChat</th>
-                    <th style={{padding: '20px', textAlign: 'center', color: 'white', fontWeight: '700'}}>Traditional Bots</th>
-                    <th style={{padding: '20px', textAlign: 'center', color: 'white', fontWeight: '700'}}>Manual Setup</th>
+                  <tr style={{ background: 'var(--gradient)' }}>
+                    <th style={{ padding: '20px', textAlign: 'left', color: 'white', fontWeight: '700' }}>Feature</th>
+                    <th style={{ padding: '20px', textAlign: 'center', color: 'white', fontWeight: '700' }}>FlowChat</th>
+                    <th style={{ padding: '20px', textAlign: 'center', color: 'white', fontWeight: '700' }}>Traditional Bots</th>
+                    <th style={{ padding: '20px', textAlign: 'center', color: 'white', fontWeight: '700' }}>Manual Setup</th>
                   </tr>
                 </thead>
                 <tbody>
-                  <tr style={{borderBottom: '1px solid var(--border)'}}>
-                    <td style={{padding: '16px 20px', fontWeight: '600'}}>Setup Time</td>
-                    <td style={{padding: '16px 20px', textAlign: 'center', color: 'var(--ok)'}}>40 seconds</td>
-                    <td style={{padding: '16px 20px', textAlign: 'center', color: 'var(--text-dim)'}}>2-4 weeks</td>
-                    <td style={{padding: '16px 20px', textAlign: 'center', color: 'var(--text-dim)'}}>1-3 months</td>
+                  <tr style={{ borderBottom: '1px solid var(--border)' }}>
+                    <td style={{ padding: '16px 20px', fontWeight: '600' }}>Setup Time</td>
+                    <td style={{ padding: '16px 20px', textAlign: 'center', color: 'var(--ok)' }}>40 seconds</td>
+                    <td style={{ padding: '16px 20px', textAlign: 'center', color: 'var(--text-dim)' }}>2-4 weeks</td>
+                    <td style={{ padding: '16px 20px', textAlign: 'center', color: 'var(--text-dim)' }}>1-3 months</td>
                   </tr>
-                  <tr style={{borderBottom: '1px solid var(--border)'}}>
-                    <td style={{padding: '16px 20px', fontWeight: '600'}}>Data Upload Required</td>
-                    <td style={{padding: '16px 20px', textAlign: 'center', color: 'var(--ok)'}}>❌ None</td>
-                    <td style={{padding: '16px 20px', textAlign: 'center', color: 'var(--warn)'}}>✅ Manual</td>
-                    <td style={{padding: '16px 20px', textAlign: 'center', color: 'var(--warn)'}}>✅ Extensive</td>
+                  <tr style={{ borderBottom: '1px solid var(--border)' }}>
+                    <td style={{ padding: '16px 20px', fontWeight: '600' }}>Data Upload Required</td>
+                    <td style={{ padding: '16px 20px', textAlign: 'center', color: 'var(--ok)' }}>❌ None</td>
+                    <td style={{ padding: '16px 20px', textAlign: 'center', color: 'var(--warn)' }}>✅ Manual</td>
+                    <td style={{ padding: '16px 20px', textAlign: 'center', color: 'var(--warn)' }}>✅ Extensive</td>
                   </tr>
-                  <tr style={{borderBottom: '1px solid var(--border)'}}>
-                    <td style={{padding: '16px 20px', fontWeight: '600'}}>AI Training</td>
-                    <td style={{padding: '16px 20px', textAlign: 'center', color: 'var(--ok)'}}>❌ Automatic</td>
-                    <td style={{padding: '16px 20px', textAlign: 'center', color: 'var(--warn)'}}>✅ Manual</td>
-                    <td style={{padding: '16px 20px', textAlign: 'center', color: 'var(--warn)'}}>✅ Complex</td>
+                  <tr style={{ borderBottom: '1px solid var(--border)' }}>
+                    <td style={{ padding: '16px 20px', fontWeight: '600' }}>AI Training</td>
+                    <td style={{ padding: '16px 20px', textAlign: 'center', color: 'var(--ok)' }}>❌ Automatic</td>
+                    <td style={{ padding: '16px 20px', textAlign: 'center', color: 'var(--warn)' }}>✅ Manual</td>
+                    <td style={{ padding: '16px 20px', textAlign: 'center', color: 'var(--warn)' }}>✅ Complex</td>
                   </tr>
-                  <tr style={{borderBottom: '1px solid var(--border)'}}>
-                    <td style={{padding: '16px 20px', fontWeight: '600'}}>API Integration</td>
-                    <td style={{padding: '16px 20px', textAlign: 'center', color: 'var(--ok)'}}>✅ Instant</td>
-                    <td style={{padding: '16px 20px', textAlign: 'center', color: 'var(--text-dim)'}}>✅ Available</td>
-                    <td style={{padding: '16px 20px', textAlign: 'center', color: 'var(--warn)'}}>❌ Custom Dev</td>
+                  <tr style={{ borderBottom: '1px solid var(--border)' }}>
+                    <td style={{ padding: '16px 20px', fontWeight: '600' }}>API Integration</td>
+                    <td style={{ padding: '16px 20px', textAlign: 'center', color: 'var(--ok)' }}>✅ Instant</td>
+                    <td style={{ padding: '16px 20px', textAlign: 'center', color: 'var(--text-dim)' }}>✅ Available</td>
+                    <td style={{ padding: '16px 20px', textAlign: 'center', color: 'var(--warn)' }}>❌ Custom Dev</td>
                   </tr>
-                  <tr style={{borderBottom: '1px solid var(--border)'}}>
-                    <td style={{padding: '16px 20px', fontWeight: '600'}}>Multi-Platform Support</td>
-                    <td style={{padding: '16px 20px', textAlign: 'center', color: 'var(--ok)'}}>✅ All Platforms</td>
-                    <td style={{padding: '16px 20px', textAlign: 'center', color: 'var(--text-dim)'}}>⚠️ Limited</td>
-                    <td style={{padding: '16px 20px', textAlign: 'center', color: 'var(--warn)'}}>❌ Platform-Specific</td>
+                  <tr style={{ borderBottom: '1px solid var(--border)' }}>
+                    <td style={{ padding: '16px 20px', fontWeight: '600' }}>Multi-Platform Support</td>
+                    <td style={{ padding: '16px 20px', textAlign: 'center', color: 'var(--ok)' }}>✅ All Platforms</td>
+                    <td style={{ padding: '16px 20px', textAlign: 'center', color: 'var(--text-dim)' }}>⚠️ Limited</td>
+                    <td style={{ padding: '16px 20px', textAlign: 'center', color: 'var(--warn)' }}>❌ Platform-Specific</td>
                   </tr>
-                  <tr style={{borderBottom: '1px solid var(--border)'}}>
-                    <td style={{padding: '16px 20px', fontWeight: '600'}}>Cost</td>
-                    <td style={{padding: '16px 20px', textAlign: 'center', color: 'var(--ok)'}}>from $0</td>
-                    <td style={{padding: '16px 20px', textAlign: 'center', color: 'var(--text-dim)'}}>$200-500/month</td>
-                    <td style={{padding: '16px 20px', textAlign: 'center', color: 'var(--warn)'}}>$5,000-50,000</td>
+                  <tr style={{ borderBottom: '1px solid var(--border)' }}>
+                    <td style={{ padding: '16px 20px', fontWeight: '600' }}>Cost</td>
+                    <td style={{ padding: '16px 20px', textAlign: 'center', color: 'var(--ok)' }}>from $0</td>
+                    <td style={{ padding: '16px 20px', textAlign: 'center', color: 'var(--text-dim)' }}>$200-500/month</td>
+                    <td style={{ padding: '16px 20px', textAlign: 'center', color: 'var(--warn)' }}>$5,000-50,000</td>
                   </tr>
                   <tr>
-                    <td style={{padding: '16px 20px', fontWeight: '600'}}>Maintenance</td>
-                    <td style={{padding: '16px 20px', textAlign: 'center', color: 'var(--ok)'}}>❌ Zero</td>
-                    <td style={{padding: '16px 20px', textAlign: 'center', color: 'var(--warn)'}}>✅ Ongoing</td>
-                    <td style={{padding: '16px 20px', textAlign: 'center', color: 'var(--warn)'}}>✅ Constant</td>
+                    <td style={{ padding: '16px 20px', fontWeight: '600' }}>Maintenance</td>
+                    <td style={{ padding: '16px 20px', textAlign: 'center', color: 'var(--ok)' }}>❌ Zero</td>
+                    <td style={{ padding: '16px 20px', textAlign: 'center', color: 'var(--warn)' }}>✅ Ongoing</td>
+                    <td style={{ padding: '16px 20px', textAlign: 'center', color: 'var(--warn)' }}>✅ Constant</td>
                   </tr>
                 </tbody>
               </table>
             </div>
-          </section>
+          </section> */}
 
           {/* Pricing Section */}
           <section className="landing-pricing">
-            <div style={{maxWidth: '1200px', margin: '0 auto', padding: '0 24px'}}>
-              <h2 className="landing-section__title">Simple, Transparent Pricing</h2>
+            <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 24px' }}>
+              <h2 className="landing-section__title">תמחור פשוט</h2>
               <p className="landing-section__subtitle">
-                Start free, scale as you grow
+                התחל בחינם, אין צורך בכרטיס אשראי.
               </p>
-              
-              <div style={{display: 'flex', justifyContent: 'center', marginBottom: '60px'}}>
-                <div className="pricing-card featured" style={{maxWidth: '500px', width: '100%'}}>
-                  <div className="pricing-badge">Free Forever</div>
-                  <h3 className="pricing-title">Free Plan</h3>
-                  <div className="pricing-price">$0</div>
-                  <p className="pricing-period">forever</p>
+
+              <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '60px' }}>
+                <div className="pricing-card featured" style={{ maxWidth: '500px', width: '100%' }}>
+                  <div className="pricing-badge">חינם ל-14 יום</div>
+                  <h3 className="pricing-title">ללא התחייבות</h3>
+                  <div className="pricing-price">התנסות חינם</div>
+                  {/* <p className="pricing-period">forever</p> */}
                   <ul className="pricing-features">
-                    <li>1 AI Bot</li>
-                    <li>1 Website Domain</li>
-                    <li>Full API Access</li>
-                    <li>Basic Analytics</li>
-                    <li>Custom Branding</li>
-                    <li>No Credit Card Required</li>
+                    <li>בוט אחד</li>
+                    <li>מערכת ניהול בוטים</li>
+                    <li>גישה מלאה ל-API</li>
+                    {/* <li>Basic Analytics</li> */}
+                    {/* <li>Custom Branding</li> */}
+                    <li>אין צורך בכרטיס אשראי</li>
                   </ul>
                   <button className="btn btn--primary" onClick={() => handleSelectPlan('free')}>
-                    Start Free Now
+                    התחל חינם עכשיו
                   </button>
                   <div style={{
                     marginTop: '20px',
@@ -1278,11 +1269,11 @@ function Landing() {
                     fontSize: '0.9rem',
                     color: 'var(--ok)'
                   }}>
-                    <strong>Perfect for:</strong> Small businesses, startups, and anyone wanting to try AI chatbots
+                    <strong>מצוין עבור:</strong> עסקים קטנים, סטארטאפים, וכל מי שרוצה לנסות צ'אט-בוטים מבוססי AI
                   </div>
                 </div>
               </div>
-              
+              {/* 
               <div style={{
                 padding: '40px',
                 background: 'var(--panel)',
@@ -1290,28 +1281,28 @@ function Landing() {
                 border: '1px solid var(--border)',
                 textAlign: 'center'
               }}>
-                <h3 style={{fontSize: '1.5rem', fontWeight: '700', marginBottom: '16px', color: 'var(--text)'}}>
-                  Need More? We've Got You Covered
+                <h3 style={{ fontSize: '1.5rem', fontWeight: '700', marginBottom: '16px', color: 'var(--text)' }}>
+                  צריך יותר? שדרג לתוכניות Pro או Enterprise
                 </h3>
-                <p style={{color: 'var(--text-dim)', marginBottom: '32px', lineHeight: '1.6'}}>
-                  As your business grows, easily upgrade to our Pro or Enterprise plans for more bots, domains, and advanced features.
+                <p style={{ color: 'var(--text-dim)', marginBottom: '32px', lineHeight: '1.6' }}>
+                  כאשר העסק שלך מתפתח, תוכל בקלות לשדרג לתוכניות Pro או Enterprise שלנו עבור יותר בוטים, דומיינים ותכונות מתקדמות.
                 </p>
-                <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '32px', marginBottom: '32px'}}>
-                  <div style={{textAlign: 'center'}}>
-                    <div style={{fontSize: '1.5rem', fontWeight: '800', color: 'var(--brand)', marginBottom: '8px'}}>Pro Plan</div>
-                    <div style={{fontSize: '1.2rem', fontWeight: '700', marginBottom: '4px'}}>$99/month</div>
-                    <div style={{color: 'var(--text-dim)', fontSize: '0.9rem'}}>5 bots • 10K queries • Advanced features</div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '32px', marginBottom: '32px' }}>
+                  <div style={{ textAlign: 'center' }}>
+                    <div style={{ fontSize: '1.5rem', fontWeight: '800', color: 'var(--brand)', marginBottom: '8px' }}>Pro Plan</div>
+                    <div style={{ fontSize: '1.2rem', fontWeight: '700', marginBottom: '4px' }}>$99/month</div>
+                    <div style={{ color: 'var(--text-dim)', fontSize: '0.9rem' }}>5 bots • 10K queries • Advanced features</div>
                   </div>
-                  <div style={{textAlign: 'center'}}>
-                    <div style={{fontSize: '1.5rem', fontWeight: '800', color: 'var(--brand)', marginBottom: '8px'}}>Enterprise</div>
-                    <div style={{fontSize: '1.2rem', fontWeight: '700', marginBottom: '4px'}}>Custom</div>
-                    <div style={{color: 'var(--text-dim)', fontSize: '0.9rem'}}>Unlimited • 24/7 support • SLA</div>
+                  <div style={{ textAlign: 'center' }}>
+                    <div style={{ fontSize: '1.5rem', fontWeight: '800', color: 'var(--brand)', marginBottom: '8px' }}>Enterprise</div>
+                    <div style={{ fontSize: '1.2rem', fontWeight: '700', marginBottom: '4px' }}>Custom</div>
+                    <div style={{ color: 'var(--text-dim)', fontSize: '0.9rem' }}>Unlimited • 24/7 support • SLA</div>
                   </div>
                 </div>
                 <button className="btn" onClick={() => handleSelectPlan('contact')}>
                   Contact Sales for Pro/Enterprise
                 </button>
-              </div>
+              </div> */}
             </div>
           </section>
         </>
@@ -1319,12 +1310,12 @@ function Landing() {
 
       {/* Bots Section */}
       {activeSection === 'bots' && isLoggedIn && (
-        <section className="landing-features" style={{paddingTop: '120px'}}>
+        <section className="landing-features" style={{ paddingTop: '120px' }}>
           <h2 className="landing-section__title">Your AI Bots</h2>
           <p className="landing-section__subtitle">
             Manage and create intelligent chatbots for your business
           </p>
-          
+
           {error && (
             <div style={{
               background: 'rgba(239,68,68,0.1)',
@@ -1340,7 +1331,7 @@ function Landing() {
           )}
 
           {bots.length < 1 && (
-            <div style={{display: 'flex', justifyContent: 'center', marginBottom: '40px'}}>
+            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '40px' }}>
               <button className="btn btn--primary" onClick={handleCreateBot}>
                 + Create New Bot
               </button>
@@ -1362,7 +1353,7 @@ function Landing() {
           )}
 
           {loading ? (
-            <div style={{textAlign: 'center', padding: '40px', color: 'var(--text-dim)'}}>
+            <div style={{ textAlign: 'center', padding: '40px', color: 'var(--text-dim)' }}>
               Loading your bots...
             </div>
           ) : bots.length === 0 ? (
@@ -1373,9 +1364,9 @@ function Landing() {
               borderRadius: '16px',
               border: '1px solid var(--border)'
             }}>
-              <div style={{fontSize: '48px', marginBottom: '20px'}}>🤖</div>
-              <h3 style={{margin: '0 0 12px 0', fontSize: '1.5rem'}}>No bots yet</h3>
-              <p style={{color: 'var(--text-dim)', margin: '0 0 24px 0'}}>
+              <div style={{ fontSize: '48px', marginBottom: '20px' }}>🤖</div>
+              <h3 style={{ margin: '0 0 12px 0', fontSize: '1.5rem' }}>No bots yet</h3>
+              <p style={{ color: 'var(--text-dim)', margin: '0 0 24px 0' }}>
                 Create your first AI bot to get started with automated customer support. Free plan allows 1 bot.
               </p>
               <button className="btn btn--primary" onClick={handleCreateBot}>
@@ -1383,18 +1374,18 @@ function Landing() {
               </button>
             </div>
           ) : (
-            <div style={{display: 'flex', justifyContent: 'center'}}>
-              <div className="feature-card" style={{maxWidth: '400px', width: '100%'}}>
+            <div style={{ display: 'flex', justifyContent: 'center' }}>
+              <div className="feature-card" style={{ maxWidth: '400px', width: '100%' }}>
                 <div className="feature-icon">🤖</div>
                 <h3 className="feature-title">{username}'s AI Bot</h3>
                 <p className="feature-desc">
                   {bots.length} conversation{bots.length !== 1 ? 's' : ''} • Active
                 </p>
-                <div style={{marginTop: '20px', display: 'flex', gap: '8px'}}>
-                  <button 
-                    className="btn btn--primary" 
+                <div style={{ marginTop: '20px', display: 'flex', gap: '8px' }}>
+                  <button
+                    className="btn btn--primary"
                     onClick={() => navigate('/fullchat')}
-                    style={{flex: 1}}
+                    style={{ flex: 1 }}
                   >
                     Manage Conversations
                   </button>
@@ -1413,15 +1404,15 @@ function Landing() {
           margin: '80px 0 0 0',
           textAlign: 'center'
         }}>
-          <h2 style={{fontSize: '2.5rem', fontWeight: '800', margin: '0 0 16px 0'}}>
-            Ready to Transform Your Customer Support?
+          <h2 style={{ fontSize: '2.5rem', fontWeight: '800', margin: '0 0 16px 0' }}>
+            מוכן לשדרג את התמיכה בלקוחות שלך?
           </h2>
-          <p style={{fontSize: '1.2rem', margin: '0 0 40px 0', opacity: '0.9'}}>
-            Join thousands of businesses already using FlowChat to automate support and boost efficiency
+          <p style={{ fontSize: '1.2rem', margin: '0 0 40px 0', opacity: '0.9' }}>
+            אוטומציה בשירות לקוחות זו רמה אחרת לגמרי. אין סיבה שלך לא יהיה!
           </p>
-          <div style={{display: 'flex', gap: '16px', justifyContent: 'center', flexWrap: 'wrap'}}>
-            <button 
-              className="btn" 
+          <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', flexWrap: 'wrap' }}>
+            <button
+              className="btn"
               onClick={handleGetStarted}
               style={{
                 background: 'white',
@@ -1432,10 +1423,10 @@ function Landing() {
                 fontWeight: '700'
               }}
             >
-              Start Building Your Bot
+              התחל בחינם
             </button>
-            <button 
-              className="btn" 
+            <button
+              className="btn"
               onClick={() => document.getElementById('how-it-works').scrollIntoView({ behavior: 'smooth' })}
               style={{
                 background: 'transparent',
@@ -1446,11 +1437,11 @@ function Landing() {
                 fontWeight: '700'
               }}
             >
-              Learn More
+              למידע נוסף
             </button>
           </div>
-          <div style={{marginTop: '40px', fontSize: '0.9rem', opacity: '0.8'}}>
-            ⚡ Setup in 40 seconds • 🚀 No credit card required • 💬 24/7 support
+          <div style={{ marginTop: '40px', fontSize: '0.9rem', opacity: '0.8' }}>
+            ⚡ הגדרה תוך 40 שניות • 🚀 אין צורך בכרטיס אשראי • 💬 שירות תמיכה
           </div>
         </section>
       )}
@@ -1462,7 +1453,7 @@ function Landing() {
           <span>FlowChat</span>
         </div>
         <p className="landing-footer__text">
-          © 2024 FlowChat. The future of AI-powered customer support.
+          גם אתם יכולים לשדרג את התמיכה בלקוחות שלכם עם FlowChat. התחילו בחינם עוד היום!
         </p>
       </footer>
     </div>

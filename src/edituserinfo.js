@@ -338,7 +338,7 @@ function EditUserInfo() {
         <div className="edit-header">
           <div className="edit-brand">
             <div className="edit-dot" />
-            <div>FlowChat · Edit Profile</div>
+            <div>ערוך את הפרופיל שלך</div>
           </div>
           <button 
             className="theme-toggle" 
@@ -351,9 +351,9 @@ function EditUserInfo() {
 
         <div className="edit-content">
           <div className="edit-section">
-            <h1 className="edit-title">Edit Your Profile</h1>
-            <p className="edit-subtitle">Update your account information and bot settings</p>
-            
+            <h1 className="edit-title">ערוך את הפרופיל שלך</h1>
+            <p className="edit-subtitle">עדכן את פרטי החשבון שלך והגדרות הבוט</p>
+
             {errorMessage && <div className="alert">{errorMessage}</div>}
             {successMessage && <div className="success">{successMessage}</div>}
 
@@ -381,10 +381,10 @@ function EditUserInfo() {
             </div>
 
             <div>
-              <label className="label">Bot Definition</label>
+              <label className="label">הגדרות לבוט</label>
               <textarea
                 className="textarea"
-                placeholder="Enter your bot definition..."
+                placeholder="הכנס הגדרות לבוט כאן..."
                 value={botDefinition}
                 onChange={(e) => setBotDefinition(e.target.value)}
               />
@@ -419,7 +419,7 @@ function EditUserInfo() {
                   marginBottom: '8px',
                   display: 'block'
                 }}>
-                  Your usertoken:
+                  הטוקן שלך:
                 </label>
                 <div style={{display: 'flex', gap: '8px', alignItems: 'center'}}>
                   <input
@@ -452,7 +452,7 @@ function EditUserInfo() {
                       cursor: 'pointer'
                     }}
                   >
-                    Copy
+                    העתק
                   </button>
                 </div>
               </div>
@@ -466,7 +466,7 @@ function EditUserInfo() {
                   marginBottom: '8px',
                   display: 'block'
                 }}>
-                  Language:
+                  שפת פיתוח:
                 </label>
                 <select
                   style={{
@@ -493,7 +493,7 @@ function EditUserInfo() {
                     fontWeight: '600',
                     color: 'var(--text)'
                   }}>
-                    Example request:
+                    קוד להטמעה:
                   </label>
                   <button
                     onClick={() => {
@@ -555,10 +555,10 @@ print(response.json())`}</pre>
 
             <div className="actions">
               <button className="btn btn--secondary" onClick={handleBack}>
-                Back to Chat
+                חזרה לצ'אט
               </button>
               <button className="btn btn--primary" onClick={handleSave}>
-                Save Changes
+                שמור שינויים
               </button>
             </div>
           </div>
