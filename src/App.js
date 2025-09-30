@@ -224,7 +224,7 @@ function Login() {
         <div className="login-header">
           <div className="login-brand" onClick={handleBackToLanding} style={{cursor: 'pointer'}}>
             <div className="login-dot" />
-            <div>FlowChat</div>
+            <div className="logo-text">FlowChat</div>
           </div>
           <button
             className="theme-toggle"
@@ -268,10 +268,10 @@ function Login() {
 
           <div className="actions">
             <button className="btn btn--primary" type="button" onClick={handleLogin}>
-              Login
+              כניסה
             </button>
             <button className="btn btn--muted" type="button" onClick={handleRegister}>
-              Register
+              הרשמה
             </button>
           </div>
           

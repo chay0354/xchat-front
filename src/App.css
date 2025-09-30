@@ -92,6 +92,11 @@ h1 {
   position: relative;
 }
 
+.logo-text {
+  color: white !important;
+
+}
+
 /* Input Styling */
 input {
   width: 100%;

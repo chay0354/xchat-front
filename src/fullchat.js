@@ -10,7 +10,7 @@ function FullChat() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [newMessage, setNewMessage] = useState('');
-  const [theme, setTheme] = useState('dark');
+  const [theme, setTheme] = useState('light');
   const [chatFilter, setChatFilter] = useState('');
 
   const scrollRef = useRef(null);
@@ -271,9 +271,9 @@ function FullChat() {
           <button className="fc-ghost" onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}>
             {theme === 'dark' ? '☀️ Light' : '🌙 Dark'}
           </button>
-          <button className="fc-ghost" onClick={() => navigate('/')}>Home</button>
-          <button className="fc-ghost" onClick={() => navigate('/edituserinfo')}>Edit Profile</button>
-          <button className="fc-ghost" onClick={() => navigate('/')}>Log Out</button>
+          <button className="fc-ghost" onClick={() => navigate('/')}>לעמוד הבית</button>
+          <button className="fc-ghost" onClick={() => navigate('/edituserinfo')}>ערוך פרופיל</button>
+          <button className="fc-ghost" onClick={() => navigate('/')}>התנתק</button>
         </div>
       </aside>
 
@@ -295,7 +295,7 @@ function FullChat() {
           <div className="fc-header__right">
             {isTestChat && (
               <button className="fc-btn fc-btn--danger" onClick={handleClearConversation} title="Clear chat">
-                🗑 Clear
+                🗑 נקה
               </button>
             )}
           </div>
@@ -305,7 +305,7 @@ function FullChat() {
         <section className="fc-messages" ref={scrollRef}>
           {messages.length === 0 ? (
             <div className="fc-placeholder">
-              No messages yet. Say hi 👋
+              אין הודעות עדיין. התחל לשאול משהו בצ'אט הבדיקה!<br/>
             </div>
           ) : (
             <div className="fc-thread">
