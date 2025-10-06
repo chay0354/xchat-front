@@ -209,12 +209,12 @@ function Register() {
       .then((data) => {
         if (data.reply) {
           setBotDefinition(data.reply);
-          setSuccessMessage('Bot definition received.');
+          setSuccessMessage('הגדרות הבוט עודכנו בהצלחה!');
         } else {
-          setErrorMessage(data.error || 'Failed to get bot definition.');
+          setErrorMessage(data.error || 'ההגדרות הבוט נכשלו. נסה שוב.');
         }
       })
-      .catch(() => setErrorMessage('Error sending request to server.'))
+      .catch(() => setErrorMessage('שגיאה בשליחת הבקשה לשרת.'))
       .finally(() => setIsDefining(false));
   };
 
@@ -352,7 +352,7 @@ print(response.json())`;
               onClick={() => setSelectedPlan('test')}
             >
               <h3 style={{margin: '0 0 8px 0', fontSize: '1.3rem', fontWeight: '700'}}>חינם ל-14 יום</h3>
-              <div style={{fontSize: '2rem', fontWeight: '900', color: 'var(--brand)', margin: '0 0 8px 0'}}>חינם ל-14 יום, אח״כ רק 15₪ לחודש</div>
+              <div style={{fontSize: '2rem', fontWeight: '900', color: 'var(--brand)', margin: '0 0 8px 0'}}>חינם ל-14 יום, אח״כ רק 19₪ לחודש</div>
               <p style={{color: 'var(--text-dim)', margin: '0 0 20px 0'}}>אין צורך בכרטיס אשראי</p>
               <ul style={{listStyle: 'none', padding: 0, margin: 0, textAlign: 'left'}}>
                 <li style={{padding: '4px 0', color: 'var(--text-dim)', display: 'flex', alignItems: 'center', gap: '8px'}}>
@@ -376,8 +376,8 @@ print(response.json())`;
           </div>
 
           <div className="actions">
-            <button className="btn" onClick={handleStage2Back}>Back</button>
-            <button className="btn btn--primary" onClick={handleStage2Next}>Next</button>
+            <button className="btn" onClick={handleStage2Back}>חזור</button>
+            <button className="btn btn--primary" onClick={handleStage2Next}>הבא</button>
           </div>
         </div>
       );

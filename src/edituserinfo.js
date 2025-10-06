@@ -358,22 +358,22 @@ function EditUserInfo() {
             {successMessage && <div className="success">{successMessage}</div>}
 
             <div>
-              <label className="label">Calendar Token</label>
+              <label className="label">טוקן היומן</label>
               <input
                 type="text"
                 className="input"
-                placeholder="Enter your calendar token..."
+                placeholder="הכנס את טוקן היומן שלך..."
                 value={calendarToken}
                 onChange={(e) => setCalendarToken(e.target.value)}
               />
             </div>
 
             <div>
-              <label className="label">Password</label>
+              <label className="label">סיסמה</label>
               <input
                 type="password"
                 className="input"
-                placeholder="Enter new password..."
+                placeholder="הכנס סיסמה חדשה..."
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 autoComplete="new-password"

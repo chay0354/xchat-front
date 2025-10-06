@@ -26,8 +26,8 @@ const designTokens = `
   --panel-strong: #ffffff;
   --text: #0f1420;
   --text-dim: #5b667a;
-  --brand: #316bff;
-  --brand-2: #6b5cff;
+  --brand: #3f77caff;
+  --brand-2: #5590e9ff;
   --ok: #16a34a;
   --warn: #dc2626;
   --border: rgba(15,20,32,0.12);
@@ -599,7 +599,8 @@ function Landing() {
         <>
           {/* Hero Section */}
           <section className="landing-hero">
-            <h1 className="landing-hero__title">
+            <h1>
+            {/* <h1 className="landing-hero__title"> */}
               {isLoggedIn ? `ברוך השב, ${username}!` : 'צור בוט תוך 40 שניות!'}
             </h1>
             <p className="landing-hero__subtitle">
@@ -662,7 +663,7 @@ function Landing() {
           {/* Features Section */}
           <section className="landing-features">
             <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 24px' }}>
-              <h2 className="landing-section__title">הכח של FlowChat</h2>
+              <h2 className="landing-section__title">הכח של flowchat</h2>
               <p className="landing-section__subtitle">
                 הדרך המהירה ביותר ליצור צ'אט-בוטים אינטליגנטיים ומודעים להקשר
               </p>
@@ -1314,9 +1315,9 @@ function Landing() {
       {/* Bots Section */}
       {activeSection === 'bots' && isLoggedIn && (
         <section className="landing-features" style={{ paddingTop: '120px' }}>
-          <h2 className="landing-section__title">Your AI Bots</h2>
+          <h2 className="landing-section__title">הבוטים שלך</h2>
           <p className="landing-section__subtitle">
-            Manage and create intelligent chatbots for your business
+            נהל וצור צ'אט-בוטים אינטליגנטיים עבור העסק שלך
           </p>
 
           {error && (
@@ -1351,7 +1352,7 @@ function Landing() {
               marginBottom: '40px',
               color: 'var(--brand)'
             }}>
-              <strong>Free Plan Limit:</strong> You can create 1 bot. Upgrade to create more bots.
+              <strong>מגבלת תוכנית חינם:</strong> אתה יכול ליצור בוט אחד בלבד בתוכנית החינמית. לשדרוג וליצירת בוטים נוספים, אנא שדרג לתוכנית Pro.
             </div>
           )}
 
@@ -1370,10 +1371,10 @@ function Landing() {
               <div style={{ fontSize: '48px', marginBottom: '20px' }}>🤖</div>
               <h3 style={{ margin: '0 0 12px 0', fontSize: '1.5rem' }}>No bots yet</h3>
               <p style={{ color: 'var(--text-dim)', margin: '0 0 24px 0' }}>
-                Create your first AI bot to get started with automated customer support. Free plan allows 1 bot.
+                צור את הבוט הראשון שלך כדי להתחיל עם תמיכה אוטומטית בלקוחות. התוכנית החינמית מאפשרת בוט אחד בלבד.
               </p>
               <button className="btn btn--primary" onClick={handleCreateBot}>
-                Create Your First Bot
+                צור את הבוט הראשון שלך
               </button>
             </div>
           ) : (
@@ -1388,9 +1389,9 @@ function Landing() {
                   <button
                     className="btn btn--primary"
                     onClick={() => navigate('/fullchat')}
-                    style={{ flex: 1 }}
+                    style={{ flex: 1, display: 'flex', justifyContent: 'center' }}
                   >
-                    Manage Conversations
+                    נהל את הבוט
                   </button>
                 </div>
               </div>
@@ -1444,7 +1445,7 @@ function Landing() {
             </button>
           </div>
           <div style={{ marginTop: '40px', fontSize: '0.9rem', opacity: '0.8' }}>
-            ⚡ הגדרה תוך 40 שניות • 🚀 אין צורך בכרטיס אשראי • 💬 שירות תמיכה
+            הגדרה תוך 40 שניות • אין צורך בכרטיס אשראי • 💬 שירות תמיכה
           </div>
         </section>
       )}
