@@ -558,6 +558,11 @@ function Landing() {
                 <button className={`btn ${activeSection === 'home' ? 'btn--primary' : ''}`} onClick={() => setActiveSection('home')}>
                   בית
                 </button>
+                {username === 'admin' && (
+                  <button className="btn" onClick={() => navigate('/admin')}>
+                    ניהול
+                  </button>
+                )}
                 <button className={`btn ${activeSection === 'bots' ? 'btn--primary' : ''}`} onClick={() => setActiveSection('bots')}>
                   הבוטים שלך
                 </button>

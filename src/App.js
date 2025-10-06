@@ -6,6 +6,7 @@ import Register from './register';
 import FullChat from './fullchat';
 import EditUserInfo from './edituserinfo';
 import Landing from './landing';
+import Admin from './admin';
 import logo from './logo.png';
 // Using environment variable directly
 
@@ -209,6 +210,8 @@ function Login() {
       if (data.token) {
         Cookies.set('testtoken', data.token, { expires: 1, path: '/', sameSite: 'Lax' });
       }
+      
+      // All users go to home page, admin can access admin panel via button
       navigate('/', { replace: true });
     } catch (e) {
       console.error(e);
@@ -301,6 +304,7 @@ function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/fullchat" element={<FullChat />} />
         <Route path="/edituserinfo" element={<EditUserInfo />} />
+        <Route path="/admin" element={<Admin />} />
       </Routes>
     </Router>
   );

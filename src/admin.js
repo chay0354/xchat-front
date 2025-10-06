@@ -1,0 +1,637 @@
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import Cookies from 'js-cookie';
+import logo from './logo.png';
+
+const adminStyles = `
+.admin-root {
+  min-height: 100vh;
+  background: radial-gradient(1200px 900px at -10% -20%, #1b2232 0%, var(--bg) 50%), var(--bg);
+  color: var(--text);
+  padding: 20px;
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial;
+}
+
+.admin-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+  padding: 24px 28px;
+  background: linear-gradient(180deg, rgba(15,20,32,0.9), rgba(15,20,32,0.8));
+  border-radius: 18px;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(10px);
+}
+
+.admin-title {
+  font-size: 28px;
+  font-weight: 800;
+  margin: 0;
+  background: linear-gradient(135deg, var(--brand), var(--brand-2));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.admin-nav {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+}
+
+.admin-welcome {
+  font-size: 14px;
+  color: #ffffff;
+  font-weight: 500;
+}
+
+.btn {
+  padding: 12px 20px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--panel);
+  color: var(--text);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.btn:hover {
+  background: var(--panel-strong);
+  border-color: var(--brand);
+  transform: translateY(-1px);
+}
+
+.btn--primary {
+  background: linear-gradient(135deg, var(--brand), var(--brand-2));
+  border-color: var(--brand);
+  color: white;
+  box-shadow: 0 4px 15px rgba(110, 168, 254, 0.3);
+}
+
+.btn--danger {
+  background: linear-gradient(135deg, var(--warn), #dc2626);
+  border-color: var(--warn);
+  color: white;
+  box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+}
+
+.admin-content {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 24px;
+  height: calc(100vh - 140px);
+}
+
+.users-panel {
+  background: linear-gradient(180deg, rgba(15,20,32,0.9), rgba(15,20,32,0.8));
+  border-radius: 18px;
+  border: 1px solid var(--border);
+  padding: 24px;
+  overflow-y: auto;
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(10px);
+}
+
+.users-title {
+  font-size: 20px;
+  font-weight: 800;
+  margin-bottom: 24px;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.users-count {
+  background: var(--brand);
+  color: white;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.user-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.user-item {
+  padding: 18px 20px;
+  background: linear-gradient(180deg, rgba(27,34,50,0.8), rgba(15,20,32,0.6));
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.user-item::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--brand), var(--brand-2));
+  transform: scaleX(0);
+  transition: transform 0.3s ease;
+}
+
+.user-item:hover {
+  border-color: var(--brand);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(110, 168, 254, 0.15);
+}
+
+.user-item:hover::before {
+  transform: scaleX(1);
+}
+
+.user-item.active {
+  border-color: var(--brand);
+  background: linear-gradient(135deg, rgba(110, 168, 254, 0.1), rgba(138, 125, 255, 0.05));
+  box-shadow: 0 8px 25px rgba(110, 168, 254, 0.2);
+}
+
+.user-item.active::before {
+  transform: scaleX(1);
+}
+
+.user-name {
+  font-weight: 700;
+  margin-bottom: 6px;
+  font-size: 16px;
+  color: #ffffff;
+}
+
+.user-date {
+  font-size: 13px;
+  color: #b8c5d1;
+  font-weight: 500;
+}
+
+.details-panel {
+  background: linear-gradient(180deg, rgba(15,20,32,0.9), rgba(15,20,32,0.8));
+  border-radius: 18px;
+  border: 1px solid var(--border);
+  padding: 24px;
+  overflow-y: auto;
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(10px);
+}
+
+.details-title {
+  font-size: 20px;
+  font-weight: 800;
+  margin-bottom: 24px;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.user-info {
+  background: linear-gradient(180deg, rgba(27,34,50,0.8), rgba(15,20,32,0.6));
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 24px;
+  border: 1px solid var(--border);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+
+.info-row:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+}
+
+.info-label {
+  font-weight: 700;
+  color: #b8c5d1;
+  font-size: 14px;
+}
+
+.info-value {
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.conversations-title {
+  font-size: 18px;
+  font-weight: 800;
+  margin-bottom: 20px;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.conversations-count {
+  background: var(--ok);
+  color: white;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.conversation-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.conversation-item {
+  background: linear-gradient(180deg, rgba(27,34,50,0.8), rgba(15,20,32,0.6));
+  border-radius: 12px;
+  padding: 20px;
+  border: 1px solid var(--border);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  transition: all 0.3s ease;
+}
+
+.conversation-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+.conversation-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.conversation-idx {
+  font-weight: 800;
+  color: var(--brand);
+  font-size: 16px;
+  background: rgba(110, 168, 254, 0.1);
+  padding: 6px 12px;
+  border-radius: 20px;
+}
+
+.conversation-date {
+  font-size: 13px;
+  color: #b8c5d1;
+  font-weight: 500;
+}
+
+.conversation-content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.message-pair {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  background: rgba(0,0,0,0.1);
+  border-radius: 8px;
+  border-left: 3px solid var(--brand);
+}
+
+.question, .answer {
+  padding: 16px;
+  border-radius: 10px;
+  font-size: 14px;
+  line-height: 1.6;
+  font-weight: 500;
+  color: #ffffff;
+}
+
+.question {
+  background: linear-gradient(135deg, rgba(110, 168, 254, 0.1), rgba(110, 168, 254, 0.05));
+  border-left: 4px solid var(--brand);
+  border: 1px solid rgba(110, 168, 254, 0.2);
+}
+
+.answer {
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.1), rgba(34, 197, 94, 0.05));
+  border-left: 4px solid var(--ok);
+  border: 1px solid rgba(34, 197, 94, 0.2);
+}
+
+.loading {
+  text-align: center;
+  padding: 40px 20px;
+  color: #b8c5d1;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.error {
+  color: var(--warn);
+  text-align: center;
+  padding: 20px;
+  background: rgba(239, 68, 68, 0.1);
+  border-radius: 12px;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  font-weight: 600;
+}
+
+.no-data {
+  text-align: center;
+  color: #b8c5d1;
+  padding: 60px 20px;
+  font-style: italic;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.bot-definition {
+  background: linear-gradient(180deg, rgba(27,34,50,0.8), rgba(15,20,32,0.6));
+  border-radius: 12px;
+  padding: 20px;
+  margin-top: 20px;
+  border: 1px solid var(--border);
+  max-height: 250px;
+  overflow-y: auto;
+  font-size: 13px;
+  line-height: 1.6;
+  color: #b8c5d1;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.bot-definition-title {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 12px;
+  color: #ffffff;
+}
+
+/* Scrollbar styling */
+.users-panel::-webkit-scrollbar,
+.details-panel::-webkit-scrollbar,
+.bot-definition::-webkit-scrollbar {
+  width: 6px;
+}
+
+.users-panel::-webkit-scrollbar-track,
+.details-panel::-webkit-scrollbar-track,
+.bot-definition::-webkit-scrollbar-track {
+  background: var(--panel);
+  border-radius: 3px;
+}
+
+.users-panel::-webkit-scrollbar-thumb,
+.details-panel::-webkit-scrollbar-thumb,
+.bot-definition::-webkit-scrollbar-thumb {
+  background: var(--brand);
+  border-radius: 3px;
+}
+
+.users-panel::-webkit-scrollbar-thumb:hover,
+.details-panel::-webkit-scrollbar-thumb:hover,
+.bot-definition::-webkit-scrollbar-thumb:hover {
+  background: var(--brand-2);
+}
+`;
+
+function Admin() {
+  const navigate = useNavigate();
+  const [users, setUsers] = useState([]);
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [userDetails, setUserDetails] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  const username = Cookies.get('username');
+
+  useEffect(() => {
+    if (username !== 'admin') {
+      navigate('/login');
+      return;
+    }
+    fetchUsers();
+  }, [username, navigate]);
+
+  const fetchUsers = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch(
+        `${process.env.REACT_APP_API_URL || 'http://localhost:5137'}/admin/users?username=${encodeURIComponent(username)}`
+      );
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch users');
+      }
+      
+      const data = await response.json();
+      setUsers(data.users);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchUserDetails = async (userId) => {
+    try {
+      setLoading(true);
+      const response = await fetch(
+        `${process.env.REACT_APP_API_URL || 'http://localhost:5137'}/admin/user/${userId}?username=${encodeURIComponent(username)}`
+      );
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch user details');
+      }
+      
+      const data = await response.json();
+      setUserDetails(data);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleUserSelect = (user) => {
+    setSelectedUser(user);
+    fetchUserDetails(user[0]); // user[0] is the id
+  };
+
+  const handleLogout = () => {
+    Cookies.remove('username');
+    Cookies.remove('testtoken');
+    navigate('/login');
+  };
+
+  const formatDate = (dateString) => {
+    if (!dateString) return 'N/A';
+    return new Date(dateString).toLocaleString();
+  };
+
+  if (loading && users.length === 0) {
+    return (
+      <div className="admin-root">
+        <style>{adminStyles}</style>
+        <div className="loading">טוען לוח בקרה...</div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="admin-root">
+      <style>{adminStyles}</style>
+      
+      <div className="admin-header">
+        <div className="admin-title">לוח בקרה</div>
+        <div className="admin-nav">
+          <img src={logo} alt="Logo" style={{ height: '30px' }} />
+          <span className="admin-welcome">ברוך הבא, {username}</span>
+          <button className="btn btn--danger" onClick={handleLogout}>
+            התנתק
+          </button>
+        </div>
+      </div>
+
+      <div className="admin-content">
+        <div className="users-panel">
+          <div className="users-title">
+            משתמשים
+            <span className="users-count">{users.length}</span>
+          </div>
+          {error && <div className="error">{error}</div>}
+          {users.length === 0 ? (
+            <div className="no-data">לא נמצאו משתמשים</div>
+          ) : (
+            <div className="user-list">
+              {users.map((user) => (
+                <div
+                  key={user[0]}
+                  className={`user-item ${selectedUser?.[0] === user[0] ? 'active' : ''}`}
+                  onClick={() => handleUserSelect(user)}
+                >
+                  <div className="user-name">{user[1]}</div>
+                  <div className="user-date">הצטרף: {formatDate(user[2])}</div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div className="details-panel">
+          {!selectedUser ? (
+            <div className="no-data">בחר משתמש כדי לראות פרטים</div>
+          ) : loading ? (
+            <div className="loading">טוען פרטי משתמש...</div>
+          ) : userDetails ? (
+            <>
+              <div className="details-title">פרטי משתמש</div>
+              
+              <div className="user-info">
+                <div className="info-row">
+                  <span className="info-label">שם משתמש:</span>
+                  <span className="info-value">{userDetails.user.username}</span>
+                </div>
+                <div className="info-row">
+                  <span className="info-label">מזהה משתמש:</span>
+                  <span className="info-value">{userDetails.user.id}</span>
+                </div>
+                <div className="info-row">
+                  <span className="info-label">נוצר:</span>
+                  <span className="info-value">{formatDate(userDetails.user.created_at)}</span>
+                </div>
+              </div>
+
+              {userDetails.user.botDefinition && (
+                <div>
+                  <div className="bot-definition-title">הגדרת בוט</div>
+                  <div className="bot-definition">
+                    {userDetails.user.botDefinition}
+                  </div>
+                </div>
+              )}
+
+              <div className="conversations-title">
+                שיחות
+                <span className="conversations-count">{userDetails.conversations.length}</span>
+              </div>
+              
+              {userDetails.conversations.length === 0 ? (
+                <div className="no-data">לא נמצאו שיחות</div>
+              ) : (
+                <div className="conversation-list">
+                  {(() => {
+                    // Group conversations by convtoken
+                    const groupedConversations = {};
+                    userDetails.conversations.forEach(conv => {
+                      const convToken = conv[1]; // conv[1] is convtoken
+                      if (!groupedConversations[convToken]) {
+                        groupedConversations[convToken] = [];
+                      }
+                      groupedConversations[convToken].push(conv);
+                    });
+
+                    // Sort conversation tokens by the first message's date
+                    const sortedTokens = Object.keys(groupedConversations).sort((a, b) => {
+                      const dateA = new Date(groupedConversations[a][0][5]); // conv[5] is created_at
+                      const dateB = new Date(groupedConversations[b][0][5]);
+                      return dateB - dateA; // Most recent first
+                    });
+
+                    return sortedTokens.map((convToken, index) => {
+                      const convMessages = groupedConversations[convToken];
+                      const firstMessage = convMessages[0];
+                      const lastMessage = convMessages[convMessages.length - 1];
+                      
+                      return (
+                        <div key={convToken} className="conversation-item">
+                          <div className="conversation-header">
+                            <span className="conversation-idx">שיחה #{index + 1}</span>
+                            <span className="conversation-date">{formatDate(firstMessage[5])}</span>
+                          </div>
+                          <div className="conversation-content">
+                            {convMessages.map((msg, msgIndex) => (
+                              <div key={msg[0]} className="message-pair">
+                                {msg[3] && (
+                                  <div className="question">
+                                    <strong>שאלה {msgIndex + 1}:</strong> {msg[3]}
+                                  </div>
+                                )}
+                                {msg[4] && (
+                                  <div className="answer">
+                                    <strong>תשובה {msgIndex + 1}:</strong> {msg[4]}
+                                  </div>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      );
+                    });
+                  })()}
+                </div>
+              )}
+            </>
+          ) : (
+            <div className="error">נכשל בטעינת פרטי המשתמש</div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default Admin;
