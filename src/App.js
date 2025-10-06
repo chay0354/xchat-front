@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
+// import styles from './App.module.css';
 import Cookies from 'js-cookie';
 import Register from './register';
 import FullChat from './fullchat';
@@ -152,7 +153,8 @@ const sentences = [
 
 /* ---------------- Login Component ---------------- */
 function Login() {
-  const [theme, setTheme] = useState('light');
+  // const [theme, setTheme] = useState('light');
+  const theme = 'light'; // Force light theme
   const [currentText, setCurrentText] = useState('');
   const [currentSentence, setCurrentSentence] = useState(0);
   const [charIndex, setCharIndex] = useState(0);

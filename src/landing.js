@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import styles from './App.module.css';
 import Cookies from 'js-cookie';
 import logoLight from './logo-light.png';
 
@@ -249,12 +250,13 @@ const landingStyles = `
   width: 64px;
   height: 64px;
   border-radius: 16px;
-  background: var(--gradient);
+  background: #fafafa;
   display: flex;
   align-items: center;
   justify-content: center;
   margin: 0 auto 24px;
   font-size: 28px;
+  border: 1px solid #eeeeee;
 }
 
 .feature-title {
@@ -547,22 +549,16 @@ function Landing() {
       {/* Header */}
       <header className="landing-header">
         <nav className="landing-nav">
-          <div className="landing-logo">
-            <img src={logoLight} alt="Logo" style={{ height: '38px' }} />
-          </div>
+
+
+
           <div className="landing-actions">
             {isLoggedIn ? (
               <>
-                <button
-                  className={`btn ${activeSection === 'home' ? 'btn--primary' : ''}`}
-                  onClick={() => setActiveSection('home')}
-                >
+                <button className={`btn ${activeSection === 'home' ? 'btn--primary' : ''}`} onClick={() => setActiveSection('home')}>
                   בית
                 </button>
-                <button
-                  className={`btn ${activeSection === 'bots' ? 'btn--primary' : ''}`}
-                  onClick={() => setActiveSection('bots')}
-                >
+                <button className={`btn ${activeSection === 'bots' ? 'btn--primary' : ''}`} onClick={() => setActiveSection('bots')}>
                   הבוטים שלך
                 </button>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginLeft: '8px' }}>
@@ -590,6 +586,11 @@ function Landing() {
               {theme === 'dark' ? '☀️' : '🌙'}
             </button>
           </div>
+
+          <div className="landing-logo">
+            <img src={logoLight} alt="Logo" style={{ height: '38px' }} />
+          </div>
+
         </nav>
       </header>
 
@@ -604,34 +605,28 @@ function Landing() {
             <p className="landing-hero__subtitle">
               {isLoggedIn
                 ? 'נהל את הבוטים שלך או צור חדשים בלוח המחוונים הפשוט שלנו.'
-                : 'תן לנו את כתובת האתר שלך, ואנחנו נבנה אוטומטית צ\'אט-בוט חכם שיודע הכל על העסק שלך. אפס הגדרה, תוצאות מיידיות.'
+                : 'תן לנו את כתובת האתר שלך, ואנחנו נבנה אוטומטית צ\'אט-בוט חכם שיודע הכל על העסק שלך. מינימום הגדרות, תוצאות מיידיות.'
               }
             </p>
 
             {/* Statistics */}
             {!isLoggedIn && (
-              <div style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))',
-                gap: '32px',
-                maxWidth: '600px',
-                margin: '48px auto'
-              }}>
+              <div className={styles['statistics-grid']}>
                 <div style={{ textAlign: 'center' }}>
-                  <div style={{ fontSize: '2.5rem', fontWeight: '800', color: 'var(--brand)', marginBottom: '8px' }}>40s</div>
-                  <div style={{ color: 'var(--text-dim)', fontSize: '0.9rem', fontWeight: '500' }}>Setup Time</div>
+                  <div className={styles.statNumbers}>40s</div>
+                  <div className={styles['stat-text']}>זמן הקמת הבוט</div>
                 </div>
                 <div style={{ textAlign: 'center' }}>
-                  <div style={{ fontSize: '2.5rem', fontWeight: '800', color: 'var(--brand)', marginBottom: '8px' }}>99.9%</div>
-                  <div style={{ color: 'var(--text-dim)', fontSize: '0.9rem', fontWeight: '500' }}>Uptime</div>
+                  <div className={styles.statNumbers}>99.9%</div>
+                  <div className={styles['stat-text']}>זמינות</div>
                 </div>
                 <div style={{ textAlign: 'center' }}>
-                  <div style={{ fontSize: '2.5rem', fontWeight: '800', color: 'var(--brand)', marginBottom: '8px' }}>10K+</div>
-                  <div style={{ color: 'var(--text-dim)', fontSize: '0.9rem', fontWeight: '500' }}>Queries/Month</div>
+                  <div className={styles.statNumbers}>10K+</div>
+                  <div className={styles['stat-text']}>שאילתות/חודש</div>
                 </div>
                 <div style={{ textAlign: 'center' }}>
-                  <div style={{ fontSize: '2.5rem', fontWeight: '800', color: 'var(--brand)', marginBottom: '8px' }}>24/7</div>
-                  <div style={{ color: 'var(--text-dim)', fontSize: '0.9rem', fontWeight: '500' }}>Support</div>
+                  <div className={styles.statNumbers}>24/7</div>
+                  <div className={styles['stat-text']}>תמיכה</div>
                 </div>
               </div>
             )}
@@ -659,6 +654,11 @@ function Landing() {
             </div>
           </section>
 
+
+          <section className="landing-footer">
+            <p>שירות לקוחות (טלפון / וואצאפ): 054-5779917</p>
+          </section>
+
           {/* Features Section */}
           <section className="landing-features">
             <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 24px' }}>
@@ -670,9 +670,9 @@ function Landing() {
               <div className="features-grid">
                 <div className="feature-card">
                   <div className="feature-icon">⚡</div>
-                  <h3 className="feature-title">Lightning Fast Setup</h3>
+                  <h3 className="feature-title">התקנה במהירות האור</h3>
                   <p className="feature-desc">
-                    From website URL to working chatbot in under 60 seconds. No manual training or data uploads required.
+                    מהזנת כתובת לצ׳אט עובר תוך פחות מדקה. אין צורך בקידוד או בהגדרות מסובכות.
                   </p>
                 </div>
 
@@ -702,17 +702,17 @@ function Landing() {
 
                 <div className="feature-card">
                   <div className="feature-icon">📈</div>
-                  <h3 className="feature-title">Scalable Infrastructure</h3>
+                  <h3 className="feature-title">תשתית ניתנת להרחבה</h3>
                   <p className="feature-desc">
-                    Handle thousands of queries per minute with our robust, cloud-based infrastructure built for scale.
+                    נהל אלפי שאילתות בדקה עם התשתית החזקה שלנו, מבוססת הענן, שנבנתה להתרחבות.
                   </p>
                 </div>
 
                 <div className="feature-card">
                   <div className="feature-icon">🛡️</div>
-                  <h3 className="feature-title">Secure & Reliable</h3>
+                  <h3 className="feature-title">בטוח ואמין</h3>
                   <p className="feature-desc">
-                    Enterprise-grade security with token-based authentication and 99.9% uptime guarantee.
+                    אבטחת מידע ברמה גבוהה עם אימות מבוסס טוקן והבטחת זמינות של 99.9%.
                   </p>
                 </div>
               </div>
@@ -742,7 +742,7 @@ function Landing() {
                     fontWeight: '600',
                     fontSize: '14px'
                   }}>
-                    🛒 E-commerce Store - TechGear.com
+                    יורו-קום מחשבים
                   </div>
                   <div style={{ padding: '20px', height: '300px', overflowY: 'auto' }}>
                     <div style={{ marginBottom: '16px' }}>
@@ -756,7 +756,7 @@ function Landing() {
                         fontSize: '14px',
                         lineHeight: '1.4'
                       }}>
-                        Hi! I'm looking to buy a laptop for programming. What would you recommend?
+                        הי, אני צריכה מחשב לצרכי לימודים. על מה אתם ממליצים?
                       </div>
                       <div style={{ fontSize: '12px', color: 'var(--text-dim)', textAlign: 'right', marginTop: '4px' }}>
                         Customer • 2:34 PM
@@ -774,10 +774,12 @@ function Landing() {
                         lineHeight: '1.4',
                         border: '1px solid var(--border)'
                       }}>
-                        Great choice! For programming, I'd recommend our MacBook Pro M2 or Dell XPS 15. Both have excellent performance for coding. What's your budget range?
+                        עבור לימודים אנחנו בדרך כלל ממליצים על
+                        MacBook Pro M2 או Dell XPS 15.
+                        שניהם מציעים ביצועים מעולים, חיי סוללה ארוכים, ומסכים איכותיים. האם יש לך תקציב או דרישות ספציפיות?
                       </div>
                       <div style={{ fontSize: '12px', color: 'var(--text-dim)', marginTop: '4px' }}>
-                        AI Assistant • 2:34 PM
+                        יורו-קום • 2:34 PM
                       </div>
                     </div>
 
@@ -792,7 +794,7 @@ function Landing() {
                         fontSize: '14px',
                         lineHeight: '1.4'
                       }}>
-                        Around $1500-2000. I need something that can handle multiple monitors.
+                        סביב $1500-2000. אני צריכה משהו שיכול להתחבר לכמה מסכים.
                       </div>
                       <div style={{ fontSize: '12px', color: 'var(--text-dim)', textAlign: 'right', marginTop: '4px' }}>
                         Customer • 2:35 PM
@@ -810,10 +812,10 @@ function Landing() {
                         lineHeight: '1.4',
                         border: '1px solid var(--border)'
                       }}>
-                        Perfect! The MacBook Pro M2 14" ($1,999) supports up to 2 external displays. We also have the Dell XPS 15 ($1,799) with similar capabilities. Both come with 16GB RAM and 512GB SSD. Would you like to see the detailed specs?
+                        מעולה! ה-MacBook Pro M2 14" ($1,999) תומך עד 2 מסכים חיצוניים. יש לנו גם את ה-Dell XPS 15 ($1,799) עם יכולות דומות. שניהם מגיעים עם 16GB RAM ו-512GB SSD. תרצי לראות את המפרטים המלאים?
                       </div>
                       <div style={{ fontSize: '12px', color: 'var(--text-dim)', marginTop: '4px' }}>
-                        AI Assistant • 2:35 PM
+                        יורו-קום • 2:35 PM
                       </div>
                     </div>
                   </div>
@@ -834,7 +836,7 @@ function Landing() {
                     fontWeight: '600',
                     fontSize: '14px'
                   }}>
-                    🏥 Healthcare - MedCenter
+                    מרכז רפואי נווה-אמירים
                   </div>
                   <div style={{ padding: '20px', height: '300px', overflowY: 'auto' }}>
                     <div style={{ marginBottom: '16px' }}>
@@ -848,10 +850,10 @@ function Landing() {
                         fontSize: '14px',
                         lineHeight: '1.4'
                       }}>
-                        I need to schedule an appointment with Dr. Smith. What are the available times?
+                        אני צריכה לקבוע תור עם ד"ר גבני. מה השעות הפנויות?
                       </div>
                       <div style={{ fontSize: '12px', color: 'var(--text-dim)', textAlign: 'right', marginTop: '4px' }}>
-                        Patient • 1:45 PM
+                        מטופל • 1:45 PM
                       </div>
                     </div>
 
@@ -866,17 +868,18 @@ function Landing() {
                         lineHeight: '1.4',
                         border: '1px solid var(--border)'
                       }}>
-                        Dr. Smith has the following available appointments this week:
+                        ד״ר גבני פנוי בשעות האלה:
                         <br /><br />
-                        • Tuesday 2:30 PM
-                        • Wednesday 10:00 AM
-                        • Thursday 3:15 PM
-                        • Friday 9:30 AM
+                        יום שני 14:30
+                        • יום שלישי 14:30
+                        • יום רביעי 10:00
+                        • יום חמישי 15:15
+                        • יום שישי 09:30
                         <br /><br />
-                        What type of appointment do you need?
+                        מה סוג התור שאת צריכה?
                       </div>
                       <div style={{ fontSize: '12px', color: 'var(--text-dim)', marginTop: '4px' }}>
-                        AI Assistant • 1:45 PM
+                        מרכז רפואי נווה-אמירים • 1:45 PM
                       </div>
                     </div>
 
@@ -891,10 +894,10 @@ function Landing() {
                         fontSize: '14px',
                         lineHeight: '1.4'
                       }}>
-                        It's for a routine checkup. Tuesday at 2:30 PM works for me.
+                        זה בדיקה שגרתית. יום שלישי בשעה 14:30 מתאים לי.
                       </div>
                       <div style={{ fontSize: '12px', color: 'var(--text-dim)', textAlign: 'right', marginTop: '4px' }}>
-                        Patient • 1:46 PM
+                        מטופל • 1:46 PM
                       </div>
                     </div>
 
@@ -909,12 +912,12 @@ function Landing() {
                         lineHeight: '1.4',
                         border: '1px solid var(--border)'
                       }}>
-                        Perfect! I've reserved Tuesday 2:30 PM with Dr. Smith for your routine checkup. You'll receive a confirmation email shortly.
+                        מעולה! קבעתי לך תור ביום שלישי בשעה 14:30 עם ד"ר גבני לבדיקה השגרתית שלך. תקבלי אישור במייל בקרוב.
                         <br /><br />
-                        Please arrive 15 minutes early and bring your insurance card and ID. Any questions about the appointment?
+                        אנא הגיעי 15 דקות לפני הזמן ואל תשכחי להביא את כרטיס הביטוח שלך ואת תעודת הזהות. יש לך שאלות לגבי התור?
                       </div>
                       <div style={{ fontSize: '12px', color: 'var(--text-dim)', marginTop: '4px' }}>
-                        AI Assistant • 1:46 PM
+                        מרכז רפואי נווה-אמירים • 1:46 PM
                       </div>
                     </div>
                   </div>
@@ -1101,7 +1104,7 @@ function Landing() {
           <section className="landing-features">
             <h2 className="landing-section__title">שאלות נפוצות</h2>
             <p className="landing-section__subtitle">
-              כל מה שצריך לדעת על FlowChat
+              כל מה שצריך לדעת על flowchat
             </p>
 
             <div style={{ maxWidth: '100%', margin: '0 auto', textAlign: 'right', width: '100%', padding: '0 20px' }} dir="rtl">
@@ -1269,7 +1272,7 @@ function Landing() {
                     fontSize: '0.9rem',
                     color: 'var(--ok)'
                   }}>
-                    <strong>מצוין עבור:</strong> עסקים קטנים, סטארטאפים, וכל מי שרוצה לנסות צ'אט-בוטים מבוססי AI
+                    <strong>מצוין עבור:</strong> עסקים קטנים ובינוניים, או כל מי שרוצה לנסות צ'אט-בוטים מבוססי AI
                   </div>
                 </div>
               </div>
@@ -1450,10 +1453,10 @@ function Landing() {
       <footer className="landing-footer">
         <div className="landing-footer__logo">
           <div className="landing-logo__dot" />
-          <span>FlowChat</span>
+          <span>flowchat</span>
         </div>
         <p className="landing-footer__text">
-          גם אתם יכולים לשדרג את התמיכה בלקוחות שלכם עם FlowChat. התחילו בחינם עוד היום!
+          גם אתם יכולים לשדרג את התמיכה בלקוחות שלכם עם flowchat. התחילו בחינם עוד היום!
         </p>
       </footer>
     </div>
