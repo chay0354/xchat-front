@@ -15,7 +15,7 @@ function FullChat() {
 
   const scrollRef = useRef(null);
 
-  const username = Cookies.get('username') || '';
+  // const username = Cookies.get('username') || '';
   const navigate = useNavigate();
 
   const isHebrew = (text) => /[\u0590-\u05FF]/.test(text);
@@ -150,7 +150,7 @@ function FullChat() {
       });
       
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
+        // const errorData = await response.json().catch(() => ({}));
         if (response.status === 402) {
           setError('Plan limit reached. Please upgrade your plan to continue.');
         } else {
@@ -229,7 +229,7 @@ function FullChat() {
         <div className="fc-sidebar__top">
           <div className="fc-logo">
             <div className="fc-logo__dot" />
-            <span>FlowChat</span>
+            <span>flowchat</span>
           </div>
           <div className="fc-search">
             <input
