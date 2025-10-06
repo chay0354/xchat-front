@@ -245,7 +245,7 @@ const pageStyles = `
 `;
 
 function EditUserInfo() {
-  const [theme, setTheme] = useState('dark');
+  const [theme, setTheme] = useState('light');
   const [calendarToken, setCalendarToken] = useState('');
   const [password, setPassword] = useState('');
   const [botDefinition, setBotDefinition] = useState('');

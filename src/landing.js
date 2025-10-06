@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Cookies from 'js-cookie';
+import logoLight from './logo-light.png';
 
 const designTokens = `
 :root {
@@ -547,8 +548,7 @@ function Landing() {
       <header className="landing-header">
         <nav className="landing-nav">
           <div className="landing-logo">
-            <div className="landing-logo__dot" />
-            <span>FlowChat</span>
+            <img src={logoLight} alt="Logo" style={{ height: '38px' }} />
           </div>
           <div className="landing-actions">
             {isLoggedIn ? (

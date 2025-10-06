@@ -5,6 +5,7 @@ import Register from './register';
 import FullChat from './fullchat';
 import EditUserInfo from './edituserinfo';
 import Landing from './landing';
+import logo from './logo.png';
 // Using environment variable directly
 
 /* ---------------- Shared Design Tokens ---------------- */
@@ -145,13 +146,13 @@ html, body, #root { overflow: hidden; }
 
 /* ---------------- Animated Sentences ---------------- */
 const sentences = [
-  'create a state of the art support agents in 40 seconds',
-  'let your clients talk to a cutting edge AI-driven virtual assistant',
+  'בנה מנגנון תמיכה ללקוחות שלך בפחות מדקה',
+  'תן ללקוחות שלך לדבר עם עוזר וירטואלי 24/7',
 ];
 
 /* ---------------- Login Component ---------------- */
 function Login() {
-  const [theme, setTheme] = useState('dark');
+  const [theme, setTheme] = useState('light');
   const [currentText, setCurrentText] = useState('');
   const [currentSentence, setCurrentSentence] = useState(0);
   const [charIndex, setCharIndex] = useState(0);
@@ -222,30 +223,26 @@ function Login() {
       <div className="login-bg" />
       <div className="login-card">
         <div className="login-header">
-          <div className="login-brand" onClick={handleBackToLanding} style={{cursor: 'pointer'}}>
-            <div className="login-dot" />
-            <div className="logo-text">FlowChat</div>
+          <p></p>
+          <div className="login-brand" onClick={handleBackToLanding} style={{ cursor: 'pointer' }}>
+            <img src={logo} alt="Logo" style={{  height: '38px' }} />
           </div>
-          <button
-            className="theme-toggle"
-            onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-            aria-label="Toggle theme"
-          >
+          {/* <button className="theme-toggle" onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')} aria-label="Toggle theme">
             {theme === 'dark' ? '☀️ Light' : '🌙 Dark'}
-          </button>
+          </button> */}
         </div>
 
-        <div className="login-title">Welcome back</div>
+        <div className="login-title">ברוכים השבים :)</div>
         <div className="login-sub">{currentText}</div>
 
         <div className="login-form" onKeyDown={(e) => e.key === 'Enter' && handleLogin()}>
           <div className="input-wrap">
-            <label htmlFor="username" className="input-label">Username</label>
+            <label htmlFor="username" className="input-label">שם משתמש</label>
             <input
               id="username"
               type="text"
               className="input"
-              placeholder="e.g. chay"
+              placeholder="לדוגמא: נינט טייב"
               value={usernameInput}
               onChange={(e) => setUsernameInput(e.target.value)}
               autoFocus
@@ -254,12 +251,12 @@ function Login() {
           </div>
 
           <div className="input-wrap">
-            <label htmlFor="password" className="input-label">Password</label>
+            <label htmlFor="password" className="input-label">סיסמה</label>
             <input
               id="password"
               type="password"
               className="input"
-              placeholder="••••••••"
+              // placeholder="••••••••"
               value={passwordInput}
               onChange={(e) => setPasswordInput(e.target.value)}
               autoComplete="current-password"
@@ -274,17 +271,17 @@ function Login() {
               הרשמה
             </button>
           </div>
-          
-          <div style={{textAlign: 'center', marginTop: '16px'}}>
-            <button className="btn btn--muted" type="button" onClick={handleBackToLanding} style={{fontSize: '12px', padding: '6px 12px'}}>
-              ← Back to Home
+
+          <div style={{ textAlign: 'center', marginTop: '16px' }}>
+            <button className="btn btn--muted" type="button" onClick={handleBackToLanding} style={{ fontSize: '12px', padding: '6px 12px' }}>
+              חזרה לדף הבית
             </button>
           </div>
 
           {error && <div className="alert">{error}</div>}
 
           <div className="login-foot">
-            Tip: you can press <strong>Enter</strong> to submit
+            שירות לקוחות (טלפון+וואצאפ): 054-5779917
           </div>
         </div>
       </div>
