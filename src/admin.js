@@ -438,7 +438,14 @@ function Admin() {
   const fetchUsers = async () => {
     try {
       setLoading(true);
-      const usertoken = Cookies.get('usertoken');
+      const usertoken = Cookies.get('testtoken') || Cookies.get('usertoken');
+      
+      if (!usertoken) {
+        setError('No authentication token found. Please log in again.');
+        setLoading(false);
+        return;
+      }
+      
       const response = await fetch(
         `${process.env.REACT_APP_API_URL || 'http://localhost:5137'}/admin/users?usertoken=${encodeURIComponent(usertoken)}`
       );
@@ -459,7 +466,7 @@ function Admin() {
   const fetchUserDetails = async (userId) => {
     try {
       setLoading(true);
-      const usertoken = Cookies.get('usertoken');
+      const usertoken = Cookies.get('testtoken') || Cookies.get('usertoken');
       const response = await fetch(
         `${process.env.REACT_APP_API_URL || 'http://localhost:5137'}/admin/user/${userId}?usertoken=${encodeURIComponent(usertoken)}`
       );
@@ -495,7 +502,7 @@ function Admin() {
 
     try {
       setDeleting(true);
-      const usertoken = Cookies.get('usertoken');
+      const usertoken = Cookies.get('testtoken') || Cookies.get('usertoken');
       const response = await fetch(
         `${process.env.REACT_APP_API_URL || 'http://localhost:5137'}/admin/user/${userId}?usertoken=${encodeURIComponent(usertoken)}`,
         { method: 'DELETE' }
