@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+// Updated: Added fullname and phone support - $(date)
 import { useNavigate } from 'react-router-dom';
 import styles from './App.module.css';
 import Cookies from 'js-cookie';
