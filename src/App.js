@@ -159,7 +159,7 @@ function Login() {
   const [currentText, setCurrentText] = useState('');
   const [currentSentence, setCurrentSentence] = useState(0);
   const [charIndex, setCharIndex] = useState(0);
-  const [usernameInput, setUsernameInput] = useState('');
+  const [emailInput, setEmailInput] = useState('');
   const [passwordInput, setPasswordInput] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
@@ -186,24 +186,24 @@ function Login() {
 
   const handleLogin = async () => {
     setError('');
-    if (!usernameInput.trim()) {
-      setError('Please enter a username.');
+    if (!emailInput.trim()) {
+      setError('Please enter an email.');
       return;
     }
     try {
-      Cookies.set('username', usernameInput, { expires: 1, path: '/', sameSite: 'Lax' });
+      Cookies.set('email', emailInput, { expires: 1, path: '/', sameSite: 'Lax' });
 
       // ✅ Backend call using environment variable
       const authRes = await fetch(
-        `${process.env.REACT_APP_API_URL || 'http://localhost:5137'}/auth?username=${encodeURIComponent(usernameInput)}&password=${encodeURIComponent(passwordInput)}`
+        `${process.env.REACT_APP_API_URL || 'http://localhost:5137'}/auth?email=${encodeURIComponent(emailInput)}&password=${encodeURIComponent(passwordInput)}`
       );
       if (!authRes.ok) {
-        setError('Incorrect username or password.');
+        setError('Incorrect email or password.');
         return;
       }
 
       const tokenRes = await fetch(
-        `${process.env.REACT_APP_API_URL || 'http://localhost:5137'}/get-token?username=${encodeURIComponent(usernameInput)}`
+        `${process.env.REACT_APP_API_URL || 'http://localhost:5137'}/get-token?email=${encodeURIComponent(emailInput)}`
       );
       if (!tokenRes.ok) throw new Error('Failed to fetch token');
       const data = await tokenRes.json();
@@ -242,16 +242,16 @@ function Login() {
 
         <div className="login-form" onKeyDown={(e) => e.key === 'Enter' && handleLogin()}>
           <div className="input-wrap">
-            <label htmlFor="username" className="input-label">שם משתמש</label>
+            <label htmlFor="email" className="input-label">אימייל</label>
             <input
-              id="username"
-              type="text"
+              id="email"
+              type="email"
               className="input"
-              placeholder="לדוגמא: נינט טייב"
-              value={usernameInput}
-              onChange={(e) => setUsernameInput(e.target.value)}
+              placeholder="לדוגמא: user@example.com"
+              value={emailInput}
+              onChange={(e) => setEmailInput(e.target.value)}
               autoFocus
-              autoComplete="username"
+              autoComplete="email"
             />
           </div>
 

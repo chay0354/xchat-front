@@ -206,6 +206,14 @@ const adminStyles = `
   box-shadow: 0 4px 15px rgba(0,0,0,0.1);
 }
 
+.user-actions {
+  margin-bottom: 20px;
+  padding: 15px;
+  background: rgba(239, 68, 68, 0.1);
+  border-radius: 8px;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
 .info-row {
   display: flex;
   justify-content: space-between;
@@ -415,22 +423,24 @@ function Admin() {
   const [userDetails, setUserDetails] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [deleting, setDeleting] = useState(false);
 
-  const username = Cookies.get('username');
+  const email = Cookies.get('email');
 
   useEffect(() => {
-    if (username !== 'admin') {
+    if (email !== 'flowchat.admin@gmail.com') {
       navigate('/login');
       return;
     }
     fetchUsers();
-  }, [username, navigate]);
+  }, [email, navigate]);
 
   const fetchUsers = async () => {
     try {
       setLoading(true);
+      const usertoken = Cookies.get('usertoken');
       const response = await fetch(
-        `${process.env.REACT_APP_API_URL || 'http://localhost:5137'}/admin/users?username=${encodeURIComponent(username)}`
+        `${process.env.REACT_APP_API_URL || 'http://localhost:5137'}/admin/users?usertoken=${encodeURIComponent(usertoken)}`
       );
       
       if (!response.ok) {
@@ -449,8 +459,9 @@ function Admin() {
   const fetchUserDetails = async (userId) => {
     try {
       setLoading(true);
+      const usertoken = Cookies.get('usertoken');
       const response = await fetch(
-        `${process.env.REACT_APP_API_URL || 'http://localhost:5137'}/admin/user/${userId}?username=${encodeURIComponent(username)}`
+        `${process.env.REACT_APP_API_URL || 'http://localhost:5137'}/admin/user/${userId}?usertoken=${encodeURIComponent(usertoken)}`
       );
       
       if (!response.ok) {
@@ -472,9 +483,37 @@ function Admin() {
   };
 
   const handleLogout = () => {
-    Cookies.remove('username');
+    Cookies.remove('email');
     Cookies.remove('testtoken');
     navigate('/login');
+  };
+
+  const handleDeleteUser = async (userId) => {
+    if (!window.confirm('האם אתה בטוח שברצונך למחוק את המשתמש הזה? פעולה זו לא ניתנת לביטול.')) {
+      return;
+    }
+
+    try {
+      setDeleting(true);
+      const usertoken = Cookies.get('usertoken');
+      const response = await fetch(
+        `${process.env.REACT_APP_API_URL || 'http://localhost:5137'}/admin/user/${userId}?usertoken=${encodeURIComponent(usertoken)}`,
+        { method: 'DELETE' }
+      );
+      
+      if (!response.ok) {
+        throw new Error('Failed to delete user');
+      }
+      
+      // Refresh users list
+      await fetchUsers();
+      setSelectedUser(null);
+      setUserDetails(null);
+    } catch (err) {
+      setError('שגיאה במחיקת המשתמש: ' + err.message);
+    } finally {
+      setDeleting(false);
+    }
   };
 
   const formatDate = (dateString) => {
@@ -499,7 +538,7 @@ function Admin() {
         <div className="admin-title">לוח בקרה</div>
         <div className="admin-nav">
           <img src={logo} alt="Logo" style={{ height: '30px' }} />
-          <span className="admin-welcome">ברוך הבא, {username}</span>
+          <span className="admin-welcome">ברוך הבא, {email}</span>
           <button className="btn btn--danger" onClick={handleLogout}>
             התנתק
           </button>
@@ -542,17 +581,35 @@ function Admin() {
               
               <div className="user-info">
                 <div className="info-row">
-                  <span className="info-label">שם משתמש:</span>
-                  <span className="info-value">{userDetails.user.username}</span>
-                </div>
-                <div className="info-row">
                   <span className="info-label">מזהה משתמש:</span>
                   <span className="info-value">{userDetails.user.id}</span>
+                </div>
+                <div className="info-row">
+                  <span className="info-label">אימייל:</span>
+                  <span className="info-value">{userDetails.user.email}</span>
+                </div>
+                <div className="info-row">
+                  <span className="info-label">שם מלא:</span>
+                  <span className="info-value">{userDetails.user.fullname || 'לא צוין'}</span>
+                </div>
+                <div className="info-row">
+                  <span className="info-label">טלפון:</span>
+                  <span className="info-value">{userDetails.user.phone || 'לא צוין'}</span>
                 </div>
                 <div className="info-row">
                   <span className="info-label">נוצר:</span>
                   <span className="info-value">{formatDate(userDetails.user.created_at)}</span>
                 </div>
+              </div>
+
+              <div className="user-actions">
+                <button 
+                  className="btn btn--danger" 
+                  onClick={() => handleDeleteUser(userDetails.user.id)}
+                  disabled={deleting}
+                >
+                  {deleting ? 'מוחק...' : 'מחק משתמש'}
+                </button>
               </div>
 
               {userDetails.user.botDefinition && (

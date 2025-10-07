@@ -15,7 +15,7 @@ function FullChat() {
 
   const scrollRef = useRef(null);
 
-  // const username = Cookies.get('username') || '';
+  // const email = Cookies.get('email') || '';
   const navigate = useNavigate();
 
   const isHebrew = (text) => /[\u0590-\u05FF]/.test(text);
@@ -82,18 +82,18 @@ function FullChat() {
         // Try with usertoken first (new version)
         let response = await fetch(`${API_BASE}/fullchat?usertoken=${encodeURIComponent(usertoken)}`);
         
-        // If that fails with "No username provided", try with username parameter (old version)
+        // If that fails with "No email provided", try with email parameter (old version)
         if (!response.ok) {
           const errorData = await response.json().catch(() => ({}));
-          if (errorData.error === 'No username provided') {
-            console.log('Trying with username parameter for compatibility...');
-            // Get username from token by calling get-user-info first
+          if (errorData.error === 'No email provided') {
+            console.log('Trying with email parameter for compatibility...');
+            // Get email from token by calling get-user-info first
             const userInfoResponse = await fetch(`${API_BASE}/get-user-info?usertoken=${encodeURIComponent(usertoken)}`);
             if (userInfoResponse.ok) {
               const userData = await userInfoResponse.json();
-              const username = userData[0]?.username;
-              if (username) {
-                response = await fetch(`${API_BASE}/fullchat?username=${encodeURIComponent(username)}`);
+              const email = userData[0]?.email;
+              if (email) {
+                response = await fetch(`${API_BASE}/fullchat?email=${encodeURIComponent(email)}`);
               }
             }
           }

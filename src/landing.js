@@ -488,7 +488,8 @@ const landingStyles = `
 function Landing() {
   const [theme, setTheme] = useState('light');
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
+  const [fullname, setFullname] = useState('');
   const [activeSection, setActiveSection] = useState('home');
   const [bots, setBots] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -498,10 +499,12 @@ function Landing() {
   // Check if user is logged in
   useEffect(() => {
     const token = Cookies.get('testtoken');
-    const user = Cookies.get('username');
+    const user = Cookies.get('email');
+    const name = Cookies.get('fullname');
     if (token && user) {
       setIsLoggedIn(true);
-      setUsername(user);
+      setEmail(user);
+      setFullname(name || user); // fallback to email if no fullname
       loadBots();
     }
   }, []);
@@ -533,9 +536,11 @@ function Landing() {
   const handleLogout = () => {
     Cookies.remove('testtoken');
     Cookies.remove('usertoken');
-    Cookies.remove('username');
+    Cookies.remove('email');
+    Cookies.remove('fullname');
     setIsLoggedIn(false);
-    setUsername('');
+    setEmail('');
+    setFullname('');
     setBots([]);
     setActiveSection('home');
   };
@@ -558,7 +563,7 @@ function Landing() {
                 <button className={`btn ${activeSection === 'home' ? 'btn--primary' : ''}`} onClick={() => setActiveSection('home')}>
                   בית
                 </button>
-                {username === 'admin' && (
+                {email === 'flowchat.admin@gmail.com' && (
                   <button className="btn" onClick={() => navigate('/admin')}>
                     ניהול
                   </button>
@@ -567,7 +572,7 @@ function Landing() {
                   הבוטים שלך
                 </button>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginLeft: '8px' }}>
-                  <span style={{ fontSize: '14px', color: 'var(--text-dim)' }}>Hi, {username}</span>
+                  <span style={{ fontSize: '14px', color: 'var(--text-dim)' }}>Hi, {fullname}</span>
                   <button className="btn" onClick={handleLogout} style={{ padding: '6px 12px', fontSize: '12px' }}>
                     התנתק
                   </button>
@@ -605,7 +610,7 @@ function Landing() {
           {/* Hero Section */}
           <section className="landing-hero">
             <h1 className="landing-hero__title">
-              {isLoggedIn ? `ברוך השב, ${username}!` : 'צור בוט תוך 40 שניות!'}
+              {isLoggedIn ? `ברוך השב, ${fullname}!` : 'צור בוט תוך 40 שניות!'}
             </h1>
             <p className="landing-hero__subtitle">
               {isLoggedIn
@@ -1385,7 +1390,7 @@ function Landing() {
             <div style={{ display: 'flex', justifyContent: 'center' }}>
               <div className="feature-card" style={{ maxWidth: '400px', width: '100%' }}>
                 <div className="feature-icon">🤖</div>
-                <h3 className="feature-title">{username}'s AI Bot</h3>
+                <h3 className="feature-title">{fullname}'s AI Bot</h3>
                 <p className="feature-desc">
                   {bots.length} conversation{bots.length !== 1 ? 's' : ''} • Active
                 </p>

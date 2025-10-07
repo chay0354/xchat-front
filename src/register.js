@@ -132,9 +132,11 @@ const pageStyles = `
 function Register() {
   const [theme, setTheme] = useState('light');
   const [currentStage, setCurrentStage] = useState(1);
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [fullname, setFullname] = useState('');
+  const [phone, setPhone] = useState('');
   const [selectedPlan, setSelectedPlan] = useState('test');
   const [websiteUrl, setWebsiteUrl] = useState('');
   const [botDefinition, setBotDefinition] = useState('');
@@ -155,14 +157,14 @@ function Register() {
   }, [navigate.location?.state]);
 
   useEffect(() => {
-    if (!Cookies.get('username')) Cookies.set('username', '', { expires: 1, path: '/', sameSite: 'Lax' });
+    if (!Cookies.get('email')) Cookies.set('email', '', { expires: 1, path: '/', sameSite: 'Lax' });
     if (!Cookies.get('password')) Cookies.set('password', '', { expires: 1, path: '/', sameSite: 'Lax' });
     if (!Cookies.get('usertoken')) Cookies.set('usertoken', '', { expires: 1, path: '/', sameSite: 'Lax' });
   }, []);
 
   const handleStage1Next = () => {
-    if (!username || !password) {
-      setErrorMessage('Username and password must not be empty.');
+    if (!email || !password || !fullname || !phone) {
+      setErrorMessage('All fields are required.');
       setSuccessMessage('');
       return;
     }
@@ -172,8 +174,10 @@ function Register() {
       return;
     }
     setErrorMessage('');
-    Cookies.set('username', username, { expires: 1, path: '/', sameSite: 'Lax' });
+    Cookies.set('email', email, { expires: 1, path: '/', sameSite: 'Lax' });
     Cookies.set('password', password, { expires: 1, path: '/', sameSite: 'Lax' });
+    Cookies.set('fullname', fullname, { expires: 1, path: '/', sameSite: 'Lax' });
+    Cookies.set('phone', phone, { expires: 1, path: '/', sameSite: 'Lax' });
     setSuccessMessage('Saved!');
     setTimeout(() => { setSuccessMessage(''); setCurrentStage(2); }, 900);
   };
@@ -225,7 +229,7 @@ function Register() {
       return;
     }
     setErrorMessage('');
-    const payload = { username, password, botDefinition, googleCalendarToken, plan: selectedPlan };
+    const payload = { email, password, botDefinition, googleCalendarToken, plan: selectedPlan, fullname, phone };
     fetch(`${API_BASE}/savedata`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -289,14 +293,38 @@ print(response.json())`;
           {!!successMessage && <div className="success">{successMessage}</div>}
 
           <div>
-            <div className="label">שם משתמש</div>
+            <div className="label">שם מלא</div>
             <input
               className="input"
               type="text"
-              placeholder="e.g. chay"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              autoComplete="username"
+              placeholder="e.g. יוסי כהן"
+              value={fullname}
+              onChange={(e) => setFullname(e.target.value)}
+              autoComplete="name"
+            />
+          </div>
+
+          <div>
+            <div className="label">אימייל</div>
+            <input
+              className="input"
+              type="email"
+              placeholder="e.g. user@example.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              autoComplete="email"
+            />
+          </div>
+
+          <div>
+            <div className="label">טלפון</div>
+            <input
+              className="input"
+              type="tel"
+              placeholder="e.g. 050-1234567"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              autoComplete="tel"
             />
           </div>
 
@@ -513,7 +541,7 @@ print(response.json())`;
             <div className="step-num">1</div>
             <div>
               <div className="step-title">חשבון</div>
-              <div style={{ fontSize: 12, color: 'var(--text-dim)' }}>שם משתמש וסיסמה</div>
+              <div style={{ fontSize: 12, color: 'var(--text-dim)' }}>פרטים אישיים</div>
             </div>
           </div>
           <div className={`step ${currentStage === 2 ? 'active' : ''}`}>
