@@ -122,10 +122,118 @@ const pageStyles = `
 @keyframes spin { to { transform: rotate(360deg); } }
 
 @media (max-width: 768px) {
-  .reg-root { padding: 10px; }
-  .reg-card { width: 100%; max-height: 95vh; }
-  .reg-content { padding: 10px; }
-  .section { gap: 8px; }
+  .reg-root { 
+    padding: 10px; 
+    min-height: 100vh;
+  }
+  
+  .reg-card { 
+    width: 100%; 
+    max-height: 95vh; 
+    border-radius: 16px;
+  }
+  
+  .reg-content { 
+    padding: 16px; 
+  }
+  
+  .section { 
+    gap: 12px; 
+    max-width: 100%;
+  }
+  
+  .reg-steps {
+    padding: 6px 12px;
+    gap: 6px;
+  }
+  
+  .step {
+    padding: 6px;
+    font-size: 13px;
+  }
+  
+  .step-num {
+    width: 32px;
+    height: 32px;
+    font-size: 14px;
+  }
+  
+  .step-title {
+    font-size: 12px;
+  }
+  
+  .input, .textarea, .select {
+    padding: 14px 16px;
+    font-size: 16px; /* Prevents zoom on iOS */
+  }
+  
+  .btn {
+    padding: 14px 12px;
+    font-size: 16px;
+  }
+  
+  .actions {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  
+  .codebox {
+    font-size: 12px;
+    padding: 10px 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .reg-root { 
+    padding: 8px; 
+  }
+  
+  .reg-card { 
+    border-radius: 12px;
+  }
+  
+  .reg-content { 
+    padding: 12px; 
+  }
+  
+  .section { 
+    gap: 10px; 
+  }
+  
+  .reg-steps {
+    padding: 4px 8px;
+    gap: 4px;
+  }
+  
+  .step {
+    padding: 4px;
+    font-size: 12px;
+  }
+  
+  .step-num {
+    width: 28px;
+    height: 28px;
+    font-size: 12px;
+  }
+  
+  .step-title {
+    font-size: 11px;
+  }
+  
+  .input, .textarea, .select {
+    padding: 12px 14px;
+    font-size: 16px;
+  }
+  
+  .btn {
+    padding: 12px 10px;
+    font-size: 15px;
+  }
+  
+  .codebox {
+    font-size: 11px;
+    padding: 8px 10px;
+  }
 }
 `;
 

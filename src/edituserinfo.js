@@ -236,11 +236,91 @@ const pageStyles = `
 }
 
 @media (max-width: 768px) {
-  .edit-root { padding: 10px; }
-  .edit-card { width: 100%; max-height: 95vh; }
-  .edit-content { padding: 20px; }
-  .edit-section { gap: 12px; }
-  .actions { grid-template-columns: 1fr; }
+  .edit-root { 
+    padding: 10px; 
+    min-height: 100vh;
+  }
+  
+  .edit-card { 
+    width: 100%; 
+    max-height: 95vh; 
+    border-radius: 16px;
+  }
+  
+  .edit-content { 
+    padding: 20px; 
+  }
+  
+  .edit-section { 
+    gap: 12px; 
+  }
+  
+  .actions { 
+    grid-template-columns: 1fr; 
+    gap: 10px;
+  }
+  
+  .edit-title {
+    font-size: 20px;
+  }
+  
+  .edit-subtitle {
+    font-size: 13px;
+  }
+  
+  .input, .textarea {
+    padding: 14px 16px;
+    font-size: 16px; /* Prevents zoom on iOS */
+  }
+  
+  .btn {
+    padding: 14px 16px;
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .edit-root { 
+    padding: 8px; 
+  }
+  
+  .edit-card { 
+    border-radius: 12px;
+  }
+  
+  .edit-content { 
+    padding: 16px; 
+  }
+  
+  .edit-section { 
+    gap: 10px; 
+  }
+  
+  .edit-title {
+    font-size: 18px;
+  }
+  
+  .edit-subtitle {
+    font-size: 12px;
+  }
+  
+  .input, .textarea {
+    padding: 12px 14px;
+    font-size: 16px;
+  }
+  
+  .btn {
+    padding: 12px 14px;
+    font-size: 15px;
+  }
+  
+  .edit-header {
+    padding: 16px 20px;
+  }
+  
+  .edit-brand {
+    font-size: 14px;
+  }
 }
 `;
 

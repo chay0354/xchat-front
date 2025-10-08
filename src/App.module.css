@@ -18,3 +18,38 @@
     font-size: 0.9rem;
     font-weight: 500;
 }
+
+/* Mobile responsive statistics */
+@media (max-width: 768px) {
+    .statistics-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 24px;
+        margin: 32px auto;
+        padding: 0 16px;
+    }
+    
+    .statNumbers {
+        font-size: 2rem;
+    }
+    
+    .stat-text {
+        font-size: 0.8rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .statistics-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 16px;
+        margin: 24px auto;
+        padding: 0 12px;
+    }
+    
+    .statNumbers {
+        font-size: 1.8rem;
+    }
+    
+    .stat-text {
+        font-size: 0.75rem;
+    }
+}
