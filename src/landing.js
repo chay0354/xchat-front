@@ -1127,7 +1127,7 @@ function Landing() {
         <>
           {/* Hero Section */}
           <section className="landing-hero">
-            <h1 className="landing-hero__title" style={{ fontFamily: 'ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, sans-serif' }}>
+            <h1 className="landing-hero__title rubik-font" style={{ fontFamily: 'ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, sans-serif' }}>
               {isLoggedIn ? `ברוך השב, ${fullname}!` : 'צור בוט תוך 40 שניות!'}
             </h1>
             <p className="landing-hero__subtitle">
