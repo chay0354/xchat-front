@@ -200,6 +200,7 @@ function FullChat() {
     }
   };
 
+
   // Build messages from conversation
   const buildMessages = () => {
     if (!selectedChat) return [];
@@ -220,11 +221,53 @@ function FullChat() {
   );
   const isTestChat = selectedChat && selectedChat.convtoken.toLowerCase() === 'testchat';
 
+  // Mobile detection for mobile-only features
+  const [isMobile, setIsMobile] = useState(false);
+  const [showChatSelection, setShowChatSelection] = useState(false);
+  const shouldShowMobileSelection = isMobile && showChatSelection;
+
+  // Detect mobile/desktop on mount and resize
+  useEffect(() => {
+    const checkIsMobile = () => {
+      const mobile = window.innerWidth <= 980;
+      setIsMobile(mobile);
+    };
+    
+    checkIsMobile();
+    window.addEventListener('resize', checkIsMobile);
+    return () => window.removeEventListener('resize', checkIsMobile);
+  }, []);
+
+  // Handle mobile chat selection state
+  useEffect(() => {
+    if (isMobile && !selectedChat) {
+      setShowChatSelection(true);
+    } else if (!isMobile) {
+      setShowChatSelection(false);
+    }
+  }, [isMobile, selectedChat]);
+
+  // Handle chat selection for mobile
+  const handleChatSelect = (chat) => {
+    setSelectedChat(chat);
+    loadFullConversation(chat);
+    if (isMobile) {
+      setShowChatSelection(false); // Hide chat selection screen on mobile
+    }
+  };
+
+  // Show chat selection screen on mobile
+  const showChatSelectionScreen = () => {
+    if (isMobile) {
+      setShowChatSelection(true);
+    }
+  };
+
   return (
-    <div className={`fc-root ${theme === 'dark' ? 'theme-dark' : 'theme-light'}`}>
+    <div className={`fc-root ${theme === 'dark' ? 'theme-dark' : 'theme-light'} ${shouldShowMobileSelection ? 'fc-mobile-chat-selection' : ''}`}>
       <style>{globalStyles}</style>
 
-      {/* Sidebar */}
+      {/* Desktop Sidebar / Mobile Chat Selection */}
       <aside className="fc-sidebar">
         <div className="fc-sidebar__top">
           <div className="fc-logo">
@@ -251,8 +294,7 @@ function FullChat() {
                 key={chat.convtoken}
                 className={`fc-chatitem ${selectedChat?.convtoken === chat.convtoken ? 'active' : ''}`}
                 onClick={() => {
-                  setSelectedChat(chat);
-                  loadFullConversation(chat);
+                  handleChatSelect(chat);
                 }}
               >
                 <div className="fc-avatar">{chat.convtoken.charAt(0).toUpperCase()}</div>
@@ -282,6 +324,12 @@ function FullChat() {
         {/* Header */}
         <header className="fc-header">
           <div className="fc-header__left">
+            {/* Mobile Clear button - positioned at top left */}
+            {isTestChat && (
+              <button className="fc-btn fc-btn--danger fc-mobile-clear" onClick={handleClearConversation} title="Clear chat">
+                🗑 נקה
+              </button>
+            )}
             <div className="fc-avatar fc-avatar--lg">
               {selectedChat ? selectedChat.convtoken.charAt(0).toUpperCase() : '?'}
             </div>
@@ -293,11 +341,24 @@ function FullChat() {
             </div>
           </div>
           <div className="fc-header__right">
-            {isTestChat && (
-              <button className="fc-btn fc-btn--danger" onClick={handleClearConversation} title="Clear chat">
+            {/* Desktop clear button */}
+            {isTestChat && !isMobile && (
+              <button className="fc-btn fc-btn--danger fc-desktop-clear" onClick={handleClearConversation} title="Clear chat">
                 🗑 נקה
               </button>
             )}
+            
+            {/* Mobile back button - MOBILE ONLY */}
+            {selectedChat && isMobile && (
+              <button 
+                className="fc-mobile-back" 
+                onClick={showChatSelectionScreen}
+                title="Back to chat selection"
+              >
+                ←
+              </button>
+            )}
+            
           </div>
         </header>
 
@@ -481,9 +542,355 @@ body { margin: 0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI
 @keyframes spin { to { transform: rotate(360deg); } }
 
 @media (max-width: 980px) {
-  .fc-root { grid-template-columns: 1fr; }
-  .fc-sidebar { display: none; }
-  .fc-main { grid-template-rows: auto 1fr auto; }
+  .fc-root { 
+    grid-template-columns: 1fr; 
+    height: 100vh;
+    overflow: hidden;
+  }
+  
+  .fc-sidebar { 
+    display: none; 
+  }
+  
+  .fc-main { 
+    grid-template-rows: auto 1fr auto; 
+    height: 100vh;
+  }
+  
+  /* Mobile chat selection screen */
+  .fc-mobile-chat-selection {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    background: var(--bg);
+  }
+  
+  .fc-mobile-chat-selection .fc-sidebar {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    border-right: none;
+    background: var(--bg);
+    backdrop-filter: blur(20px);
+  }
+  
+  .fc-mobile-chat-selection .fc-main {
+    display: none;
+  }
+  
+  /* Hide chat selection when chat is selected */
+  .fc-root:not(.fc-mobile-chat-selection) .fc-mobile-chat-selection {
+    display: none;
+  }
+  
+  .fc-root:not(.fc-mobile-chat-selection) .fc-main {
+    display: grid;
+  }
+  
+  /* Desktop - force normal layout, hide all mobile elements */
+  @media (min-width: 981px) {
+    .fc-root {
+      grid-template-columns: 300px 1fr !important;
+      height: 100vh !important;
+    }
+    
+    .fc-sidebar { 
+      display: flex !important; 
+    }
+    
+    .fc-main { 
+      display: grid !important; 
+    }
+    
+    .fc-mobile-chat-selection {
+      display: none !important;
+    }
+    
+    
+    .fc-mobile-clear {
+      display: none !important;
+    }
+    
+    .fc-mobile-back {
+      display: none !important;
+      visibility: hidden !important;
+      opacity: 0 !important;
+      pointer-events: none !important;
+    }
+    
+    /* Extra strong rules to hide back button on desktop */
+    .fc-header__right .fc-mobile-back,
+    .fc-header .fc-mobile-back,
+    button.fc-mobile-back {
+      display: none !important;
+      visibility: hidden !important;
+      opacity: 0 !important;
+      pointer-events: none !important;
+    }
+    
+    /* Force desktop layout regardless of any classes */
+    .fc-root.fc-mobile-chat-selection {
+      grid-template-columns: 300px 1fr !important;
+    }
+    
+    .fc-root.fc-mobile-chat-selection .fc-sidebar {
+      display: flex !important;
+    }
+    
+    .fc-root.fc-mobile-chat-selection .fc-main {
+      display: grid !important;
+    }
+    
+    /* Ensure desktop clear button is visible */
+    .fc-desktop-clear {
+      display: flex !important;
+    }
+  }
+  
+  /* Mobile chat selection specific styles */
+  .fc-mobile-chat-selection .fc-chatitem {
+    padding: 16px;
+    border-radius: 12px;
+    margin-bottom: 8px;
+    transition: all 0.2s ease;
+    background: var(--panel);
+    border: 1px solid var(--border);
+  }
+  
+  .fc-mobile-chat-selection .fc-chatitem:hover {
+    background: var(--panel-strong);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  }
+  
+  .fc-mobile-chat-selection .fc-chatitem.active {
+    background: var(--brand);
+    color: white;
+    border-color: var(--brand);
+  }
+  
+  .fc-header {
+    padding: 12px 16px;
+  }
+  
+  .fc-messages {
+    padding: 12px 16px;
+  }
+  
+  .fc-composer {
+    padding: 10px 16px;
+  }
+  
+  .fc-bubble {
+    max-width: min(85ch, 90%);
+    padding: 10px 12px;
+  }
+  
+  .fc-input {
+    padding: 14px 16px;
+    font-size: 16px; /* Prevents zoom on iOS */
+  }
+  
+  .fc-iconbtn {
+    height: 48px;
+    width: 56px;
+  }
+}
+
+@media (max-width: 768px) {
+  .fc-header {
+    padding: 10px 12px;
+    flex-wrap: wrap;
+    gap: 8px;
+    position: relative;
+  }
+  
+  .fc-header__left {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  
+  .fc-header__right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+  
+  /* Desktop header layout - restore original */
+  @media (min-width: 981px) {
+    .fc-header__left {
+      margin-left: 0;
+    }
+    
+    .fc-header__right {
+      gap: 16px;
+    }
+  }
+  
+  
+  .fc-mobile-clear {
+    flex-shrink: 0;
+    min-width: 44px;
+    min-height: 44px;
+    padding: 10px 12px;
+    font-size: 14px;
+    font-weight: 600;
+    border-radius: 8px;
+    margin-right: 8px;
+  }
+  
+  .fc-mobile-back {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+    padding: 10px;
+    border-radius: 10px;
+    transition: all 0.2s ease;
+    min-width: 44px;
+    min-height: 44px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    flex-shrink: 0;
+  }
+  
+  .fc-mobile-back:hover {
+    background: var(--panel-strong);
+    border-color: var(--brand);
+    transform: translateY(-1px);
+  }
+  
+  .fc-mobile-back:active {
+    transform: translateY(0);
+  }
+  
+  .fc-desktop-clear {
+    display: none; /* Hidden by default, shown on desktop via media query */
+  }
+  
+  /* Hide mobile buttons on desktop */
+  @media (min-width: 981px) {
+    .fc-mobile-back {
+      display: none;
+    }
+    
+    .fc-mobile-clear {
+      display: none;
+    }
+  }
+  
+  .fc-title {
+    font-size: 14px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  .fc-subtitle {
+    font-size: 11px;
+  }
+  
+  .fc-messages {
+    padding: 10px 12px;
+  }
+  
+  .fc-bubble {
+    max-width: min(80ch, 95%);
+    padding: 8px 10px;
+    font-size: 14px;
+  }
+  
+  .fc-composer {
+    padding: 8px 12px;
+  }
+  
+  .fc-input {
+    padding: 12px 14px;
+    font-size: 16px;
+  }
+  
+  .fc-iconbtn {
+    height: 44px;
+    width: 52px;
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .fc-header {
+    padding: 8px 10px;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  
+  .fc-header__left {
+    gap: 8px;
+  }
+  
+  .fc-mobile-back {
+    min-width: 40px;
+    min-height: 40px;
+    padding: 8px;
+    font-size: 16px;
+  }
+  
+  .fc-mobile-clear {
+    min-width: 40px;
+    min-height: 40px;
+    padding: 8px 10px;
+    font-size: 13px;
+  }
+  
+  .fc-header__right {
+    gap: 6px;
+  }
+  
+  .fc-avatar--lg { 
+    width: 36px; 
+    height: 36px; 
+    font-size: 14px; 
+  }
+  
+  .fc-title { 
+    font-size: 13px; 
+  }
+  
+  .fc-subtitle { 
+    font-size: 10px; 
+  }
+  
+  .fc-messages {
+    padding: 8px 10px;
+  }
+  
+  .fc-bubble {
+    max-width: 95%;
+    padding: 6px 8px;
+    font-size: 13px;
+  }
+  
+  .fc-composer {
+    padding: 6px 10px;
+  }
+  
+  .fc-input {
+    padding: 10px 12px;
+    font-size: 16px;
+  }
+  
+  .fc-iconbtn {
+    height: 40px;
+    width: 48px;
+    font-size: 12px;
+  }
 }
 `;
 

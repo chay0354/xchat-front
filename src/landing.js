@@ -429,6 +429,15 @@ const landingStyles = `
   border-top: 1px solid var(--border);
 }
 
+  .chat-examples-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 24px;
+    margin-top: 60px;
+    max-width: 1000px;
+    margin: 60px auto 0;
+  }
+
 .landing-footer__logo {
   display: flex;
   align-items: center;
@@ -449,39 +458,460 @@ const landingStyles = `
   margin: 0;
 }
 
-/* Responsive */
-@media (max-width: 768px) {
+/* Mobile-First Responsive Design */
+@media (max-width: 1200px) {
+  .landing-nav {
+    padding: 0 20px;
+  }
+  
   .landing-hero {
-    padding: 100px 16px 60px;
+    padding: 120px 20px 80px;
+  }
+  
+  .features-grid,
+  .steps-grid,
+  .pricing-grid {
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 24px;
+  }
+}
+
+/* User name font styling */
+.user-name {
+  font-family: Arial, sans-serif !important;
+}
+
+/* Mobile-specific enhancements */
+@media (max-width: 768px) {
+  .landing-root {
+    overflow-x: hidden;
+  }
+  
+  .landing-bg {
+    background:
+      radial-gradient(300px 200px at 10% 10%, rgba(142,125,255,0.15), transparent 60%),
+      radial-gradient(400px 300px at 90% 80%, rgba(110,168,254,0.12), transparent 60%);
+  }
+  
+  /* Add subtle animation to hero title */
+  .landing-hero__title {
+    animation: fadeInUp 0.8s ease-out;
+  }
+  
+  .landing-hero__subtitle {
+    animation: fadeInUp 0.8s ease-out 0.2s both;
+  }
+  
+  .landing-hero__cta {
+    animation: fadeInUp 0.8s ease-out 0.4s both;
+  }
+  
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
+
+/* Desktop Layout - Keep original and unchanged */
+@media (min-width: 769px) {
+  .landing-header {
+    padding: 20px 0;
+  }
+  
+  .landing-nav {
+    padding: 0 20px;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .landing-logo {
+    font-size: 28px;
+  }
+  
+  .desktop-nav {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+  }
+  
+  .mobile-menu-toggle {
+    display: none;
+  }
+  
+  .mobile-menu {
+    display: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .landing-header {
+    padding: 12px 0;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    backdrop-filter: blur(20px);
+    background: rgba(10, 19, 40, 0.95);
+  }
+  
+  .landing-nav {
+    padding: 0 16px;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+  }
+  
+  .landing-logo {
+    font-size: 24px;
+    order: 1;
+  }
+  
+  /* Hide desktop nav on mobile */
+  .desktop-nav {
+    display: none;
+  }
+  
+  /* Show mobile menu toggle */
+  .mobile-menu-toggle {
+    display: block;
+    background: none;
+    border: none;
+    color: var(--text);
+    font-size: 24px;
+    cursor: pointer;
+    padding: 8px;
+    order: 2;
+    z-index: 1001;
+  }
+  
+  .mobile-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: rgba(10, 19, 40, 0.98);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--border);
+    border-radius: 0 0 16px 16px;
+    padding: 20px;
+    display: none;
+    flex-direction: column;
+    gap: 12px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+    z-index: 1000;
+  }
+  
+  .mobile-menu.open {
+    display: flex;
+  }
+  
+  .mobile-menu .btn {
+    width: 100%;
+    padding: 14px 20px;
+    font-size: 16px;
+    min-height: 48px;
+    border-radius: 12px;
+    text-align: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+  }
+  
+  .mobile-menu .btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+  }
+  
+  .mobile-menu .btn--primary {
+    background: linear-gradient(135deg, var(--brand), var(--brand-2));
+    color: white;
+    border: none;
+    box-shadow: 0 4px 15px rgba(110, 168, 254, 0.3);
+  }
+  
+  .mobile-menu .btn--primary:hover {
+    box-shadow: 0 6px 20px rgba(110, 168, 254, 0.4);
+  }
+  
+  
+  .btn {
+    padding: 12px 24px;
+    font-size: 14px;
+    white-space: nowrap;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 25px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+  }
+  
+  .btn--primary {
+    background: linear-gradient(135deg, var(--brand), var(--brand-2));
+    color: white;
+    border: none;
+    box-shadow: 0 4px 15px rgba(110, 168, 254, 0.3);
+  }
+  
+  .btn--primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(110, 168, 254, 0.4);
+  }
+  
+  .landing-hero {
+    padding: 40px 16px 60px;
+    text-align: center;
+  }
+  
+  .landing-hero__title {
+    font-size: clamp(2.2rem, 8vw, 3.5rem);
+    line-height: 1.1;
+    margin-bottom: 20px;
+    background: linear-gradient(135deg, var(--brand), var(--brand-2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  .landing-hero__subtitle {
+    font-size: clamp(1rem, 4vw, 1.2rem);
+    margin-bottom: 40px;
+    line-height: 1.5;
+    color: var(--text-dim);
+    max-width: 90%;
+    margin-left: auto;
+    margin-right: auto;
   }
   
   .landing-hero__cta {
     flex-direction: column;
     align-items: center;
+    gap: 16px;
+    margin-bottom: 40px;
   }
   
   .landing-hero__cta .btn {
     width: 100%;
-    max-width: 300px;
+    max-width: 280px;
+    padding: 16px 32px;
+    font-size: 16px;
+    min-height: 52px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 30px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  
+  .landing-hero__cta .btn--primary {
+    background: linear-gradient(135deg, var(--brand), var(--brand-2));
+    color: white;
+    border: none;
+    box-shadow: 0 6px 25px rgba(110, 168, 254, 0.4);
+  }
+  
+  .landing-hero__cta .btn:not(.btn--primary) {
+    background: transparent;
+    color: var(--text);
+    border: 2px solid var(--border);
+    backdrop-filter: blur(10px);
+  }
+  
+  .landing-hero__cta .btn:not(.btn--primary):hover {
+    background: var(--panel);
+    border-color: var(--brand);
+    transform: translateY(-2px);
+  }
+  
+  /* Add subtle animation to hero title */
+  .landing-hero__title {
+    animation: fadeInUp 0.8s ease-out;
+  }
+  
+  .landing-hero__subtitle {
+    animation: fadeInUp 0.8s ease-out 0.2s both;
+  }
+  
+  .landing-hero__cta {
+    animation: fadeInUp 0.8s ease-out 0.4s both;
+  }
+  
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
   
   .features-grid,
   .steps-grid,
   .pricing-grid {
     grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  
+  .feature-card,
+  .step-card,
+  .pricing-card {
+    padding: 24px 20px;
+  }
+  
+  .landing-features,
+  .landing-how,
+  .landing-pricing {
+    padding: 60px 16px;
+  }
+  
+  .landing-section__title {
+    font-size: 2rem;
+  }
+  
+  .landing-section__subtitle {
+    font-size: 1.1rem;
+    margin-bottom: 40px;
+  }
+  
+  .landing-footer {
+    padding: 40px 16px 30px;
+  }
+  
+  .chat-examples-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+    margin-top: 40px;
+  }
+  
+  /* Final CTA section tablet styles */
+  .final-cta-buttons {
+    flex-wrap: wrap !important;
+    gap: 12px !important;
+  }
+  
+  .final-cta-buttons .btn {
+    flex: 1 !important;
+    min-width: 200px !important;
+    max-width: 250px !important;
+    padding: 14px 20px !important;
+    font-size: 15px !important;
+    min-height: 48px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .landing-header {
+    padding: 10px 0;
   }
   
   .landing-nav {
-    padding: 0 16px;
+    padding: 0 12px;
   }
   
-  .landing-actions {
-    gap: 8px;
+  .landing-logo {
+    font-size: 20px;
   }
   
-  .btn {
-    padding: 8px 16px;
-    font-size: 14px;
+  .mobile-menu-toggle {
+    font-size: 20px;
+    padding: 6px;
+  }
+  
+  .mobile-menu {
+    padding: 16px;
+    gap: 10px;
+  }
+  
+  .mobile-menu .btn {
+    padding: 12px 16px;
+    font-size: 15px;
+    min-height: 44px;
+  }
+  
+  
+  .landing-hero {
+    padding: 30px 12px 40px;
+  }
+  
+  .landing-hero__title {
+    font-size: clamp(1.8rem, 10vw, 2.8rem);
+    margin-bottom: 16px;
+  }
+  
+  .landing-hero__subtitle {
+    font-size: 0.95rem;
+    margin-bottom: 32px;
+    max-width: 95%;
+  }
+  
+  .landing-hero__cta {
+    gap: 12px;
+    margin-bottom: 32px;
+  }
+  
+  .landing-hero__cta .btn {
+    max-width: 260px;
+    padding: 14px 28px;
+    font-size: 15px;
+    min-height: 48px;
+    border-radius: 25px;
+  }
+  
+  .feature-card,
+  .step-card,
+  .pricing-card {
+    padding: 20px 16px;
+  }
+  
+  .landing-features,
+  .landing-how,
+  .landing-pricing {
+    padding: 40px 12px;
+  }
+  
+  .landing-section__title {
+    font-size: 1.8rem;
+  }
+  
+  .landing-section__subtitle {
+    font-size: 1rem;
+  }
+  
+  .landing-footer {
+    padding: 30px 12px 20px;
+  }
+  
+  /* Final CTA section mobile styles */
+  .final-cta-buttons {
+    flex-direction: row !important;
+    gap: 12px !important;
+    align-items: center !important;
+    flex-wrap: wrap !important;
+    justify-content: center !important;
+  }
+  
+  .final-cta-buttons .btn {
+    flex: 1 !important;
+    min-width: 140px !important;
+    max-width: 200px !important;
+    padding: 14px 20px !important;
+    font-size: 15px !important;
+    min-height: 48px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    white-space: nowrap !important;
   }
 }
 `;
@@ -495,6 +925,7 @@ function Landing() {
   const [bots, setBots] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
 
   // Check if user is logged in
@@ -507,6 +938,7 @@ function Landing() {
       setEmail(user);
       setFullname(name || user); // fallback to email if no fullname
       loadBots();
+      loadUserInfo(); // Load full user info from database
     }
   }, []);
 
@@ -529,6 +961,28 @@ function Landing() {
     }
   };
 
+  const loadUserInfo = async () => {
+    const token = Cookies.get('testtoken');
+    if (!token) return;
+
+    try {
+      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5137'}/get-user-info?usertoken=${encodeURIComponent(token)}`);
+      if (response.ok) {
+        const data = await response.json();
+        if (data && data.length > 0) {
+          const userInfo = data[0];
+          if (userInfo.fullname) {
+            setFullname(userInfo.fullname);
+            // Update cookie with the full name from database
+            Cookies.set('fullname', userInfo.fullname);
+          }
+        }
+      }
+    } catch (err) {
+      console.error('Error loading user info:', err);
+    }
+  };
+
   const handleGetStarted = () => { navigate('/register') };
   const handleLogin = () => { navigate('/login') };
   const handleSelectPlan = (planName) => { navigate('/register', { state: { selectedPlan: planName } }) };
@@ -544,7 +998,30 @@ function Landing() {
     setFullname('');
     setBots([]);
     setActiveSection('home');
+    setMobileMenuOpen(false);
   };
+
+  const toggleMobileMenu = () => {
+    setMobileMenuOpen(!mobileMenuOpen);
+  };
+
+  const closeMobileMenu = () => {
+    setMobileMenuOpen(false);
+  };
+
+  // Close mobile menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (mobileMenuOpen && !event.target.closest('.landing-nav')) {
+        setMobileMenuOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [mobileMenuOpen]);
 
 
   return (
@@ -555,10 +1032,12 @@ function Landing() {
       {/* Header */}
       <header className="landing-header">
         <nav className="landing-nav">
+          <div className="landing-logo">
+            <img src={logoLight} alt="Logo" style={{ height: '38px' }} />
+          </div>
 
-
-
-          <div className="landing-actions">
+          {/* Desktop Navigation */}
+          <div className="landing-actions desktop-nav">
             {isLoggedIn ? (
               <>
                 <button className={`btn ${activeSection === 'home' ? 'btn--primary' : ''}`} onClick={() => setActiveSection('home')}>
@@ -573,7 +1052,7 @@ function Landing() {
                   הבוטים שלך
                 </button>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginLeft: '8px' }}>
-                  <span style={{ fontSize: '14px', color: 'var(--text-dim)' }}>Hi, {fullname}</span>
+                  <span style={{ fontSize: '14px', color: 'var(--text-dim)', fontFamily: 'Arial, sans-serif' }}>Hi, {fullname}</span>
                   <button className="btn" onClick={handleLogout} style={{ padding: '6px 12px', fontSize: '12px' }}>
                     התנתק
                   </button>
@@ -598,10 +1077,53 @@ function Landing() {
             </button>
           </div>
 
-          <div className="landing-logo">
-            <img src={logoLight} alt="Logo" style={{ height: '38px' }} />
-          </div>
+          {/* Mobile Menu Toggle */}
+          <button className="mobile-menu-toggle" onClick={toggleMobileMenu} aria-label="Toggle mobile menu">
+            {mobileMenuOpen ? '✕' : '☰'}
+          </button>
 
+          {/* Mobile Menu Dropdown */}
+          <div className={`mobile-menu ${mobileMenuOpen ? 'open' : ''}`}>
+            {isLoggedIn ? (
+              <>
+                <button className={`btn ${activeSection === 'home' ? 'btn--primary' : ''}`} onClick={() => { setActiveSection('home'); closeMobileMenu(); }}>
+                  בית
+                </button>
+                {email === 'flowchat.admin@gmail.com' && (
+                  <button className="btn" onClick={() => { navigate('/admin'); closeMobileMenu(); }}>
+                    ניהול
+                  </button>
+                )}
+                <button className={`btn ${activeSection === 'bots' ? 'btn--primary' : ''}`} onClick={() => { setActiveSection('bots'); closeMobileMenu(); }}>
+                  הבוטים שלך
+                </button>
+                <div style={{ padding: '8px 0', borderTop: '1px solid var(--border)', marginTop: '8px' }}>
+                  <div style={{ fontSize: '14px', color: 'var(--text-dim)', textAlign: 'center', marginBottom: '8px', fontFamily: 'Arial, sans-serif' }}>
+                    Hi, {fullname}
+                  </div>
+                  <button className="btn" onClick={handleLogout}>
+                    התנתק
+                  </button>
+                </div>
+              </>
+            ) : (
+              <>
+                <button className="btn" onClick={() => { handleLogin(); closeMobileMenu(); }}>
+                  התחבר
+                </button>
+                <button className="btn btn--primary" onClick={() => { handleGetStarted(); closeMobileMenu(); }}>
+                  התחל עכשיו
+                </button>
+              </>
+            )}
+            <button
+              className="btn"
+              onClick={() => { setTheme(theme === 'dark' ? 'light' : 'dark'); closeMobileMenu(); }}
+              style={{ marginTop: '8px', borderTop: '1px solid var(--border)', paddingTop: '12px' }}
+            >
+              {theme === 'dark' ? '☀️ Light Mode' : '🌙 Dark Mode'}
+            </button>
+          </div>
         </nav>
       </header>
 
@@ -610,7 +1132,7 @@ function Landing() {
         <>
           {/* Hero Section */}
           <section className="landing-hero">
-            <h1 className="landing-hero__title">
+            <h1 className="landing-hero__title" style={{ fontFamily: 'ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, sans-serif' }}>
               {isLoggedIn ? `ברוך השב, ${fullname}!` : 'צור בוט תוך 40 שניות!'}
             </h1>
             <p className="landing-hero__subtitle">
@@ -738,7 +1260,7 @@ function Landing() {
                 כך נראה הצ׳אט אחרי שהוטמע באתרי לקוחות
               </p>
 
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(450px, 1fr))', gap: '32px', marginTop: '60px', maxWidth: '1000px', margin: '60px auto 0' }}>
+              <div className="chat-examples-grid">
                 {/* E-commerce Chat Example */}
                 <div style={{
                   background: 'var(--panel-strong)',
@@ -1391,7 +1913,7 @@ function Landing() {
             <div style={{ display: 'flex', justifyContent: 'center' }}>
               <div className="feature-card" style={{ maxWidth: '400px', width: '100%' }}>
                 <div className="feature-icon">🤖</div>
-                <h3 className="feature-title">{fullname}'s AI Bot</h3>
+                <h3 className="feature-title" style={{ fontFamily: 'Arial, sans-serif' }}>{fullname}'s AI Bot</h3>
                 <p className="feature-desc">
                   {bots.length} conversation{bots.length !== 1 ? 's' : ''} • Active
                 </p>
@@ -1424,7 +1946,7 @@ function Landing() {
           <p style={{ fontSize: '1.2rem', margin: '0 0 40px 0', opacity: '0.9' }}>
             אוטומציה בשירות לקוחות זו רמה אחרת לגמרי. אין סיבה שלך לא יהיה!
           </p>
-          <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', flexWrap: 'wrap' }}>
+          <div className="final-cta-buttons" style={{ display: 'flex', gap: '16px', justifyContent: 'center', flexWrap: 'wrap' }}>
             <button
               className="btn"
               onClick={handleGetStarted}

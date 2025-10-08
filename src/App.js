@@ -77,6 +77,69 @@ html, body, #root { overflow: hidden; }
   backdrop-filter: blur(10px);
 }
 
+@media (max-width: 768px) {
+  .login-card {
+    width: min(95vw, 400px);
+    padding: 24px 20px 18px;
+    margin: 0 16px;
+  }
+  
+  .login-title {
+    font-size: 20px;
+  }
+  
+  .login-sub {
+    font-size: 14px;
+    min-height: 20px;
+  }
+  
+  .input {
+    padding: 14px 16px;
+    font-size: 16px; /* Prevents zoom on iOS */
+  }
+  
+  .btn {
+    padding: 14px 12px;
+    font-size: 16px;
+  }
+  
+  .actions {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  
+  .login-foot {
+    font-size: 11px;
+    text-align: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .login-card {
+    width: 95vw;
+    padding: 20px 16px 16px;
+    margin: 0 8px;
+  }
+  
+  .login-title {
+    font-size: 18px;
+  }
+  
+  .login-sub {
+    font-size: 13px;
+  }
+  
+  .input {
+    padding: 12px 14px;
+    font-size: 16px;
+  }
+  
+  .btn {
+    padding: 12px 10px;
+    font-size: 15px;
+  }
+}
+
 .login-header {
   display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;
 }

@@ -35,11 +35,19 @@ const adminStyles = `
   background-clip: text;
 }
 
-.admin-nav {
-  display: flex;
-  gap: 15px;
-  align-items: center;
-}
+  .admin-nav {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  
+  .admin-logo {
+    height: 30px;
+    width: auto;
+    object-fit: contain;
+    flex-shrink: 0;
+  }
 
 .admin-welcome {
   font-size: 14px;
@@ -414,6 +422,234 @@ const adminStyles = `
 .bot-definition::-webkit-scrollbar-thumb:hover {
   background: var(--brand-2);
 }
+
+/* Mobile Responsive Design */
+@media (max-width: 1200px) {
+  .admin-content {
+    grid-template-columns: 1fr;
+    gap: 20px;
+    height: auto;
+  }
+  
+  .users-panel,
+  .details-panel {
+    height: 50vh;
+    min-height: 400px;
+  }
+}
+
+@media (max-width: 768px) {
+  .admin-root {
+    padding: 12px;
+  }
+  
+  .admin-header {
+    padding: 16px 20px;
+    flex-direction: column;
+    gap: 16px;
+    align-items: flex-start;
+  }
+  
+  .admin-title {
+    font-size: 24px;
+  }
+  
+  .admin-nav {
+    width: 100%;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  
+  .admin-logo {
+    height: 24px;
+    order: 1;
+  }
+  
+  .admin-welcome {
+    font-size: 13px;
+    order: 2;
+    flex: 1;
+    text-align: center;
+    margin: 0 8px;
+  }
+  
+  .btn {
+    padding: 10px 16px;
+    font-size: 13px;
+    order: 3;
+  }
+  
+  .admin-content {
+    gap: 16px;
+  }
+  
+  .users-panel,
+  .details-panel {
+    height: 45vh;
+    min-height: 350px;
+    padding: 16px;
+  }
+  
+  .users-title,
+  .details-title {
+    font-size: 18px;
+    margin-bottom: 16px;
+  }
+  
+  .user-item {
+    padding: 14px 16px;
+  }
+  
+  .user-name {
+    font-size: 14px;
+  }
+  
+  .user-date {
+    font-size: 12px;
+  }
+  
+  .conversation-item {
+    padding: 16px;
+  }
+  
+  .conversation-header {
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+  }
+  
+  .conversation-idx {
+    font-size: 14px;
+    padding: 4px 8px;
+  }
+  
+  .conversation-date {
+    font-size: 11px;
+  }
+  
+  .question, .answer {
+    padding: 12px;
+    font-size: 13px;
+  }
+  
+  .bot-definition {
+    font-size: 12px;
+    padding: 16px;
+    max-height: 200px;
+  }
+}
+
+@media (max-width: 480px) {
+  .admin-root {
+    padding: 8px;
+  }
+  
+  .admin-header {
+    padding: 12px 16px;
+  }
+  
+  .admin-title {
+    font-size: 20px;
+  }
+  
+  .admin-nav {
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+    justify-content: space-between;
+  }
+  
+  .admin-logo {
+    height: 20px;
+    order: 1;
+  }
+  
+  .admin-welcome {
+    font-size: 11px;
+    order: 2;
+    flex: 1;
+    text-align: center;
+    margin: 0 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  .btn {
+    padding: 8px 12px;
+    font-size: 12px;
+    order: 3;
+    white-space: nowrap;
+  }
+  
+  .users-panel,
+  .details-panel {
+    height: 40vh;
+    min-height: 300px;
+    padding: 12px;
+  }
+  
+  .users-title,
+  .details-title {
+    font-size: 16px;
+    margin-bottom: 12px;
+  }
+  
+  .user-item {
+    padding: 12px 14px;
+  }
+  
+  .user-name {
+    font-size: 13px;
+  }
+  
+  .user-date {
+    font-size: 11px;
+  }
+  
+  .conversation-item {
+    padding: 12px;
+  }
+  
+  .conversation-header {
+    margin-bottom: 10px;
+    padding-bottom: 6px;
+  }
+  
+  .conversation-idx {
+    font-size: 12px;
+    padding: 3px 6px;
+  }
+  
+  .conversation-date {
+    font-size: 10px;
+  }
+  
+  .question, .answer {
+    padding: 10px;
+    font-size: 12px;
+  }
+  
+  .bot-definition {
+    font-size: 11px;
+    padding: 12px;
+    max-height: 150px;
+  }
+  
+  .info-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+  
+  .info-label {
+    font-size: 12px;
+  }
+  
+  .info-value {
+    font-size: 13px;
+  }
+}
 `;
 
 function Admin() {
@@ -544,7 +780,7 @@ function Admin() {
       <div className="admin-header">
         <div className="admin-title">לוח בקרה</div>
         <div className="admin-nav">
-          <img src={logo} alt="Logo" style={{ height: '30px' }} />
+          <img src={logo} alt="Logo" className="admin-logo" />
           <span className="admin-welcome">ברוך הבא, {email}</span>
           <button className="btn btn--danger" onClick={handleLogout}>
             התנתק

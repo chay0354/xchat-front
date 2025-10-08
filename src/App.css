@@ -8,10 +8,45 @@
 html,
 body {
   height: 100%;
+  overflow-x: hidden; /* Prevent horizontal scroll */
 }
 
 body {
   font-family: Arial, sans-serif;
+  -webkit-text-size-adjust: 100%; /* Prevent text scaling on iOS */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Mobile-specific optimizations */
+@media (max-width: 768px) {
+  body {
+    font-size: 16px; /* Prevent zoom on iOS */
+  }
+  
+  input, textarea, select {
+    font-size: 16px !important; /* Prevent zoom on iOS */
+  }
+  
+  button {
+    touch-action: manipulation; /* Improve touch response */
+  }
+  
+  a {
+    -webkit-tap-highlight-color: transparent; /* Remove tap highlight */
+  }
+}
+
+/* Prevent horizontal scroll on all devices */
+* {
+  max-width: 100%;
+}
+
+/* Improve touch targets on mobile */
+@media (max-width: 768px) {
+  button, a, input, select, textarea {
+    min-height: 44px; /* Apple's recommended minimum touch target */
+  }
 }
 
 /* Split Screen Styling */
