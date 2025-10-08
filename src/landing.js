@@ -1044,7 +1044,7 @@ function Landing() {
                   )}
                   <button className={`btn ${activeSection === 'bots' ? 'btn--primary' : ''}`} onClick={() => setActiveSection('bots')}>הבוטים שלך</button>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginLeft: '8px' }}>
-                    <span style={{ fontSize: '14px', color: 'var(--text-dim)', fontFamily: 'Arial, sans-serif' }}>Hi, {fullname}</span>
+                    <span style={{ fontSize: '14px', color: '#eee', fontFamily: 'Arial, sans-serif' }}>הי, {fullname}</span>
                     <button className="btn" onClick={handleLogout} style={{ padding: '6px 12px', fontSize: '12px' }}>התנתק</button>
                   </div>
                 </>
@@ -1057,18 +1057,16 @@ function Landing() {
                 </>
               )}
 
-            <button
+            {/* <button
               className="theme-toggle"
               onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
               aria-label="Toggle theme"
             >
               {theme === 'dark' ? '☀️' : '🌙'}
-            </button>
+            </button> */}
           </div>
 
-          <div className="landing-logo">
-            <img src={logoLight} alt="Logo" style={{ height: '38px' }} />
-          </div>
+          <div className="landing-logo"><img src={logoLight} alt="Logo" style={{ height: '38px' }} /></div>
 
 
 
@@ -1917,7 +1915,7 @@ function Landing() {
                   <button
                     className="btn btn--primary"
                     onClick={() => navigate('/fullchat')}
-                    style={{ flex: 1 , display: 'flex', justifyContent: 'center' }}
+                    style={{ flex: 1, display: 'flex', justifyContent: 'center' }}
                   >
                     נהל את הבוט
                   </button>
@@ -1985,7 +1983,7 @@ function Landing() {
           <span>flowchat</span>
         </div>
         <p className="landing-footer__text">
-          המלאכה 16 ראש-העין | שירות לקוחות: 054-5779917
+          flowchat מבית stealthCode | המלאכה 16 ראש-העין | שירות לקוחות: 054-5779917
         </p>
       </footer>
     </div>
