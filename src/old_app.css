@@ -142,7 +142,7 @@ input {
   padding: 0 1vh;
   border: 0.2vh solid #ccc;
   background-color: #f9f9f9;
-  color: #333;
+  color: #ff0000;
   white-space: nowrap;
   text-overflow: ellipsis;
   overflow: hidden;

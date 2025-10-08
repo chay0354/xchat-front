@@ -510,7 +510,7 @@ body { margin: 0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI
 .fc-ghost:hover { background: var(--panel); border-color: var(--brand); }
 
 .fc-main { display: grid; grid-template-rows: auto 1fr auto; min-height: 0; }
-.fc-header { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; border-bottom: 1px solid var(--border); background: linear-gradient(180deg, rgba(0,0,0,0.12), rgba(0,0,0,0)) , transparent; backdrop-filter: blur(8px); contain: paint; }
+.fc-header { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; border-bottom: 1px solid var(--border); background: linear-gradient(180deg, rgba(0,0,0,0.12), rgba(0,0,0,0)) , transparent; backdrop-filter: blur(8px); contain: paint }
 .fc-header__left { display: flex; align-items: center; gap: 12px; }
 .fc-avatar--lg { width: 44px; height: 44px; border-radius: 12px; background: var(--bubble-bot); display:flex; align-items:center; justify-content:center; font-weight:800; }
 .fc-title { font-size: 16px; font-weight: 700; }
@@ -671,6 +671,7 @@ body { margin: 0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI
   
   .fc-header {
     padding: 12px 16px;
+    background: #ffffff;
   }
   
   .fc-messages {
@@ -703,6 +704,7 @@ body { margin: 0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI
     flex-wrap: wrap;
     gap: 8px;
     position: relative;
+    background: #ffffff;
   }
   
   .fc-header__left {
@@ -829,6 +831,7 @@ body { margin: 0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI
     padding: 8px 10px;
     flex-wrap: wrap;
     gap: 6px;
+    background: #ffffff;
   }
   
   .fc-header__left {

@@ -488,7 +488,7 @@ print(response.json())`;
               onClick={() => setSelectedPlan('test')}
             >
               <h3 style={{margin: '0 0 8px 0', fontSize: '1.3rem', fontWeight: '700'}}>חינם ל-14 יום</h3>
-              <div style={{fontSize: '2rem', fontWeight: '900', color: 'var(--brand)', margin: '0 0 8px 0'}}>חינם ל-14 יום, אח״כ רק 15₪ לחודש</div>
+              <div style={{fontSize: '2rem', fontWeight: '900', color: 'var(--brand)', margin: '0 0 8px 0'}}>חינם ל-14 יום, אח״כ רק 23₪ לחודש</div>
               <p style={{color: 'var(--text-dim)', margin: '0 0 20px 0'}}>אין צורך בכרטיס אשראי</p>
               <ul style={{listStyle: 'none', padding: 0, margin: 0, textAlign: 'left'}}>
                 <li style={{padding: '4px 0', color: 'var(--text-dim)', display: 'flex', alignItems: 'center', gap: '8px'}}>
