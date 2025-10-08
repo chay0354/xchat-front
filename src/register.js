@@ -512,8 +512,8 @@ print(response.json())`;
           </div>
 
           <div className="actions">
-            <button className="btn" onClick={handleStage2Back}>Back</button>
-            <button className="btn btn--primary" onClick={handleStage2Next}>Next</button>
+            <button className="btn" onClick={handleStage2Back}>חזור</button>
+            <button className="btn btn--primary" onClick={handleStage2Next}>הבא</button>
           </div>
         </div>
       );

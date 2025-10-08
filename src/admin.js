@@ -894,7 +894,7 @@ function Admin() {
                     return sortedTokens.map((convToken, index) => {
                       const convMessages = groupedConversations[convToken];
                       const firstMessage = convMessages[0];
-                      const lastMessage = convMessages[convMessages.length - 1];
+                      // const lastMessage = convMessages[convMessages.length - 1];
                       
                       return (
                         <div key={convToken} className="conversation-item">
