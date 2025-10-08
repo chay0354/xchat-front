@@ -1032,42 +1032,31 @@ function Landing() {
       {/* Header */}
       <header className="landing-header">
         <nav className="landing-nav">
-          <div className="landing-logo">
-            <img src={logoLight} alt="Logo" style={{ height: '38px' }} />
-          </div>
 
           {/* Desktop Navigation */}
           <div className="landing-actions desktop-nav">
-            {isLoggedIn ? (
-              <>
-                <button className={`btn ${activeSection === 'home' ? 'btn--primary' : ''}`} onClick={() => setActiveSection('home')}>
-                  בית
-                </button>
-                {email === 'flowchat.admin@gmail.com' && (
-                  <button className="btn" onClick={() => navigate('/admin')}>
-                    ניהול
-                  </button>
-                )}
-                <button className={`btn ${activeSection === 'bots' ? 'btn--primary' : ''}`} onClick={() => setActiveSection('bots')}>
-                  הבוטים שלך
-                </button>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginLeft: '8px' }}>
-                  <span style={{ fontSize: '14px', color: 'var(--text-dim)', fontFamily: 'Arial, sans-serif' }}>Hi, {fullname}</span>
-                  <button className="btn" onClick={handleLogout} style={{ padding: '6px 12px', fontSize: '12px' }}>
-                    התנתק
-                  </button>
-                </div>
-              </>
-            ) : (
-              <>
-                <button className="btn" onClick={handleLogin}>
-                  התחבר
-                </button>
-                <button className="btn btn--primary" onClick={handleGetStarted}>
-                  התחל עכשיו
-                </button>
-              </>
-            )}
+            {isLoggedIn ?
+              (
+                <>
+                  <button className={`btn ${activeSection === 'home' ? 'btn--primary' : ''}`} onClick={() => setActiveSection('home')}>בית</button>
+                  {email === 'flowchat.admin@gmail.com' && (
+                    <button className="btn" onClick={() => navigate('/admin')}>ניהול</button>
+                  )}
+                  <button className={`btn ${activeSection === 'bots' ? 'btn--primary' : ''}`} onClick={() => setActiveSection('bots')}>הבוטים שלך</button>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginLeft: '8px' }}>
+                    <span style={{ fontSize: '14px', color: 'var(--text-dim)', fontFamily: 'Arial, sans-serif' }}>Hi, {fullname}</span>
+                    <button className="btn" onClick={handleLogout} style={{ padding: '6px 12px', fontSize: '12px' }}>התנתק</button>
+                  </div>
+                </>
+              )
+              :
+              (
+                <>
+                  <button className="btn" onClick={handleLogin}>התחבר</button>
+                  <button className="btn btn--primary" onClick={handleGetStarted}>התחל עכשיו</button>
+                </>
+              )}
+
             <button
               className="theme-toggle"
               onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
@@ -1076,6 +1065,12 @@ function Landing() {
               {theme === 'dark' ? '☀️' : '🌙'}
             </button>
           </div>
+
+          <div className="landing-logo">
+            <img src={logoLight} alt="Logo" style={{ height: '38px' }} />
+          </div>
+
+
 
           {/* Mobile Menu Toggle */}
           <button className="mobile-menu-toggle" onClick={toggleMobileMenu} aria-label="Toggle mobile menu">
@@ -1099,7 +1094,7 @@ function Landing() {
                 </button>
                 <div style={{ padding: '8px 0', borderTop: '1px solid var(--border)', marginTop: '8px' }}>
                   <div style={{ fontSize: '14px', color: 'var(--text-dim)', textAlign: 'center', marginBottom: '8px', fontFamily: 'Arial, sans-serif' }}>
-                    Hi, {fullname}
+                    הי, {fullname}
                   </div>
                   <button className="btn" onClick={handleLogout}>
                     התנתק
@@ -1847,9 +1842,9 @@ function Landing() {
       {/* Bots Section */}
       {activeSection === 'bots' && isLoggedIn && (
         <section className="landing-features" style={{ paddingTop: '120px' }}>
-          <h2 className="landing-section__title">Your AI Bots</h2>
+          <h2 className="landing-section__title">הבוטים שלך</h2>
           <p className="landing-section__subtitle">
-            Manage and create intelligent chatbots for your business
+            נהל את הבוטים
           </p>
 
           {error && (
@@ -1884,7 +1879,7 @@ function Landing() {
               marginBottom: '40px',
               color: 'var(--brand)'
             }}>
-              <strong>Free Plan Limit:</strong> You can create 1 bot. Upgrade to create more bots.
+              <strong>חינם ל-14 יום:</strong> יצירה של עד בוט אחד
             </div>
           )}
 
@@ -1904,6 +1899,7 @@ function Landing() {
               <h3 style={{ margin: '0 0 12px 0', fontSize: '1.5rem' }}>No bots yet</h3>
               <p style={{ color: 'var(--text-dim)', margin: '0 0 24px 0' }}>
                 Create your first AI bot to get started with automated customer support. Free plan allows 1 bot.
+                צור את הבוט האינטליגנטי הראשון שלך!
               </p>
               <button className="btn btn--primary" onClick={handleCreateBot}>
                 Create Your First Bot
@@ -1913,7 +1909,7 @@ function Landing() {
             <div style={{ display: 'flex', justifyContent: 'center' }}>
               <div className="feature-card" style={{ maxWidth: '400px', width: '100%' }}>
                 <div className="feature-icon">🤖</div>
-                <h3 className="feature-title" style={{ fontFamily: 'Arial, sans-serif' }}>{fullname}'s AI Bot</h3>
+                <h3 className="feature-title" style={{ fontFamily: 'Arial, sans-serif' }}>הבוט של {fullname}</h3>
                 <p className="feature-desc">
                   {bots.length} conversation{bots.length !== 1 ? 's' : ''} • Active
                 </p>
@@ -1921,9 +1917,9 @@ function Landing() {
                   <button
                     className="btn btn--primary"
                     onClick={() => navigate('/fullchat')}
-                    style={{ flex: 1 }}
+                    style={{ flex: 1 , display: 'flex', justifyContent: 'center' }}
                   >
-                    Manage Conversations
+                    נהל את הבוט
                   </button>
                 </div>
               </div>
@@ -1989,7 +1985,7 @@ function Landing() {
           <span>flowchat</span>
         </div>
         <p className="landing-footer__text">
-          גם אתם יכולים לשדרג את התמיכה בלקוחות שלכם עם flowchat. התחילו בחינם עוד היום!
+          המלאכה 16 ראש-העין | שירות לקוחות: 054-5779917
         </p>
       </footer>
     </div>
