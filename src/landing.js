@@ -6,35 +6,7 @@ import Cookies from 'js-cookie';
 import logoLight from './logo-light.png';
 
 const designTokens = `
-:root {
-  --bg: #0f1420;
-  --panel: rgba(255,255,255,0.06);
-  --panel-strong: rgba(255,255,255,0.12);
-  --text: #e8ecf3;
-  --text-dim: #aab3c5;
-  --brand: #6ea8fe;
-  --brand-2: #8a7dff;
-  --ok: #22c55e;
-  --warn: #ef4444;
-  --border: rgba(255,255,255,0.12);
-  --shadow: 0 8px 30px rgba(0,0,0,0.25);
-  --gradient: linear-gradient(135deg, var(--brand), var(--brand-2));
-}
 
-.theme-light {
-  --bg: #f3f6fb;
-  --panel: #ffffff;
-  --panel-strong: #ffffff;
-  --text: #0f1420;
-  --text-dim: #5b667a;
-  --brand: #316bff;
-  --brand-2: #6b5cff;
-  --ok: #16a34a;
-  --warn: #dc2626;
-  --border: rgba(15,20,32,0.12);
-  --shadow: 0 10px 25px rgba(15,20,32,0.08);
-  --gradient: linear-gradient(135deg, var(--brand), var(--brand-2));
-}
 
 * { box-sizing: border-box; }
 html, body, #root { min-height: 100%; }
@@ -62,18 +34,7 @@ const landingStyles = `
 }
 
 /* Header */
-.landing-header {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 100;
-  padding: 20px 0;
-  background: rgba(10, 19, 40, 0.95);
-  backdrop-filter: blur(20px);
-  border-bottom: 1px solid rgba(255,255,255,0.1);
-  color: white;
-}
+
 
 .landing-nav {
   display: flex;
@@ -344,82 +305,8 @@ const landingStyles = `
   width: 100%;
 }
 
-.pricing-card {
-  background: var(--panel);
-  border: 1px solid var(--border);
-  border-radius: 20px;
-  padding: 40px 32px;
-  text-align: center;
-  position: relative;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
 
-.pricing-card:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--shadow);
-}
 
-.pricing-card.featured {
-  border-color: var(--brand);
-  background: linear-gradient(180deg, rgba(110,168,254,0.1), var(--panel));
-}
-
-.pricing-badge {
-  position: absolute;
-  top: -12px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: var(--gradient);
-  color: white;
-  padding: 6px 20px;
-  border-radius: 20px;
-  font-size: 12px;
-  font-weight: 700;
-}
-
-.pricing-title {
-  font-size: 1.5rem;
-  font-weight: 800;
-  margin: 0 0 8px 0;
-}
-
-.pricing-price {
-  font-size: 3rem;
-  font-weight: 900;
-  margin: 0 0 8px 0;
-  background: var(--gradient);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-.pricing-period {
-  color: var(--text-dim);
-  margin: 0 0 32px 0;
-}
-
-.pricing-features {
-  list-style: none;
-  padding: 0;
-  margin: 0 0 32px 0;
-  text-align: left;
-}
-
-.pricing-features li {
-  padding: 8px 0;
-  color: var(--text-dim);
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.pricing-features li::before {
-  content: "✓";
-  color: var(--ok);
-  font-weight: 800;
-  width: 20px;
-  text-align: center;
-}
 
 /* Footer */
 .landing-footer {
@@ -1775,7 +1662,7 @@ function Landing() {
               <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '60px' }}>
                 <div className="pricing-card featured" style={{ maxWidth: '500px', width: '100%' }}>
                   <div className="pricing-badge">חינם ל-14 יום</div>
-                  <h3 className="pricing-title">ללא התחייבות</h3>
+                  <h3 className="pricing-title" style={{ color: '#432323' }}>ללא התחייבות</h3>
                   <div className="pricing-price">התנסות חינם</div>
                   {/* <p className="pricing-period">forever</p> */}
                   <ul className="pricing-features">
@@ -1792,11 +1679,11 @@ function Landing() {
                   <div style={{
                     marginTop: '20px',
                     padding: '16px',
-                    background: 'rgba(34, 197, 94, 0.1)',
+                    background: '#C2A68C22',
                     borderRadius: '8px',
-                    border: '1px solid rgba(34, 197, 94, 0.3)',
+                    border: '1px solid #43232322',
                     fontSize: '0.9rem',
-                    color: 'var(--ok)'
+                    color: '#432323'
                   }}>
                     <strong>מצוין עבור:</strong> עסקים קטנים ובינוניים, או כל מי שרוצה לנסות צ'אט-בוטים מבוססי AI
                   </div>
