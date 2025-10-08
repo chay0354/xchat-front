@@ -20,16 +20,20 @@ code {
 }
 
 h1 {
-  font-family: 'RubikDoodle', cursive !important;
-  font-size: 4.5rem !important;
+  font-family: 'RubikDoodle', cursive;
+  font-size: 4.5rem;
   margin: 0;
   padding: 0;
-  color: var(--text-primary) !important;
+  color: var(--text-primary);
   /* letter-spacing: 0.02em; */
 }
 
 p {
   font-family: 'Varela Round', sans-serif;
+}
+
+.rubik-font {
+  font-family: 'RubikDoodle', cursive !important;
 }
 
 /* Mobile viewport optimization */
