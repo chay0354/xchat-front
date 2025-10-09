@@ -8,8 +8,6 @@ import './landingStyles.css';
 import { FaWhatsapp } from "react-icons/fa";
 
 const designTokens = `
-
-
 * { box-sizing: border-box; }
 html, body, #root { min-height: 100%; }
 body { margin: 0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial; }
@@ -100,13 +98,8 @@ function Landing() {
     setMobileMenuOpen(false);
   };
 
-  const toggleMobileMenu = () => {
-    setMobileMenuOpen(!mobileMenuOpen);
-  };
-
-  const closeMobileMenu = () => {
-    setMobileMenuOpen(false);
-  };
+  const toggleMobileMenu = () => { setMobileMenuOpen(!mobileMenuOpen) };
+  const closeMobileMenu = () => { setMobileMenuOpen(false) };
 
   // Close mobile menu when clicking outside
   useEffect(() => {
@@ -117,14 +110,12 @@ function Landing() {
     };
 
     document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
+    return () => { document.removeEventListener('mousedown', handleClickOutside) };
   }, [mobileMenuOpen]);
 
 
   return (
-    <div className={`landing-root ${theme === 'dark' ? 'theme-dark' : 'theme-light'}`}>
+    <div className={`landing-root ${theme === 'dark' ? 'theme-dark' : 'theme-light'} bg`}>
       <style>{designTokens}</style>
       <div className="landing-bg" />
 
@@ -217,7 +208,8 @@ function Landing() {
         <>
           {/* Hero Section */}
           <section className="landing-hero">
-            <h1 className="landing-hero__title rubik-font" style={{ fontFamily: 'ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, sans-serif' }}>
+            {/* <h1 className="landing-hero__title rubik-font"> */}
+            <h1 className="landing-hero-title">
               {isLoggedIn ? `ברוך השב, ${fullname}!` : 'צור בוט תוך 40 שניות!'}
             </h1>
             <h3>
@@ -225,7 +217,6 @@ function Landing() {
                 'נהל את הבוטים שלך או צור חדשים בלוח המחוונים הפשוט שלנו.'
                 :
                 'אין צורך בכרטיס אשראי • סריקה אוטומטית של האתר שלך ובניית בוט תוך פחות מדקה'
-                // 'הזן את כתובת האתר שלך ואנחנו נבנה -אוטומטית- צ\'אטבוט חכם שמבין את העסק שלך.'
               }
             </h3>
 
@@ -233,7 +224,7 @@ function Landing() {
 
             {!isLoggedIn &&
               <>
-                <h2 style={{ color: 'var(--gradient2)', fontSize: '34px', fontWeight: 'bold' }}>הפחת הוצאות, הגדל החזר על השקעה בעובדים. בתכלס.</h2>
+                <h2 style={{ color: 'var(--gradient2)', fontSize: '34px', fontWeight: 'bold' }}>הפחת הוצאות, הגדל החזר על השקעה.</h2>
 
                 <div className="benefits-container">
                   <ul>
@@ -838,52 +829,25 @@ function Landing() {
                     <li>גישה מלאה ל-API</li>
                     <li>אין צורך בכרטיס אשראי</li>
                   </ul>
-                  <button className="btn btn--primary" onClick={() => handleSelectPlan('free')}>
-                    התחל חינם עכשיו
-                  </button>
+                  <div className="flex-space-around">
+                    <button className="btn btn--primary" onClick={() => handleSelectPlan('free')}>
+                      התחל חינם עכשיו
+                    </button>
+                  </div>
                   <div style={{
                     marginTop: '20px',
                     padding: '16px',
-                    background: '#C2A68C22',
+                    background: '#fbeefaff',
                     borderRadius: '8px',
-                    border: '1px solid #43232322',
+                    border: '1px solid #8120742f',
                     fontSize: '0.9rem',
-                    color: '#432323'
+                    color: '#000000'
                   }}>
                     <strong>מצוין עבור:</strong> עסקים קטנים ובינוניים, או כל מי שרוצה לנסות צ'אט-בוטים מבוססי AI
                   </div>
                 </div>
               </div>
-              {/* 
-              <div style={{
-                padding: '40px',
-                background: 'var(--panel)',
-                borderRadius: '16px',
-                border: '1px solid var(--border)',
-                textAlign: 'center'
-              }}>
-                <h3 style={{ fontSize: '1.5rem', fontWeight: '700', marginBottom: '16px', color: 'var(--text)' }}>
-                  צריך יותר? שדרג לתוכניות Pro או Enterprise
-                </h3>
-                <p style={{ color: 'var(--text-dim)', marginBottom: '32px', lineHeight: '1.6' }}>
-                  כאשר העסק שלך מתפתח, תוכל בקלות לשדרג לתוכניות Pro או Enterprise שלנו עבור יותר בוטים, דומיינים ותכונות מתקדמות.
-                </p>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '32px', marginBottom: '32px' }}>
-                  <div style={{ textAlign: 'center' }}>
-                    <div style={{ fontSize: '1.5rem', fontWeight: '800', color: 'var(--brand)', marginBottom: '8px' }}>Pro Plan</div>
-                    <div style={{ fontSize: '1.2rem', fontWeight: '700', marginBottom: '4px' }}>$99/month</div>
-                    <div style={{ color: 'var(--text-dim)', fontSize: '0.9rem' }}>5 bots • 10K queries • Advanced features</div>
-                  </div>
-                  <div style={{ textAlign: 'center' }}>
-                    <div style={{ fontSize: '1.5rem', fontWeight: '800', color: 'var(--brand)', marginBottom: '8px' }}>Enterprise</div>
-                    <div style={{ fontSize: '1.2rem', fontWeight: '700', marginBottom: '4px' }}>Custom</div>
-                    <div style={{ color: 'var(--text-dim)', fontSize: '0.9rem' }}>Unlimited • 24/7 support • SLA</div>
-                  </div>
-                </div>
-                <button className="btn" onClick={() => handleSelectPlan('contact')}>
-                  Contact Sales for Pro/Enterprise
-                </button>
-              </div> */}
+
             </div>
           </section>
         </>
@@ -1023,7 +987,7 @@ function Landing() {
             </button>
           </div>
           <div style={{ marginTop: '40px', fontSize: '0.9rem', opacity: '0.8' }}>
-            ⚡ הגדרה תוך 40 שניות • 🚀 אין צורך בכרטיס אשראי • 💬 שירות תמיכה
+            הגדרה תוך 40 שניות • אין צורך בכרטיס אשראי • 💬 שירות ותמיכה
           </div>
         </section>
       )}
