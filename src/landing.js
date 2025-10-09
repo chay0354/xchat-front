@@ -5,6 +5,7 @@ import styles from './App.module.css';
 import Cookies from 'js-cookie';
 import logoLight from './logo-light.png';
 import './landingStyles.css';
+import { FaWhatsapp } from "react-icons/fa";
 
 const designTokens = `
 
@@ -284,7 +285,7 @@ function Landing() {
           {/* Features Section */}
           <section className="landing-features">
             <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 24px' }}>
-              <h2 className="landing-section__title">הכח של FlowChat</h2>
+              <h2 className="landing-section__title">הכח של Flowchat</h2>
               <p className="landing-section__subtitle">
                 הדרך המהירה ביותר ליצור צ'אט-בוטים אינטליגנטיים ומודעים להקשר
               </p>
@@ -294,7 +295,7 @@ function Landing() {
                   <div className="feature-icon">⚡</div>
                   <h3 className="feature-title">התקנה במהירות האור</h3>
                   <p className="feature-desc">
-                    מהזנת כתובת לצ׳אט עובר תוך פחות מדקה. אין צורך בקידוד או בהגדרות מסובכות.
+                    מהזנת כתובת - לצ׳אט עובד תוך פחות מדקה. אין צורך בקידוד או בהגדרות מסובכות.
                   </p>
                 </div>
 
@@ -318,7 +319,7 @@ function Landing() {
                   <div className="feature-icon">🎯</div>
                   <h3 className="feature-title">הקשר מודע</h3>
                   <p className="feature-desc">
-                    הבוט עונה על סמך תוכן האתר שלך, מה שמפחית הזיות ומבטיח עקביות במותג.
+                    הבוט עונה על סמך תוכן האתר שלך, מה שמפחית ״הזיות״ ומבטיח עקביות במותג.
                   </p>
                 </div>
 
@@ -558,7 +559,7 @@ function Landing() {
 
             <div className="features-grid">
               <div className="feature-card">
-                <div className="feature-icon">💬</div>
+                <div className="feature-icon"><FaWhatsapp color="#25D366" /></div>
                 <h3 className="feature-title">וואצאפ</h3>
                 <p className="feature-desc">
                   הגיעו ללקוחות היכן שהם נמצאים. שלחו תגובות אוטומטיות להודעות וואצאפ באמצעות ההטמעה הפשוטה שלנו.
