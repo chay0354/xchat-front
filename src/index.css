@@ -68,9 +68,7 @@ h1 {
   margin: 0;
   padding: 0;
   color: var(--text-primary);
-    letter-spacing: 0.01em !important;
-
-  /* letter-spacing: 0.02em; */
+  letter-spacing: 0.01em !important;
 }
 
 p {
@@ -133,4 +131,3 @@ p {
     min-width: 44px;
   }
 }
-
