@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 // Updated: Added fullname and phone support - $(date)
 import { useNavigate } from 'react-router-dom';
-import styles from './App.module.css';
+// import styles from './App.module.css';
 import Cookies from 'js-cookie';
 import logoLight from './logo-light.png';
 import './landingStyles.css';
@@ -154,13 +154,8 @@ function Landing() {
               </>
             }
 
-            {/* <button
-              className="theme-toggle"
-              onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-              aria-label="Toggle theme"
-            >
-              {theme === 'dark' ? '☀️' : '🌙'}
-            </button> */}
+            {/* <button className="theme-toggle" onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')} aria-label="Toggle theme">{theme === 'dark' ? '☀️' : '🌙'}</button> */}
+
           </div>
 
           <div className="landing-logo"><img src={logoLight} alt="Logo" style={{ height: '38px' }} /></div>
@@ -225,15 +220,51 @@ function Landing() {
             <h1 className="landing-hero__title rubik-font" style={{ fontFamily: 'ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, sans-serif' }}>
               {isLoggedIn ? `ברוך השב, ${fullname}!` : 'צור בוט תוך 40 שניות!'}
             </h1>
-            <p className="landing-hero__subtitle">
-              {isLoggedIn
-                ? 'נהל את הבוטים שלך או צור חדשים בלוח המחוונים הפשוט שלנו.'
-                : 'תן לנו את כתובת האתר שלך, ואנחנו נבנה אוטומטית צ\'אט-בוט חכם שיודע הכל על העסק שלך. מינימום הגדרות, תוצאות מיידיות.'
+            <h3>
+              {isLoggedIn ?
+                'נהל את הבוטים שלך או צור חדשים בלוח המחוונים הפשוט שלנו.'
+                :
+                'אין צורך בכרטיס אשראי • סריקה אוטומטית של האתר שלך ובניית בוט תוך פחות מדקה'
+                // 'הזן את כתובת האתר שלך ואנחנו נבנה -אוטומטית- צ\'אטבוט חכם שמבין את העסק שלך.'
               }
-            </p>
+            </h3>
+
+            <br />
+
+            {!isLoggedIn &&
+              <>
+                <h2 style={{ color: 'var(--gradient2)', fontSize: '34px', fontWeight: 'bold' }}>הפחת הוצאות, הגדל החזר על השקעה בעובדים. בתכלס.</h2>
+
+                <div className="benefits-container">
+                  <ul>
+
+                    <li>
+                      <b>חוסך בהוצאות: </b>
+                      עובד 24/7. עונה ללקוחות ומסנן פניות לא רלוונטיות.
+                    </li>
+
+                    <li>
+                      <b>שמירה על לידים חמים: </b>
+                      אין יותר "פספסנו את הפניה" - הצ’אטבוט מגיב מיד לכל ליד שמגיע, גם באמצע הלילה, ודואג להשאיר את הלקוח מעוניין ומחובר אליך.
+                    </li>
+
+                    {/* <li>
+                  <b>חוויית שירות אחידה ומקצועית: </b>
+                  הבוט שלך מדבר בשפה של העסק – תמיד מנומס, תמיד עקבי, ותמיד יודע מה להגיד. זה משדר אמינות ובונה אמון מול לקוחות חדשים.
+                </li> */}
+
+                    <li>
+                      <b>פחות שחיקת עובדים: </b>
+                      תן לעובדים שלך להתמקד בעבודה האמיתית שלהם, בזמן שהבוט עושה את כל העבודה השחורה: מענה ראשוני, שאלות נפוצות, איסוף פרטים ועוד.
+                    </li>
+                  </ul>
+
+                </div>
+              </>
+            }
 
             {/* Statistics */}
-            {!isLoggedIn && (
+            {/* {!isLoggedIn && (
               <div className={styles['statistics-grid']}>
                 <div style={{ textAlign: 'center' }}>
                   <div className={styles.statNumbers}>40s</div>
@@ -252,7 +283,7 @@ function Landing() {
                   <div className={styles['stat-text']}>תמיכה</div>
                 </div>
               </div>
-            )}
+            )} */}
 
             <div className="landing-hero__cta">
               {isLoggedIn ? (
@@ -799,9 +830,8 @@ function Landing() {
               <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '60px' }}>
                 <div className="pricing-card featured" style={{ maxWidth: '500px', width: '100%' }}>
                   <div className="pricing-badge">חינם ל-14 יום</div>
-                  <h3 className="pricing-title" style={{ color: '#432323' }}>ללא התחייבות</h3>
+                  <h3 className="pricing-title" style={{ color: '#2d0a46' }}>ללא התחייבות</h3>
                   <div className="pricing-price">התנסות חינם</div>
-                  {/* <p className="pricing-period">forever</p> */}
                   <ul className="pricing-features">
                     <li>בוט אחד</li>
                     <li>מערכת ניהול בוטים</li>

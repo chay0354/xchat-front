@@ -28,14 +28,9 @@
   box-shadow: var(--shadow);
 }
 
-/* F5F5F0
-E6D8C3
-C2A68C
-2F5755 */
-
 .pricing-card.featured {
   border-color: var(--brand);
-  background: linear-gradient(180deg, #E6D8C366, #F5F5F0 );  
+  background: linear-gradient(180deg, #ffffff, #f6e2f5);
 }
 
 .pricing-badge {
