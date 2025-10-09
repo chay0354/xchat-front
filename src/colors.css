@@ -21,16 +21,16 @@
   text-align: center;
   position: relative;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: var(--shadow);
 }
 
 .pricing-card:hover {
   transform: translateY(-4px);
-  box-shadow: var(--shadow);
 }
 
 .pricing-card.featured {
   border-color: var(--brand);
-  background: linear-gradient(180deg, #ffffff, #f6e2f5);
+  background: linear-gradient(180deg, #ffffff, #f8f4f8);
 }
 
 .pricing-badge {

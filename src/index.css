@@ -13,16 +13,13 @@
   --gradient: linear-gradient(135deg, var(--brand), var(--brand-2));
 }
 
-
 /*
 2d0a46 header
 c13eb9 gradient1
 1d0b40 gradient2
 e5d9fc text
 ffffff white
-
 */
-
 
 .theme-light {
   --bg: #fbfbf8;
@@ -59,6 +56,11 @@ code {
 
 @font-face {
   font-family: 'RubikDoodle';
+  src: url('./fonts/Karantina-Bold.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Karantina';
   src: url('./fonts/Karantina-Bold.ttf') format('truetype');
 }
 
@@ -117,6 +119,11 @@ p {
 /* Remove tap highlights */
 * {
   -webkit-tap-highlight-color: transparent;
+}
+
+.flex-space-around {
+  display: flex;
+  justify-content: space-around;
 }
 
 /* Improve touch targets */

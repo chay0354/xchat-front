@@ -8,6 +8,10 @@
   line-height: 1.6;
 }
 
+.bg {
+  background-color: #fbf5fb;
+}
+
 .landing-bg {
   position: absolute;
   inset: 0;
@@ -18,7 +22,21 @@
 }
 
 /* Header */
+.landing-hero-title {
+  font-family: 'Karantina', sans-serif;
+  font-size: 7rem;
+  background: var(--gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  line-height: 1;
+}
 
+@media screen and (max-width: 768px) {
+  .landing-hero-title {
+    font-size: 28vw !important;
+  }
+}
 
 .landing-nav {
   display: flex;
