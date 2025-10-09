@@ -13,25 +13,32 @@
   --gradient: linear-gradient(135deg, var(--brand), var(--brand-2));
 }
 
-/* F5F5F0
-E6D8C3
-C2A68C
-2F5755 */
+
+/*
+2d0a46 header
+c13eb9 gradient1
+1d0b40 gradient2
+e5d9fc text
+ffffff white
+
+*/
 
 
 .theme-light {
-  --bg: #F5F5F0;
+  --bg: #fbfbf8;
   --panel: #ffffff;
   --panel-strong: #ffffff;
   --text: #0f1420;
   --text-dim: #5b667a;
-  --brand: #2F5755;
+  --brand: #2d0a46;
   --brand-2: #2F5755;
   --ok: #16a34a;
   --warn: #dc2626;
-  --border: #C2A68CAA;
+  --border: #2d0a4633;
   --shadow: 0 10px 25px rgba(15, 20, 32, 0.08);
-  --gradient: linear-gradient(135deg, var(--brand), var(--brand-2));
+  --gradient1: #c13eb9;
+  --gradient2: #8543a9;
+  --gradient: linear-gradient(135deg, var(--gradient1), var(--gradient2));
 }
 
 body {
@@ -52,7 +59,7 @@ code {
 
 @font-face {
   font-family: 'RubikDoodle';
-  src: url('./fonts/RubikDoodleShadow-Regular.ttf') format('truetype');
+  src: url('./fonts/Karantina-Bold.ttf') format('truetype');
 }
 
 h1 {
@@ -61,6 +68,8 @@ h1 {
   margin: 0;
   padding: 0;
   color: var(--text-primary);
+    letter-spacing: 0.01em !important;
+
   /* letter-spacing: 0.02em; */
 }
 
