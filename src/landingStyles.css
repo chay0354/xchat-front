@@ -36,7 +36,7 @@
 
 @media screen and (max-width: 768px) {
   .landing-hero-title {
-    font-size: 28vw !important;
+    font-size: 14vw !important;
   }
 }
 
@@ -564,7 +564,7 @@
 
   .landing-hero__title {
     /* font-size: clamp(2.2rem, 8vw, 3.5rem); */
-    font-size: 28vw !important;
+    font-size: 14vw !important;
     line-height: 1.1;
     margin-bottom: 20px;
     background: linear-gradient(135deg, var(--gradient1), var(--gradient2));
