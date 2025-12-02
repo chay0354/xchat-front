@@ -282,59 +282,61 @@ function Landing() {
                 </p>
               </div>
               <div className="robot-visuals">
-                {/* Top right Bubble */}
-                <div className="robot-bubble bubble-top-left">
-                  <div className="bubble-bg-top-left">
-                    <svg width="100%" height="100%" viewBox="0 0 263 140" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <g filter="url(#filter0_d_181_1922)">
-                        <path d="M195.051 16C208.305 16.0002 219.051 26.7453 219.051 40V57.2434C219.051 59.266 220.269 61.0895 222.138 61.8632L239.245 68.9455C243.806 70.8334 243.219 77.7669 238.506 79.2309C236.455 79.8678 234.483 80.55 232.788 81.2539C229.069 82.7985 224.803 85.2309 221.368 87.3452C219.916 88.2388 219.051 89.8313 219.051 91.5363V92C219.051 105.255 208.305 116 195.051 116H44C30.7452 116 20 105.255 20 92V40C20 26.7452 30.7452 16 44 16H195.051Z" fill="white" fillOpacity="0.9" shapeRendering="crispEdges" />
-                      </g>
-                      <defs>
-                        <filter id="filter0_d_181_1922" x="0" y="0" width="262.371" height="140" filterUnits="userSpaceOnUse" colorInterpolationFilters="sRGB">
-                          <feFlood floodOpacity="0" result="BackgroundImageFix" />
-                          <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha" />
-                          <feOffset dy="4" />
-                          <feGaussianBlur stdDeviation="10" />
-                          <feComposite in2="hardAlpha" operator="out" />
-                          <feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.05 0" />
-                          <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_181_1922" />
-                          <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_181_1922" result="shape" />
-                        </filter>
-                      </defs>
-                    </svg>
+                <div className="robot-image-wrapper">
+                  {/* Top right Bubble */}
+                  <div className="robot-bubble bubble-top-left">
+                    <div className="bubble-bg-top-left">
+                      <svg width="100%" height="100%" viewBox="0 0 263 140" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <g filter="url(#filter0_d_181_1922)">
+                          <path d="M195.051 16C208.305 16.0002 219.051 26.7453 219.051 40V57.2434C219.051 59.266 220.269 61.0895 222.138 61.8632L239.245 68.9455C243.806 70.8334 243.219 77.7669 238.506 79.2309C236.455 79.8678 234.483 80.55 232.788 81.2539C229.069 82.7985 224.803 85.2309 221.368 87.3452C219.916 88.2388 219.051 89.8313 219.051 91.5363V92C219.051 105.255 208.305 116 195.051 116H44C30.7452 116 20 105.255 20 92V40C20 26.7452 30.7452 16 44 16H195.051Z" fill="white" fillOpacity="0.9" shapeRendering="crispEdges" />
+                        </g>
+                        <defs>
+                          <filter id="filter0_d_181_1922" x="0" y="0" width="262.371" height="140" filterUnits="userSpaceOnUse" colorInterpolationFilters="sRGB">
+                            <feFlood floodOpacity="0" result="BackgroundImageFix" />
+                            <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha" />
+                            <feOffset dy="4" />
+                            <feGaussianBlur stdDeviation="10" />
+                            <feComposite in2="hardAlpha" operator="out" />
+                            <feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.05 0" />
+                            <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_181_1922" />
+                            <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_181_1922" result="shape" />
+                          </filter>
+                        </defs>
+                      </svg>
+                    </div>
+                    <div className="bubble-text">
+                      מחובר. מוכן. אוטומטי.<br />
+                      בוא נביא תוצאות!
+                    </div>
                   </div>
-                  <div className="bubble-text">
-                    מחובר. מוכן. אוטומטי.<br />
-                    בוא נביא תוצאות!
-                  </div>
-                </div>
 
-                <img src={botIcon} alt="Robot" className="robot-image" />
+                  <img src={botIcon} alt="Robot" className="robot-image" />
 
-                {/* Bottom Right Bubble */}
-                <div className="robot-bubble bubble-bottom-right">
-                  <div className="bubble-bg-bottom-right">
-                    <svg width="100%" height="100%" viewBox="0 0 231 165" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <g filter="url(#filter0_d_181_1686)">
-                        <path d="M54.6594 19.0711C56.5827 14.5773 63.4198 15.1751 64.9411 19.8203C65.5086 21.5532 66.1108 23.2117 66.7305 24.6548C67.8276 27.2097 69.3899 30.0408 70.9516 32.6362C71.8358 34.1056 73.4382 34.98 75.1531 34.98H187C200.255 34.9802 211 45.7253 211 58.98V116.205C211 129.459 200.255 140.204 187 140.205H44C30.7452 140.205 20 129.459 20 116.205V58.98C20 45.7252 30.7452 34.98 44 34.98H44.5518C46.5529 34.98 48.3612 33.7869 49.1485 31.9473L54.6594 19.0711Z" fill="white" fillOpacity="0.9" shapeRendering="crispEdges" />
-                      </g>
-                      <defs>
-                        <filter id="filter0_d_181_1686" x="0" y="0" width="231" height="164.205" filterUnits="userSpaceOnUse" colorInterpolationFilters="sRGB">
-                          <feFlood floodOpacity="0" result="BackgroundImageFix" />
-                          <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha" />
-                          <feOffset dy="4" />
-                          <feGaussianBlur stdDeviation="10" />
-                          <feComposite in2="hardAlpha" operator="out" />
-                          <feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.05 0" />
-                          <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_181_1686" />
-                          <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_181_1686" result="shape" />
-                        </filter>
-                      </defs>
-                    </svg>
-                  </div>
-                  <div className="bubble-text">
-                    תן לי 40 שניות…<br />
-                    ואני כבר מתחיל לעבוד בשבילך
+                  {/* Bottom Right Bubble */}
+                  <div className="robot-bubble bubble-bottom-right">
+                    <div className="bubble-bg-bottom-right">
+                      <svg width="100%" height="100%" viewBox="0 0 231 165" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <g filter="url(#filter0_d_181_1686)">
+                          <path d="M54.6594 19.0711C56.5827 14.5773 63.4198 15.1751 64.9411 19.8203C65.5086 21.5532 66.1108 23.2117 66.7305 24.6548C67.8276 27.2097 69.3899 30.0408 70.9516 32.6362C71.8358 34.1056 73.4382 34.98 75.1531 34.98H187C200.255 34.9802 211 45.7253 211 58.98V116.205C211 129.459 200.255 140.204 187 140.205H44C30.7452 140.205 20 129.459 20 116.205V58.98C20 45.7252 30.7452 34.98 44 34.98H44.5518C46.5529 34.98 48.3612 33.7869 49.1485 31.9473L54.6594 19.0711Z" fill="white" fillOpacity="0.9" shapeRendering="crispEdges" />
+                        </g>
+                        <defs>
+                          <filter id="filter0_d_181_1686" x="0" y="0" width="231" height="164.205" filterUnits="userSpaceOnUse" colorInterpolationFilters="sRGB">
+                            <feFlood floodOpacity="0" result="BackgroundImageFix" />
+                            <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha" />
+                            <feOffset dy="4" />
+                            <feGaussianBlur stdDeviation="10" />
+                            <feComposite in2="hardAlpha" operator="out" />
+                            <feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.05 0" />
+                            <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_181_1686" />
+                            <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_181_1686" result="shape" />
+                          </filter>
+                        </defs>
+                      </svg>
+                    </div>
+                    <div className="bubble-text">
+                      תן לי 40 שניות…<br />
+                      ואני כבר מתחיל לעבוד בשבילך
+                    </div>
                   </div>
                 </div>
               </div>
@@ -345,58 +347,100 @@ function Landing() {
 
           {/* Features Section */}
           <section className="landing-features">
-            <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 24px' }}>
-              <h2 className="landing-section__title">הכח של Flowchat</h2>
-              <p className="landing-section__subtitle">
-                הדרך המהירה ביותר ליצור צ'אט-בוטים אינטליגנטיים ומודעים להקשר
-              </p>
+            <div style={{ maxWidth: '1440px', margin: '0 auto', padding: '0 24px' }}>
 
               <div className="features-grid">
                 <div className="feature-card">
-                  <div className="feature-icon">⚡</div>
+                  <div className="feature-icon">
+                    <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <circle cx="20" cy="20" r="16.6667" stroke="white" strokeWidth="2" />
+                      <path d="M14.1667 20.8333L17.5 24.1667L25.8334 15.8333" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </div>
                   <h3 className="feature-title">התקנה במהירות האור</h3>
-                  <p className="feature-desc">
-                    מהזנת כתובת - לצ׳אט עובד תוך פחות מדקה. אין צורך בקידוד או בהגדרות מסובכות.
+                  <p className="feature-description">
+                    מהזנת כתובת - לצ׳אט עובד תוך פחות מדקה.
+                    <br />
+                    אין צורך בקידוד או בהגדרות מסובכות.
                   </p>
                 </div>
 
                 <div className="feature-card">
-                  <div className="feature-icon">🧠</div>
+                  <div className="feature-icon">
+                    <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <circle cx="20" cy="20" r="16.6667" stroke="white" strokeWidth="2" />
+                      <path d="M14.1667 20.8333L17.5 24.1667L25.8334 15.8333" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </div>
                   <h3 className="feature-title">תוכן מונע AI</h3>
-                  <p className="feature-desc">
-                    מודלים מתקדמים של שפה מבינים הקשר ומספקים תגובות מדויקות ומועילות בהתבסס על התוכן שלך.
+                  <p className="feature-description">
+                    מודלים מתקדמים של שפה מבינים הקשר
+                    <br />
+                    ומספקים תגובות מדויקות ומועילות בהתבסס על
+                    <br />
+                    התוכן שלך.
                   </p>
                 </div>
 
                 <div className="feature-card">
-                  <div className="feature-icon">🔗</div>
+                  <div className="feature-icon">
+                    <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <circle cx="20" cy="20" r="16.6667" stroke="white" strokeWidth="2" />
+                      <path d="M14.1667 20.8333L17.5 24.1667L25.8334 15.8333" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </div>
                   <h3 className="feature-title">מתחבר להכל</h3>
-                  <p className="feature-desc">
-                    websites, WhatsApp, Slack, mobile apps, CRM systems. One API, infinite possibilities.
+                  <p className="feature-description">
+                    websites, WhatsApp, Slack, mobile apps,
+                    <br />
+                    CRM systems. One API, infinite
+                    <br />
+                    possibilities.
                   </p>
                 </div>
 
                 <div className="feature-card">
-                  <div className="feature-icon">🎯</div>
+                  <div className="feature-icon">
+                    <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <circle cx="20" cy="20" r="16.6667" stroke="white" strokeWidth="2" />
+                      <path d="M14.1667 20.8333L17.5 24.1667L25.8334 15.8333" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </div>
                   <h3 className="feature-title">הקשר מודע</h3>
-                  <p className="feature-desc">
-                    הבוט עונה על סמך תוכן האתר שלך, מה שמפחית ״הזיות״ ומבטיח עקביות במותג.
+                  <p className="feature-description">
+                    הבוט עונה על סמך תוכן האתר שלך, מה
+                    <br />
+                    שמפחית ״הזיות״ ומבטיח עקביות במותג.
                   </p>
                 </div>
 
                 <div className="feature-card">
-                  <div className="feature-icon">📈</div>
+                  <div className="feature-icon">
+                    <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <circle cx="20" cy="20" r="16.6667" stroke="white" strokeWidth="2" />
+                      <path d="M14.1667 20.8333L17.5 24.1667L25.8334 15.8333" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </div>
                   <h3 className="feature-title">תשתית ניתנת להרחבה</h3>
-                  <p className="feature-desc">
-                    נהל אלפי שאילתות בדקה עם התשתית החזקה שלנו, מבוססת הענן, שנבנתה להתרחבות.
+                  <p className="feature-description">
+                    נהל אלפי שאילתות בדקה עם התשתית החזקה
+                    <br />
+                    שלנו, מבוססת הענן, שנבנתה להתרחבות.
                   </p>
                 </div>
 
                 <div className="feature-card">
-                  <div className="feature-icon">🛡️</div>
+                  <div className="feature-icon">
+                    <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <circle cx="20" cy="20" r="16.6667" stroke="white" strokeWidth="2" />
+                      <path d="M14.1667 20.8333L17.5 24.1667L25.8334 15.8333" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </div>
                   <h3 className="feature-title">בטוח ואמין</h3>
-                  <p className="feature-desc">
-                    אבטחת מידע ברמה גבוהה עם אימות מבוסס טוקן והבטחת זמינות של 99.9%.
+                  <p className="feature-description">
+                    אבטחת מידע ברמה גבוהה עם אימות מבוסס
+                    <br />
+                    טוקן והבטחת זמינות של 99.9%.
                   </p>
                 </div>
               </div>
