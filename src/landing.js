@@ -4,8 +4,10 @@ import { useNavigate } from 'react-router-dom';
 // import styles from './App.module.css';
 import Cookies from 'js-cookie';
 import logoLight from './logo-light.png';
+import clientsImage from './clients.png';
 import './landingStyles.css';
 import { FaWhatsapp } from "react-icons/fa";
+import botIcon from './bot icon.png';
 
 const designTokens = `
 * { box-sizing: border-box; }
@@ -118,6 +120,8 @@ function Landing() {
     <div className={`landing-root ${theme === 'dark' ? 'theme-dark' : 'theme-light'} bg`}>
       <style>{designTokens}</style>
       <div className="landing-bg" />
+      <div className="landing-ellipse-1" />
+      <div className="landing-ellipse-2" />
 
       {/* Header */}
       <header className="landing-header">
@@ -140,8 +144,9 @@ function Landing() {
               </>
               :
               <>
-                <button className="btn" onClick={handleLogin}>התחבר</button>
-                <button className="btn btn--primary" onClick={handleGetStarted}>התחל עכשיו</button>
+                <button className="btn btn--primary btn-signup" onClick={handleGetStarted}>התחל עכשיו</button>
+
+                <button className="btn btn-login" onClick={handleLogin}>התחברות</button>
               </>
             }
 
@@ -149,7 +154,7 @@ function Landing() {
 
           </div>
 
-          <div className="landing-logo"><img src={logoLight} alt="Logo" style={{ height: '38px' }} /></div>
+          <div className="landing-logo"><img src={logoLight} alt="Logo" style={{ height: '3rem' }} /></div>
 
 
 
@@ -184,10 +189,10 @@ function Landing() {
               </>
             ) : (
               <>
-                <button className="btn" onClick={() => { handleLogin(); closeMobileMenu(); }}>
-                  התחבר
+                <button className="btn btn-login" onClick={() => { handleLogin(); closeMobileMenu(); }}>
+                  התחברות
                 </button>
-                <button className="btn btn--primary" onClick={() => { handleGetStarted(); closeMobileMenu(); }}>
+                <button className="btn btn--primary btn-signup" onClick={() => { handleGetStarted(); closeMobileMenu(); }}>
                   התחל עכשיו
                 </button>
               </>
@@ -210,49 +215,33 @@ function Landing() {
           <section className="landing-hero">
             {/* <h1 className="landing-hero__title rubik-font"> */}
             <h1 className="landing-hero-title">
-              {isLoggedIn ? `ברוך השב, ${fullname}!` : 'צור בוט תוך 40 שניות!'}
+              צור בוט תוך 40 שניות,
+              <br />
+              חסוך שעות עבודה וייצר יותר
+              <br />
+              שיחות נכנסות
             </h1>
-            <h3>
-              {isLoggedIn ?
-                'נהל את הבוטים שלך או צור חדשים בלוח המחוונים הפשוט שלנו.'
-                :
-                'אין צורך בכרטיס אשראי • סריקה אוטומטית של האתר שלך ובניית בוט תוך פחות מדקה'
-              }
-            </h3>
-
+            <h2 className="landing-hero-subtitle">
+              הדרך הכי פשוטה להפוך שיחות למכירות.
+              <br />
+              חברו את המערכת, הגדירו אוטומציות — ותנו ל-FlowChat לעבוד בשבילכם 24/7.</h2>
             <br />
 
-            {!isLoggedIn &&
+            <div className="landing-hero__cta">
               <>
-                <h2 style={{ color: 'var(--gradient2)', fontSize: '34px', fontWeight: 'bold' }}>הפחת הוצאות, הגדל החזר על השקעה.</h2>
-
-                <div className="benefits-container">
-                  <ul>
-
-                    <li>
-                      <b>חוסך בהוצאות: </b>
-                      עובד 24/7. עונה ללקוחות ומסנן פניות לא רלוונטיות.
-                    </li>
-
-                    <li>
-                      <b>שמירה על לידים חמים: </b>
-                      אין יותר "פספסנו את הפניה" - הצ’אטבוט מגיב מיד לכל ליד שמגיע, גם באמצע הלילה, ודואג להשאיר את הלקוח מעוניין ומחובר אליך.
-                    </li>
-
-                    {/* <li>
-                  <b>חוויית שירות אחידה ומקצועית: </b>
-                  הבוט שלך מדבר בשפה של העסק – תמיד מנומס, תמיד עקבי, ותמיד יודע מה להגיד. זה משדר אמינות ובונה אמון מול לקוחות חדשים.
-                </li> */}
-
-                    <li>
-                      <b>פחות שחיקת עובדים: </b>
-                      תן לעובדים שלך להתמקד בעבודה האמיתית שלהם, בזמן שהבוט עושה את כל העבודה השחורה: מענה ראשוני, שאלות נפוצות, איסוף פרטים ועוד.
-                    </li>
-                  </ul>
-
-                </div>
+                <button className="btn-start-now" onClick={handleGetStarted}>
+                  התחל עכשיו
+                </button>
+                <button className="btn-how-it-works" onClick={() => document.getElementById('how-it-works').scrollIntoView({ behavior: 'smooth' })}>
+                  צפה איך זה עובד
+                </button>
               </>
-            }
+            </div>
+
+            <h2 className="landing-hero-our-clients">
+              בין לקוחותינו
+            </h2>
+            <img src={clientsImage} alt="Clients" style={{ maxWidth: '100%', marginTop: '24px' }} />
 
             {/* Statistics */}
             {/* {!isLoggedIn && (
@@ -276,32 +265,82 @@ function Landing() {
               </div>
             )} */}
 
-            <div className="landing-hero__cta">
-              {isLoggedIn ? (
-                <>
-                  <button className="btn btn--primary" onClick={() => setActiveSection('bots')}>
-                    ניהול הבוטים שלך
-                  </button>
-                  <button className="btn" onClick={() => navigate('/fullchat')}>
-                    לעבור לצ'אט
-                  </button>
-                </>
-              ) : (
-                <>
-                  <button className="btn btn--primary" onClick={handleGetStarted}>
-                    התחל עכשיו
-                  </button>
-                  <button className="btn" onClick={() => document.getElementById('how-it-works').scrollIntoView({ behavior: 'smooth' })}>
-                    איך זה עובד
-                  </button>
-                </>
-              )}
-            </div>
           </section>
 
 
-          <section className="landing-footer">
-            <p>שירות לקוחות (טלפון / וואצאפ): 054-5779917</p>
+
+
+
+          <section className="landing-robot">
+            <div className="robot-container">
+              <div className="robot-text-content">
+                <h2 className="robot-title">יותר שיחות. יותר מכירות.<br />אפס עבודה ידנית.</h2>
+                <p className="robot-description">
+                  FlowChat הופכת את כל תהליך פתיחת השיחה למכירה - לאוטומטי לחלוטין.<br />
+                  המערכת מאתרת לידים, פותחת שיחות, עוקבת אחרי תגובות ודוחפת את הלקוח עד לסגירה.<br />
+                  אתם נשארים רק עם החלק הכיף: לסגור עסקאות.
+                </p>
+              </div>
+              <div className="robot-visuals">
+                {/* Top right Bubble */}
+                <div className="robot-bubble bubble-top-left">
+                  <div className="bubble-bg-top-left">
+                    <svg width="100%" height="100%" viewBox="0 0 263 140" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <g filter="url(#filter0_d_181_1922)">
+                        <path d="M195.051 16C208.305 16.0002 219.051 26.7453 219.051 40V57.2434C219.051 59.266 220.269 61.0895 222.138 61.8632L239.245 68.9455C243.806 70.8334 243.219 77.7669 238.506 79.2309C236.455 79.8678 234.483 80.55 232.788 81.2539C229.069 82.7985 224.803 85.2309 221.368 87.3452C219.916 88.2388 219.051 89.8313 219.051 91.5363V92C219.051 105.255 208.305 116 195.051 116H44C30.7452 116 20 105.255 20 92V40C20 26.7452 30.7452 16 44 16H195.051Z" fill="white" fillOpacity="0.9" shapeRendering="crispEdges" />
+                      </g>
+                      <defs>
+                        <filter id="filter0_d_181_1922" x="0" y="0" width="262.371" height="140" filterUnits="userSpaceOnUse" colorInterpolationFilters="sRGB">
+                          <feFlood floodOpacity="0" result="BackgroundImageFix" />
+                          <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha" />
+                          <feOffset dy="4" />
+                          <feGaussianBlur stdDeviation="10" />
+                          <feComposite in2="hardAlpha" operator="out" />
+                          <feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.05 0" />
+                          <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_181_1922" />
+                          <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_181_1922" result="shape" />
+                        </filter>
+                      </defs>
+                    </svg>
+                  </div>
+                  <div className="bubble-text">
+                    מחובר. מוכן. אוטומטי.<br />
+                    בוא נביא תוצאות!
+                  </div>
+                </div>
+
+                <img src={botIcon} alt="Robot" className="robot-image" />
+
+                {/* Bottom Right Bubble */}
+                <div className="robot-bubble bubble-bottom-right">
+                  <div className="bubble-bg-bottom-right">
+                    <svg width="100%" height="100%" viewBox="0 0 231 165" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <g filter="url(#filter0_d_181_1686)">
+                        <path d="M54.6594 19.0711C56.5827 14.5773 63.4198 15.1751 64.9411 19.8203C65.5086 21.5532 66.1108 23.2117 66.7305 24.6548C67.8276 27.2097 69.3899 30.0408 70.9516 32.6362C71.8358 34.1056 73.4382 34.98 75.1531 34.98H187C200.255 34.9802 211 45.7253 211 58.98V116.205C211 129.459 200.255 140.204 187 140.205H44C30.7452 140.205 20 129.459 20 116.205V58.98C20 45.7252 30.7452 34.98 44 34.98H44.5518C46.5529 34.98 48.3612 33.7869 49.1485 31.9473L54.6594 19.0711Z" fill="white" fillOpacity="0.9" shapeRendering="crispEdges" />
+                      </g>
+                      <defs>
+                        <filter id="filter0_d_181_1686" x="0" y="0" width="231" height="164.205" filterUnits="userSpaceOnUse" colorInterpolationFilters="sRGB">
+                          <feFlood floodOpacity="0" result="BackgroundImageFix" />
+                          <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha" />
+                          <feOffset dy="4" />
+                          <feGaussianBlur stdDeviation="10" />
+                          <feComposite in2="hardAlpha" operator="out" />
+                          <feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.05 0" />
+                          <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_181_1686" />
+                          <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_181_1686" result="shape" />
+                        </filter>
+                      </defs>
+                    </svg>
+                  </div>
+                  <div className="bubble-text">
+                    תן לי 40 שניות…<br />
+                    ואני כבר מתחיל לעבוד בשבילך
+                  </div>
+                </div>
+              </div>
+
+
+            </div>
           </section>
 
           {/* Features Section */}
