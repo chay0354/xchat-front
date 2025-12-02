@@ -56,12 +56,14 @@ code {
 
 @font-face {
   font-family: 'RubikDoodle';
-  src: url('./fonts/Karantina-Bold.ttf') format('truetype');
+  src: url('./fonts/new/TelAviv-BrutalistRegular.ttf') format('truetype');
+  /* src: url('./fonts/Karantina-Bold.ttf') format('truetype'); */
 }
 
 @font-face {
   font-family: 'Karantina';
-  src: url('./fonts/Karantina-Bold.ttf') format('truetype');
+  src: url('./fonts/new/TelAviv-BrutalistRegular.ttf') format('truetype');
+  /* src: url('./fonts/Karantina-Bold.ttf') format('truetype'); */
 }
 
 h1 {
@@ -69,7 +71,7 @@ h1 {
   font-size: 4.5rem;
   margin: 0;
   padding: 0;
-  color: var(--text-primary);
+  color: #000000 !important;
   letter-spacing: 0.01em !important;
 }
 

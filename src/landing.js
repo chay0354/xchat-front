@@ -210,7 +210,7 @@ function Landing() {
           <section className="landing-hero">
             {/* <h1 className="landing-hero__title rubik-font"> */}
             <h1 className="landing-hero-title">
-              {isLoggedIn ? `ברוך השב, ${fullname}!` : 'צור בוט תוך 40 שניות!'}
+              {isLoggedIn ? `ברוך השב, ${fullname}!` : 'צור בוט תוך 40 שניות, חסוך שעות עבודה וייצר יותר שיחות נכנסות'}
             </h1>
             <h3>
               {isLoggedIn ?

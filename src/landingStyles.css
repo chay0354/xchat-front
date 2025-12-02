@@ -24,12 +24,14 @@
 /* Header */
 .landing-hero-title {
   font-family: 'Karantina', sans-serif;
-  font-size: 7rem;
+  font-size: 5rem;
   background: var(--gradient);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
   line-height: 1;
+  font-weight: 100;
+  border-spacing: -2% !important;
 }
 
 @media screen and (max-width: 768px) {
