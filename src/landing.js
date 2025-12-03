@@ -4,8 +4,11 @@ import { useNavigate } from 'react-router-dom';
 // import styles from './App.module.css';
 import Cookies from 'js-cookie';
 import logoLight from './logo-light.png';
+import clientsImage from './clients.png';
 import './landingStyles.css';
 import { FaWhatsapp } from "react-icons/fa";
+import botIcon from './bot icon.png';
+import group5Image from './Group 5.png';
 
 const designTokens = `
 * { box-sizing: border-box; }
@@ -118,6 +121,8 @@ function Landing() {
     <div className={`landing-root ${theme === 'dark' ? 'theme-dark' : 'theme-light'} bg`}>
       <style>{designTokens}</style>
       <div className="landing-bg" />
+      <div className="landing-ellipse-1" />
+      <div className="landing-ellipse-2" />
 
       {/* Header */}
       <header className="landing-header">
@@ -140,8 +145,9 @@ function Landing() {
               </>
               :
               <>
-                <button className="btn" onClick={handleLogin}>התחבר</button>
-                <button className="btn btn--primary" onClick={handleGetStarted}>התחל עכשיו</button>
+                <button className="btn btn--primary btn-signup" onClick={handleGetStarted}>התחל עכשיו</button>
+
+                <button className="btn btn-login" onClick={handleLogin}>התחברות</button>
               </>
             }
 
@@ -149,7 +155,7 @@ function Landing() {
 
           </div>
 
-          <div className="landing-logo"><img src={logoLight} alt="Logo" style={{ height: '38px' }} /></div>
+          <div className="landing-logo"><img src={logoLight} alt="Logo" style={{ height: '3rem' }} /></div>
 
 
 
@@ -184,10 +190,10 @@ function Landing() {
               </>
             ) : (
               <>
-                <button className="btn" onClick={() => { handleLogin(); closeMobileMenu(); }}>
-                  התחבר
+                <button className="btn btn-login" onClick={() => { handleLogin(); closeMobileMenu(); }}>
+                  התחברות
                 </button>
-                <button className="btn btn--primary" onClick={() => { handleGetStarted(); closeMobileMenu(); }}>
+                <button className="btn btn--primary btn-signup" onClick={() => { handleGetStarted(); closeMobileMenu(); }}>
                   התחל עכשיו
                 </button>
               </>
@@ -210,49 +216,33 @@ function Landing() {
           <section className="landing-hero">
             {/* <h1 className="landing-hero__title rubik-font"> */}
             <h1 className="landing-hero-title">
-              {isLoggedIn ? `ברוך השב, ${fullname}!` : 'צור בוט תוך 40 שניות, חסוך שעות עבודה וייצר יותר שיחות נכנסות'}
+              צור בוט תוך 40 שניות,
+              <br />
+              חסוך שעות עבודה וייצר יותר
+              <br />
+              שיחות נכנסות
             </h1>
-            <h3>
-              {isLoggedIn ?
-                'נהל את הבוטים שלך או צור חדשים בלוח המחוונים הפשוט שלנו.'
-                :
-                'אין צורך בכרטיס אשראי • סריקה אוטומטית של האתר שלך ובניית בוט תוך פחות מדקה'
-              }
-            </h3>
-
+            <h2 className="landing-hero-subtitle">
+              הדרך הכי פשוטה להפוך שיחות למכירות.
+              <br />
+              חברו את המערכת, הגדירו אוטומציות — ותנו ל-FlowChat לעבוד בשבילכם 24/7.</h2>
             <br />
 
-            {!isLoggedIn &&
+            <div className="landing-hero__cta">
               <>
-                <h2 style={{ color: 'var(--gradient2)', fontSize: '34px', fontWeight: 'bold' }}>הפחת הוצאות, הגדל החזר על השקעה.</h2>
-
-                <div className="benefits-container">
-                  <ul>
-
-                    <li>
-                      <b>חוסך בהוצאות: </b>
-                      עובד 24/7. עונה ללקוחות ומסנן פניות לא רלוונטיות.
-                    </li>
-
-                    <li>
-                      <b>שמירה על לידים חמים: </b>
-                      אין יותר "פספסנו את הפניה" - הצ’אטבוט מגיב מיד לכל ליד שמגיע, גם באמצע הלילה, ודואג להשאיר את הלקוח מעוניין ומחובר אליך.
-                    </li>
-
-                    {/* <li>
-                  <b>חוויית שירות אחידה ומקצועית: </b>
-                  הבוט שלך מדבר בשפה של העסק – תמיד מנומס, תמיד עקבי, ותמיד יודע מה להגיד. זה משדר אמינות ובונה אמון מול לקוחות חדשים.
-                </li> */}
-
-                    <li>
-                      <b>פחות שחיקת עובדים: </b>
-                      תן לעובדים שלך להתמקד בעבודה האמיתית שלהם, בזמן שהבוט עושה את כל העבודה השחורה: מענה ראשוני, שאלות נפוצות, איסוף פרטים ועוד.
-                    </li>
-                  </ul>
-
-                </div>
+                <button className="btn-start-now" onClick={handleGetStarted}>
+                  התחל עכשיו
+                </button>
+                <button className="btn-how-it-works" onClick={() => document.getElementById('how-it-works').scrollIntoView({ behavior: 'smooth' })}>
+                  צפה איך זה עובד
+                </button>
               </>
-            }
+            </div>
+
+            <h2 className="landing-hero-our-clients">
+              בין לקוחותינו
+            </h2>
+            <img src={clientsImage} alt="Clients" style={{ maxWidth: '100%', marginTop: '24px' }} />
 
             {/* Statistics */}
             {/* {!isLoggedIn && (
@@ -276,357 +266,290 @@ function Landing() {
               </div>
             )} */}
 
-            <div className="landing-hero__cta">
-              {isLoggedIn ? (
-                <>
-                  <button className="btn btn--primary" onClick={() => setActiveSection('bots')}>
-                    ניהול הבוטים שלך
-                  </button>
-                  <button className="btn" onClick={() => navigate('/fullchat')}>
-                    לעבור לצ'אט
-                  </button>
-                </>
-              ) : (
-                <>
-                  <button className="btn btn--primary" onClick={handleGetStarted}>
-                    התחל עכשיו
-                  </button>
-                  <button className="btn" onClick={() => document.getElementById('how-it-works').scrollIntoView({ behavior: 'smooth' })}>
-                    איך זה עובד
-                  </button>
-                </>
-              )}
-            </div>
           </section>
 
 
-          <section className="landing-footer">
-            <p>שירות לקוחות (טלפון / וואצאפ): 054-5779917</p>
+
+
+
+          <section className="landing-robot">
+            <div className="robot-container">
+              <div className="robot-text-content">
+                <h2 className="robot-title">יותר שיחות. יותר מכירות.<br />אפס עבודה ידנית.</h2>
+                <p className="robot-description">
+                  FlowChat הופכת את כל תהליך פתיחת השיחה למכירה - לאוטומטי לחלוטין.<br />
+                  המערכת מאתרת לידים, פותחת שיחות, עוקבת אחרי תגובות ודוחפת את הלקוח עד לסגירה.<br />
+                  אתם נשארים רק עם החלק הכיף: לסגור עסקאות.
+                </p>
+              </div>
+              <div className="robot-visuals">
+                <div className="robot-image-wrapper">
+                  {/* Top right Bubble */}
+                  <div className="robot-bubble bubble-top-left">
+                    <div className="bubble-bg-top-left">
+                      <svg width="100%" height="100%" viewBox="0 0 263 140" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <g filter="url(#filter0_d_181_1922)">
+                          <path d="M195.051 16C208.305 16.0002 219.051 26.7453 219.051 40V57.2434C219.051 59.266 220.269 61.0895 222.138 61.8632L239.245 68.9455C243.806 70.8334 243.219 77.7669 238.506 79.2309C236.455 79.8678 234.483 80.55 232.788 81.2539C229.069 82.7985 224.803 85.2309 221.368 87.3452C219.916 88.2388 219.051 89.8313 219.051 91.5363V92C219.051 105.255 208.305 116 195.051 116H44C30.7452 116 20 105.255 20 92V40C20 26.7452 30.7452 16 44 16H195.051Z" fill="white" fillOpacity="0.9" shapeRendering="crispEdges" />
+                        </g>
+                        <defs>
+                          <filter id="filter0_d_181_1922" x="0" y="0" width="262.371" height="140" filterUnits="userSpaceOnUse" colorInterpolationFilters="sRGB">
+                            <feFlood floodOpacity="0" result="BackgroundImageFix" />
+                            <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha" />
+                            <feOffset dy="4" />
+                            <feGaussianBlur stdDeviation="10" />
+                            <feComposite in2="hardAlpha" operator="out" />
+                            <feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.05 0" />
+                            <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_181_1922" />
+                            <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_181_1922" result="shape" />
+                          </filter>
+                        </defs>
+                      </svg>
+                    </div>
+                    <div className="bubble-text">
+                      מחובר. מוכן. אוטומטי.<br />
+                      בוא נביא תוצאות!
+                    </div>
+                  </div>
+
+                  <img src={botIcon} alt="Robot" className="robot-image" />
+
+                  {/* Bottom Right Bubble */}
+                  <div className="robot-bubble bubble-bottom-right">
+                    <div className="bubble-bg-bottom-right">
+                      <svg width="100%" height="100%" viewBox="0 0 231 165" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <g filter="url(#filter0_d_181_1686)">
+                          <path d="M54.6594 19.0711C56.5827 14.5773 63.4198 15.1751 64.9411 19.8203C65.5086 21.5532 66.1108 23.2117 66.7305 24.6548C67.8276 27.2097 69.3899 30.0408 70.9516 32.6362C71.8358 34.1056 73.4382 34.98 75.1531 34.98H187C200.255 34.9802 211 45.7253 211 58.98V116.205C211 129.459 200.255 140.204 187 140.205H44C30.7452 140.205 20 129.459 20 116.205V58.98C20 45.7252 30.7452 34.98 44 34.98H44.5518C46.5529 34.98 48.3612 33.7869 49.1485 31.9473L54.6594 19.0711Z" fill="white" fillOpacity="0.9" shapeRendering="crispEdges" />
+                        </g>
+                        <defs>
+                          <filter id="filter0_d_181_1686" x="0" y="0" width="231" height="164.205" filterUnits="userSpaceOnUse" colorInterpolationFilters="sRGB">
+                            <feFlood floodOpacity="0" result="BackgroundImageFix" />
+                            <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha" />
+                            <feOffset dy="4" />
+                            <feGaussianBlur stdDeviation="10" />
+                            <feComposite in2="hardAlpha" operator="out" />
+                            <feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.05 0" />
+                            <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_181_1686" />
+                            <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_181_1686" result="shape" />
+                          </filter>
+                        </defs>
+                      </svg>
+                    </div>
+                    <div className="bubble-text">
+                      תן לי 40 שניות…<br />
+                      ואני כבר מתחיל לעבוד בשבילך
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+
+            </div>
           </section>
 
           {/* Features Section */}
           <section className="landing-features">
-            <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 24px' }}>
-              <h2 className="landing-section__title">הכח של Flowchat</h2>
-              <p className="landing-section__subtitle">
-                הדרך המהירה ביותר ליצור צ'אט-בוטים אינטליגנטיים ומודעים להקשר
-              </p>
+            <div style={{ maxWidth: '1440px', margin: '0 auto', padding: '0 24px' }}>
 
               <div className="features-grid">
                 <div className="feature-card">
-                  <div className="feature-icon">⚡</div>
+                  <div className="feature-icon">
+                    <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <circle cx="20" cy="20" r="16.6667" stroke="white" strokeWidth="2" />
+                      <path d="M14.1667 20.8333L17.5 24.1667L25.8334 15.8333" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </div>
                   <h3 className="feature-title">התקנה במהירות האור</h3>
-                  <p className="feature-desc">
-                    מהזנת כתובת - לצ׳אט עובד תוך פחות מדקה. אין צורך בקידוד או בהגדרות מסובכות.
+                  <p className="feature-description">
+                    מהזנת כתובת - לצ׳אט עובד תוך פחות מדקה.
+                    <br />
+                    אין צורך בקידוד או בהגדרות מסובכות.
                   </p>
                 </div>
 
                 <div className="feature-card">
-                  <div className="feature-icon">🧠</div>
+                  <div className="feature-icon">
+                    <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <circle cx="20" cy="20" r="16.6667" stroke="white" strokeWidth="2" />
+                      <path d="M14.1667 20.8333L17.5 24.1667L25.8334 15.8333" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </div>
                   <h3 className="feature-title">תוכן מונע AI</h3>
-                  <p className="feature-desc">
-                    מודלים מתקדמים של שפה מבינים הקשר ומספקים תגובות מדויקות ומועילות בהתבסס על התוכן שלך.
+                  <p className="feature-description">
+                    מודלים מתקדמים של שפה מבינים הקשר
+                    <br />
+                    ומספקים תגובות מדויקות ומועילות בהתבסס על
+                    <br />
+                    התוכן שלך.
                   </p>
                 </div>
 
                 <div className="feature-card">
-                  <div className="feature-icon">🔗</div>
+                  <div className="feature-icon">
+                    <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <circle cx="20" cy="20" r="16.6667" stroke="white" strokeWidth="2" />
+                      <path d="M14.1667 20.8333L17.5 24.1667L25.8334 15.8333" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </div>
                   <h3 className="feature-title">מתחבר להכל</h3>
-                  <p className="feature-desc">
-                    websites, WhatsApp, Slack, mobile apps, CRM systems. One API, infinite possibilities.
+                  <p className="feature-description">
+                    websites, WhatsApp, Slack, mobile apps,
+                    <br />
+                    CRM systems. One API, infinite
+                    <br />
+                    possibilities.
                   </p>
                 </div>
 
                 <div className="feature-card">
-                  <div className="feature-icon">🎯</div>
+                  <div className="feature-icon">
+                    <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <circle cx="20" cy="20" r="16.6667" stroke="white" strokeWidth="2" />
+                      <path d="M14.1667 20.8333L17.5 24.1667L25.8334 15.8333" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </div>
                   <h3 className="feature-title">הקשר מודע</h3>
-                  <p className="feature-desc">
-                    הבוט עונה על סמך תוכן האתר שלך, מה שמפחית ״הזיות״ ומבטיח עקביות במותג.
+                  <p className="feature-description">
+                    הבוט עונה על סמך תוכן האתר שלך, מה
+                    <br />
+                    שמפחית ״הזיות״ ומבטיח עקביות במותג.
                   </p>
                 </div>
 
                 <div className="feature-card">
-                  <div className="feature-icon">📈</div>
+                  <div className="feature-icon">
+                    <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <circle cx="20" cy="20" r="16.6667" stroke="white" strokeWidth="2" />
+                      <path d="M14.1667 20.8333L17.5 24.1667L25.8334 15.8333" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </div>
                   <h3 className="feature-title">תשתית ניתנת להרחבה</h3>
-                  <p className="feature-desc">
-                    נהל אלפי שאילתות בדקה עם התשתית החזקה שלנו, מבוססת הענן, שנבנתה להתרחבות.
+                  <p className="feature-description">
+                    נהל אלפי שאילתות בדקה עם התשתית החזקה
+                    <br />
+                    שלנו, מבוססת הענן, שנבנתה להתרחבות.
                   </p>
                 </div>
 
                 <div className="feature-card">
-                  <div className="feature-icon">🛡️</div>
+                  <div className="feature-icon">
+                    <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <circle cx="20" cy="20" r="16.6667" stroke="white" strokeWidth="2" />
+                      <path d="M14.1667 20.8333L17.5 24.1667L25.8334 15.8333" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </div>
                   <h3 className="feature-title">בטוח ואמין</h3>
-                  <p className="feature-desc">
-                    אבטחת מידע ברמה גבוהה עם אימות מבוסס טוקן והבטחת זמינות של 99.9%.
+                  <p className="feature-description">
+                    אבטחת מידע ברמה גבוהה עם אימות מבוסס
+                    <br />
+                    טוקן והבטחת זמינות של 99.9%.
                   </p>
                 </div>
               </div>
             </div>
           </section>
 
-          {/* Chat Examples Section */}
-          <section style={{ background: 'var(--panel)', padding: '100px 0', margin: '100px 0' }}>
-            <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 24px' }}>
-              <h2 className="landing-section__title">ככה זה נראה</h2>
-              <p className="landing-section__subtitle">
-                כך נראה הצ׳אט אחרי שהוטמע באתרי לקוחות
-              </p>
 
-              <div className="chat-examples-grid">
-                {/* E-commerce Chat Example */}
-                <div style={{
-                  background: 'var(--panel-strong)',
-                  borderRadius: '16px',
-                  border: '1px solid var(--border)',
-                  overflow: 'hidden'
-                }}>
-                  <div style={{
-                    background: 'var(--gradient)',
-                    padding: '16px 20px',
-                    color: 'white',
-                    fontWeight: '600',
-                    fontSize: '14px'
-                  }}>
-                    יורו-קום מחשבים
+          {/* How it works Section */}
+
+          <section className="landing-how-it-works">
+            <div className="how-it-works-container">
+
+
+              <div className="how-it-works-content">
+                <h2 className="how-it-works-title">
+                  איך זה עובד:<br />
+                  שלושה צעדים פשוטים לצ'אטבוט<br />
+                  החכם שלך
+                </h2>
+
+                <div className="steps-container">
+                  {/* Step 1 */}
+                  <div className="step-item">
+                    <div className="step-line">
+                      <svg width="6" height="71" viewBox="0 0 6 71" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <line x1="3" y1="3" x2="3" y2="68" stroke="#BA42BA" strokeWidth="6" strokeLinecap="round" />
+                      </svg>
+                    </div>
+                    <div className="step-text">
+                      <h3 className="step-title">שלב 1 – הכנס את כתובת האתר שלך</h3>
+                      <p className="step-description">
+                        פשוט הכנס את כתובת האתר שלך. המערכת שלנו תסרוק את האתר שלך ותבנה בסיס ידע.
+                      </p>
+                    </div>
+
                   </div>
-                  <div style={{ padding: '20px', height: '300px', overflowY: 'auto' }}>
-                    <div style={{ marginBottom: '16px' }}>
-                      <div style={{
-                        background: 'var(--brand)',
-                        color: 'white',
-                        padding: '12px 16px',
-                        borderRadius: '18px 18px 4px 18px',
-                        maxWidth: '80%',
-                        marginLeft: 'auto',
-                        fontSize: '14px',
-                        lineHeight: '1.4'
-                      }}>
-                        הי, אני צריכה מחשב לצרכי לימודים. על מה אתם ממליצים?
-                      </div>
-                      <div style={{ fontSize: '12px', color: 'var(--text-dim)', textAlign: 'right', marginTop: '4px' }}>
-                        Customer • 2:34 PM
-                      </div>
+
+                  {/* Step 2 */}
+                  <div className="step-item">
+                    <div className="step-line">
+                      <svg width="6" height="71" viewBox="0 0 6 71" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <line x1="3" y1="3" x2="3" y2="68" stroke="#BA42BA" strokeWidth="6" strokeLinecap="round" />
+                      </svg>
+                    </div>
+                    <div className="step-text">
+                      <h3 className="step-title">שלב 2 – עיבוד AI</h3>
+                      <p className="step-description">
+                        אנו שולפים, מנקים ומעבדים את התוכן שלך לבסיס ידע באמצעות הטמעות וקטוריות מתקדמות.
+                      </p>
                     </div>
 
-                    <div style={{ marginBottom: '16px' }}>
-                      <div style={{
-                        background: 'var(--panel)',
-                        color: 'var(--text)',
-                        padding: '12px 16px',
-                        borderRadius: '18px 18px 18px 4px',
-                        maxWidth: '85%',
-                        fontSize: '14px',
-                        lineHeight: '1.4',
-                        border: '1px solid var(--border)'
-                      }}>
-                        עבור לימודים אנחנו בדרך כלל ממליצים על
-                        MacBook Pro M2 או Dell XPS 15.
-                        שניהם מציעים ביצועים מעולים, חיי סוללה ארוכים, ומסכים איכותיים. האם יש לך תקציב או דרישות ספציפיות?
-                      </div>
-                      <div style={{ fontSize: '12px', color: 'var(--text-dim)', marginTop: '4px' }}>
-                        יורו-קום • 2:34 PM
-                      </div>
-                    </div>
+                  </div>
 
-                    <div style={{ marginBottom: '16px' }}>
-                      <div style={{
-                        background: 'var(--brand)',
-                        color: 'white',
-                        padding: '12px 16px',
-                        borderRadius: '18px 18px 4px 18px',
-                        maxWidth: '80%',
-                        marginLeft: 'auto',
-                        fontSize: '14px',
-                        lineHeight: '1.4'
-                      }}>
-                        סביב $1500-2000. אני צריכה משהו שיכול להתחבר לכמה מסכים.
-                      </div>
-                      <div style={{ fontSize: '12px', color: 'var(--text-dim)', textAlign: 'right', marginTop: '4px' }}>
-                        Customer • 2:35 PM
-                      </div>
+                  {/* Step 3 */}
+                  <div className="step-item">
+                    <div className="step-line">
+                      <svg width="6" height="71" viewBox="0 0 6 71" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <line x1="3" y1="3" x2="3" y2="68" stroke="#BA42BA" strokeWidth="6" strokeLinecap="round" />
+                      </svg>
                     </div>
-
-                    <div style={{ marginBottom: '16px' }}>
-                      <div style={{
-                        background: 'var(--panel)',
-                        color: 'var(--text)',
-                        padding: '12px 16px',
-                        borderRadius: '18px 18px 18px 4px',
-                        maxWidth: '85%',
-                        fontSize: '14px',
-                        lineHeight: '1.4',
-                        border: '1px solid var(--border)'
-                      }}>
-                        מעולה! ה-MacBook Pro M2 14" ($1,999) תומך עד 2 מסכים חיצוניים. יש לנו גם את ה-Dell XPS 15 ($1,799) עם יכולות דומות. שניהם מגיעים עם 16GB RAM ו-512GB SSD. תרצי לראות את המפרטים המלאים?
-                      </div>
-                      <div style={{ fontSize: '12px', color: 'var(--text-dim)', marginTop: '4px' }}>
-                        יורו-קום • 2:35 PM
-                      </div>
+                    <div className="step-text">
+                      <h3 className="step-title">שלב 3 – קבל את ה-API שלך</h3>
+                      <p className="step-description">
+                        קבל נקודת קצה API מוכנה לשימוש שמניעה את הצ'אטבוט שלך בכל פלטפורמה או אינטגרציה.
+                      </p>
                     </div>
                   </div>
                 </div>
+              </div>
 
-
-                {/* Healthcare Chat Example */}
-                <div style={{
-                  background: 'var(--panel-strong)',
-                  borderRadius: '16px',
-                  border: '1px solid var(--border)',
-                  overflow: 'hidden'
-                }}>
-                  <div style={{
-                    background: 'var(--gradient)',
-                    padding: '16px 20px',
-                    color: 'white',
-                    fontWeight: '600',
-                    fontSize: '14px'
-                  }}>
-                    מרכז רפואי נווה-אמירים
-                  </div>
-                  <div style={{ padding: '20px', height: '300px', overflowY: 'auto' }}>
-                    <div style={{ marginBottom: '16px' }}>
-                      <div style={{
-                        background: 'var(--brand)',
-                        color: 'white',
-                        padding: '12px 16px',
-                        borderRadius: '18px 18px 4px 18px',
-                        maxWidth: '80%',
-                        marginLeft: 'auto',
-                        fontSize: '14px',
-                        lineHeight: '1.4'
-                      }}>
-                        אני צריכה לקבוע תור עם ד"ר גבני. מה השעות הפנויות?
-                      </div>
-                      <div style={{ fontSize: '12px', color: 'var(--text-dim)', textAlign: 'right', marginTop: '4px' }}>
-                        מטופל • 1:45 PM
-                      </div>
-                    </div>
-
-                    <div style={{ marginBottom: '16px' }}>
-                      <div style={{
-                        background: 'var(--panel)',
-                        color: 'var(--text)',
-                        padding: '12px 16px',
-                        borderRadius: '18px 18px 18px 4px',
-                        maxWidth: '85%',
-                        fontSize: '14px',
-                        lineHeight: '1.4',
-                        border: '1px solid var(--border)'
-                      }}>
-                        ד״ר גבני פנוי בשעות האלה:
-                        <br /><br />
-                        יום שני 14:30
-                        • יום שלישי 14:30
-                        • יום רביעי 10:00
-                        • יום חמישי 15:15
-                        • יום שישי 09:30
-                        <br /><br />
-                        מה סוג התור שאת צריכה?
-                      </div>
-                      <div style={{ fontSize: '12px', color: 'var(--text-dim)', marginTop: '4px' }}>
-                        מרכז רפואי נווה-אמירים • 1:45 PM
-                      </div>
-                    </div>
-
-                    <div style={{ marginBottom: '16px' }}>
-                      <div style={{
-                        background: 'var(--brand)',
-                        color: 'white',
-                        padding: '12px 16px',
-                        borderRadius: '18px 18px 4px 18px',
-                        maxWidth: '80%',
-                        marginLeft: 'auto',
-                        fontSize: '14px',
-                        lineHeight: '1.4'
-                      }}>
-                        זה בדיקה שגרתית. יום שלישי בשעה 14:30 מתאים לי.
-                      </div>
-                      <div style={{ fontSize: '12px', color: 'var(--text-dim)', textAlign: 'right', marginTop: '4px' }}>
-                        מטופל • 1:46 PM
-                      </div>
-                    </div>
-
-                    <div style={{ marginBottom: '16px' }}>
-                      <div style={{
-                        background: 'var(--panel)',
-                        color: 'var(--text)',
-                        padding: '12px 16px',
-                        borderRadius: '18px 18px 18px 4px',
-                        maxWidth: '85%',
-                        fontSize: '14px',
-                        lineHeight: '1.4',
-                        border: '1px solid var(--border)'
-                      }}>
-                        מעולה! קבעתי לך תור ביום שלישי בשעה 14:30 עם ד"ר גבני לבדיקה השגרתית שלך. תקבלי אישור במייל בקרוב.
-                        <br /><br />
-                        אנא הגיעי 15 דקות לפני הזמן ואל תשכחי להביא את כרטיס הביטוח שלך ואת תעודת הזהות. יש לך שאלות לגבי התור?
-                      </div>
-                      <div style={{ fontSize: '12px', color: 'var(--text-dim)', marginTop: '4px' }}>
-                        מרכז רפואי נווה-אמירים • 1:46 PM
-                      </div>
-                    </div>
-                  </div>
-                </div>
+              <div className="how-it-works-image-container">
+                <div className="how-it-works-ellipse-1" />
+                <div className="how-it-works-ellipse-2" />
+                <img src={group5Image} alt="How it works" className="how-it-works-image" />
               </div>
             </div>
           </section>
 
 
           {/* Integration Showcase */}
-          <section className="landing-features">
-            <h2 className="landing-section__title">מתחבר להכל</h2>
-            <p className="landing-section__subtitle">
-              API אחד, אפשרויות אינסופיות. חבר את הצ׳אט למערכות שלך
-            </p>
-
-            <div className="features-grid">
-              <div className="feature-card">
-                <div className="feature-icon"><FaWhatsapp color="#25D366" /></div>
-                <h3 className="feature-title">וואצאפ</h3>
-                <p className="feature-desc">
-                  הגיעו ללקוחות היכן שהם נמצאים. שלחו תגובות אוטומטיות להודעות וואצאפ באמצעות ההטמעה הפשוטה שלנו.
+          <section className="smart-start-section">
+            <div className="smart-start-container">
+              <div className="smart-start-content">
+                <h2 className="smart-start-title">
+                  הדרך החכמה להתחיל:<br />
+                  גרסה חינמית, ללא התחייבות.
+                </h2>
+                <p className="smart-start-description">
+                  בנו בוט ראשון, הפעילו אותו, ותראו בעצמכם איך כמות השיחות והלידים שלכם עולה.
+                  <br />
+                  תוכלו לשדרג ולפתוח את כל הכוח של המערכת כשתרצו!
                 </p>
+                <button className="btn btn--primary smart-start-btn" onClick={handleGetStarted}>
+                  התחל עכשיו
+                </button>
               </div>
 
-              <div className="feature-card">
-                <div className="feature-icon">💼</div>
-                <h3 className="feature-title">צאט פנים ארגוני</h3>
-                <p className="feature-desc">
-                  בוטים פנימיים לצוות שלך. ענו על שאלות לגבי מדיניות החברה, נהלים ודוקומנטציה מיידית.
-                </p>
+              <div className="smart-start-visuals">
+                <div className="smart-start-blob blob-1" />
+                <div className="smart-start-blob blob-2" />
+                <div className="smart-start-blob blob-3" />
+
+                <div className="smart-card card-1">גישה מלאה ל-API</div>
+                <div className="smart-card card-2">אין צורך בכרטיס אשראי</div>
+                <div className="smart-card card-3">מערכת ניהול בוטים</div>
               </div>
 
-              <div className="feature-card">
-                <div className="feature-icon">🌐</div>
-                <h3 className="feature-title">וידג׳ט צ׳אט</h3>
-                <p className="feature-desc">
-                  ווידג׳ט צ׳אט יפהפה שניתן להתאמה אישית שמתאים למותג שלך. הטמעה קלה בשורת JavaScript אחת.
-                </p>
-              </div>
 
-              <div className="feature-card">
-                <div className="feature-icon">📱</div>
-                <h3 className="feature-title">אפליקציות מובייל</h3>
-                <p className="feature-desc">
-                  תמיכה ב-iOS ואנדרואיד. השתמשו ב-REST API שלנו כדי להפעיל תכונות צ'אט בתוך האפליקציה ותמיכה בלקוחות.
-                </p>
-              </div>
-
-              <div className="feature-card">
-                <div className="feature-icon">🔗</div>
-                <h3 className="feature-title">שילוב עם CRM</h3>
-                <p className="feature-desc">
-                  התחברו עם Salesforce, HubSpot, או כל CRM אחר. רשמו שיחות אוטומטית ועדכנו רישומי לקוחות.
-                </p>
-              </div>
-
-              <div className="feature-card">
-                <div className="feature-icon">⚡</div>
-                <h3 className="feature-title">פתרונות מותאמים אישית</h3>
-                <p className="feature-desc">
-                  גישה מלאה ל-API עבור אינטגרציות מותאמות אישית. Webhooks, SDKs, ותיעוד מקיף למפתחים.
-                </p>
-              </div>
             </div>
           </section>
 
