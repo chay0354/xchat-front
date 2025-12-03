@@ -6,6 +6,7 @@
   overflow-y: visible;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   line-height: 1.6;
+  direction: rtl;
 }
 
 
@@ -507,6 +508,138 @@
   font-weight: 400;
   font-size: 16px;
   color: #002169
+}
+
+/* How It Works Section */
+.landing-how-it-works {
+  padding: 100px 0;
+  background: #FFFFFF;
+}
+
+.how-it-works-container {
+  width: 100%;
+  max-width: 1640px;
+  margin: 0 auto;
+  padding: 0 40px;
+  display: flex;
+  align-items: flex-start;
+  /* Fixed invalid 'right' value */
+  justify-content: flex-end;
+  /* Center the content block */
+  /* Add gap back to separate image and text nicely */
+  flex-direction: row-reverse;
+}
+
+.how-it-works-image-container {
+  flex: 1;
+  display: flex;
+  justify-content: flex-start;
+  /* Align image to the left */
+  max-width: 40%;
+  /* Limit image width */
+  position: relative;
+}
+
+.how-it-works-image {
+  max-width: 100%;
+  height: auto;
+  position: relative;
+  z-index: 2;
+}
+
+.how-it-works-ellipse-1 {
+  position: absolute;
+  top: 60%;
+  left: 40%;
+  transform: translate(-50%, -50%) rotate(45deg);
+  width: 140%;
+  height: 140%;
+  background: url('./Ellipse 6252.png') no-repeat center center;
+  background-size: contain;
+  opacity: 0.4;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.how-it-works-ellipse-2 {
+  position: absolute;
+  top: 45%;
+  left: 100%;
+  transform: translate(-50%, -50%) rotate(90deg);
+  width: 120%;
+  height: 120%;
+  background: url('./Ellipse 6253.png') no-repeat center center;
+  background-size: contain;
+  opacity: 0.5;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.how-it-works-content {
+  flex: 1;
+  text-align: right;
+  max-width: 600px;
+  /* Ensure text doesn't stretch too much but has space */
+}
+
+.how-it-works-title {
+  font-family: 'Tel Aviv Brutalist', sans-serif;
+  font-weight: 400;
+  font-size: clamp(28px, 4vw, 40px);
+  /* Responsive font size */
+  line-height: 120%;
+  letter-spacing: -0.02em;
+  color: #002169;
+  margin-bottom: clamp(30px, 5vw, 60px);
+  text-wrap: nowrap;
+}
+
+.steps-container {
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+
+}
+
+.step-item {
+  display: flex;
+  gap: 24px;
+
+}
+
+.step-line {
+  padding-top: 8px;
+  /* Align line with text top */
+  flex-shrink: 0;
+}
+
+.step-text {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  text-wrap: nowrap;
+}
+
+.step-title {
+  font-family: 'Tel Aviv Brutalist', sans-serif;
+  font-weight: 400;
+  font-size: clamp(18px, 2.5vw, 24px);
+  /* Responsive font size */
+  line-height: 120%;
+  letter-spacing: -0.02em;
+  color: #002169;
+  margin: 0;
+
+}
+
+.step-description {
+  font-family: 'Assistant', sans-serif;
+  font-weight: 400;
+  font-size: clamp(16px, 2vw, 20px);
+  /* Responsive font size */
+  line-height: 150%;
+  color: #3C3C3C;
+  margin: 0;
 }
 
 /* How It Works */
@@ -1273,4 +1406,248 @@
   padding-right: 1rem;
   color: #000;
   text-align: right;
+}
+
+/* Smart Start Section */
+.smart-start-section {
+  background: #F8F7FD;
+  overflow: hidden;
+  direction: rtl;
+}
+
+.smart-start-container {
+  max-width: 1440px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 40px;
+}
+
+.smart-start-content {
+  flex: 1;
+  text-align: right;
+  max-width: 600px;
+  z-index: 2;
+}
+
+.smart-start-title {
+  font-family: 'Tel Aviv Brutalist', sans-serif;
+  font-weight: 400;
+  font-size: 32px;
+  line-height: 120%;
+  letter-spacing: -0.02em;
+  color: #002169;
+  margin-bottom: 24px;
+}
+
+.smart-start-description {
+  font-family: 'Assistant', sans-serif;
+  font-weight: 400;
+  font-size: 20px;
+  line-height: 150%;
+  color: #3C3C3C;
+  margin-bottom: 32px;
+}
+
+.smart-start-btn {
+  width: 174px;
+  height: 42px;
+  padding: 0 28px;
+  gap: 8px;
+  border-radius: 8px;
+  background: #BA42BA;
+  color: #FFFFFF;
+  font-family: 'Tel Aviv Brutalist', sans-serif;
+  font-weight: 400;
+  font-size: 18px;
+  line-height: 100%;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.smart-start-btn:hover {
+  background: #a035a0;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(186, 66, 186, 0.3);
+}
+
+.smart-start-visuals {
+  flex: 1;
+  position: relative;
+  height: 450px;
+  width: 100%;
+  max-width: 800px;
+}
+
+/* Cards */
+.smart-card {
+  position: absolute;
+  background: #FFFFFF;
+  border-radius: 16px;
+  padding: 24px;
+  font-family: 'Tel Aviv Brutalist', sans-serif;
+  font-weight: 400;
+  font-size: clamp(18px, 2vw, 24px);
+  /* Responsive font size */
+  color: #002169;
+  box-shadow: 0px 4px 24px rgba(0, 0, 0, 0.08);
+  white-space: nowrap;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+/* Using percentages for responsive positioning */
+.card-1 {
+  top: 16%;
+  left: 44%;
+}
+
+.card-2 {
+  top: 38%;
+  left: 20%;
+}
+
+.card-3 {
+  top: 61%;
+  left: 44%;
+}
+
+/* Background Blobs */
+.smart-start-blob {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.blob-1 {
+  width: 80%;
+  height: 120%;
+  top: -20%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: radial-gradient(50% 50% at 50% 50%, #E4A0FD 0%, rgba(228, 160, 253, 0) 100%);
+  opacity: 0.3;
+  filter: blur(80px);
+}
+
+.blob-2 {
+  width: 40%;
+  height: 70%;
+  top: 5%;
+  left: 20%;
+  background: radial-gradient(50% 50% at 50% 50%, #A599FF 0%, rgba(165, 153, 255, 0) 100%);
+  opacity: 0.7;
+  filter: blur(60px);
+  transform: rotate(22.61deg);
+}
+
+.blob-3 {
+  width: 40%;
+  height: 70%;
+  top: -20%;
+  left: 30%;
+  background: radial-gradient(50% 50% at 50% 50%, #E4A0FD 0%, rgba(228, 160, 253, 0) 100%);
+  opacity: 0.7;
+  filter: blur(60px);
+  transform: rotate(22.61deg);
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .smart-start-container {
+    flex-direction: column-reverse;
+    text-align: center;
+    padding: 0 20px;
+    gap: 60px;
+  }
+
+  .smart-start-content {
+    text-align: center;
+    max-width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .smart-start-title {
+    text-align: center;
+    font-size: 28px;
+  }
+
+  .smart-start-description {
+    text-align: center;
+    font-size: 18px;
+  }
+
+  .smart-start-visuals {
+    height: auto;
+    min-height: 300px;
+    max-width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 24px;
+  }
+
+  .smart-card {
+    position: relative;
+    top: auto !important;
+    left: auto !important;
+    width: 100%;
+    max-width: 350px;
+    font-size: 20px;
+    padding: 20px;
+    transform: none !important;
+  }
+
+  /* Adjust blobs for mobile */
+  .blob-1 {
+    width: 100%;
+    height: 100%;
+    opacity: 0.2;
+  }
+
+  .blob-2,
+  .blob-3 {
+    display: block;
+    /* Show blobs on mobile but adjust */
+    width: 60%;
+    height: 60%;
+    opacity: 0.4;
+  }
+
+  .blob-2 {
+    top: 10%;
+    left: 10%;
+  }
+
+  .blob-3 {
+    top: 40%;
+    left: 30%;
+  }
+}
+
+@media (max-width: 480px) {
+  .smart-start-section {
+    padding: 60px 16px;
+  }
+
+  .smart-start-title {
+    font-size: 24px;
+  }
+
+  .smart-card {
+    font-size: 18px;
+    padding: 16px;
+  }
 }

@@ -8,6 +8,7 @@ import clientsImage from './clients.png';
 import './landingStyles.css';
 import { FaWhatsapp } from "react-icons/fa";
 import botIcon from './bot icon.png';
+import group5Image from './Group 5.png';
 
 const designTokens = `
 * { box-sizing: border-box; }
@@ -447,269 +448,108 @@ function Landing() {
             </div>
           </section>
 
-          {/* Chat Examples Section */}
-          <section style={{ background: 'var(--panel)', padding: '100px 0', margin: '100px 0' }}>
-            <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 24px' }}>
-              <h2 className="landing-section__title">ככה זה נראה</h2>
-              <p className="landing-section__subtitle">
-                כך נראה הצ׳אט אחרי שהוטמע באתרי לקוחות
-              </p>
 
-              <div className="chat-examples-grid">
-                {/* E-commerce Chat Example */}
-                <div style={{
-                  background: 'var(--panel-strong)',
-                  borderRadius: '16px',
-                  border: '1px solid var(--border)',
-                  overflow: 'hidden'
-                }}>
-                  <div style={{
-                    background: 'var(--gradient)',
-                    padding: '16px 20px',
-                    color: 'white',
-                    fontWeight: '600',
-                    fontSize: '14px'
-                  }}>
-                    יורו-קום מחשבים
+          {/* How it works Section */}
+
+          <section className="landing-how-it-works">
+            <div className="how-it-works-container">
+
+
+              <div className="how-it-works-content">
+                <h2 className="how-it-works-title">
+                  איך זה עובד:<br />
+                  שלושה צעדים פשוטים לצ'אטבוט<br />
+                  החכם שלך
+                </h2>
+
+                <div className="steps-container">
+                  {/* Step 1 */}
+                  <div className="step-item">
+                    <div className="step-line">
+                      <svg width="6" height="71" viewBox="0 0 6 71" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <line x1="3" y1="3" x2="3" y2="68" stroke="#BA42BA" strokeWidth="6" strokeLinecap="round" />
+                      </svg>
+                    </div>
+                    <div className="step-text">
+                      <h3 className="step-title">שלב 1 – הכנס את כתובת האתר שלך</h3>
+                      <p className="step-description">
+                        פשוט הכנס את כתובת האתר שלך. המערכת שלנו תסרוק את האתר שלך ותבנה בסיס ידע.
+                      </p>
+                    </div>
+
                   </div>
-                  <div style={{ padding: '20px', height: '300px', overflowY: 'auto' }}>
-                    <div style={{ marginBottom: '16px' }}>
-                      <div style={{
-                        background: 'var(--brand)',
-                        color: 'white',
-                        padding: '12px 16px',
-                        borderRadius: '18px 18px 4px 18px',
-                        maxWidth: '80%',
-                        marginLeft: 'auto',
-                        fontSize: '14px',
-                        lineHeight: '1.4'
-                      }}>
-                        הי, אני צריכה מחשב לצרכי לימודים. על מה אתם ממליצים?
-                      </div>
-                      <div style={{ fontSize: '12px', color: 'var(--text-dim)', textAlign: 'right', marginTop: '4px' }}>
-                        Customer • 2:34 PM
-                      </div>
+
+                  {/* Step 2 */}
+                  <div className="step-item">
+                    <div className="step-line">
+                      <svg width="6" height="71" viewBox="0 0 6 71" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <line x1="3" y1="3" x2="3" y2="68" stroke="#BA42BA" strokeWidth="6" strokeLinecap="round" />
+                      </svg>
+                    </div>
+                    <div className="step-text">
+                      <h3 className="step-title">שלב 2 – עיבוד AI</h3>
+                      <p className="step-description">
+                        אנו שולפים, מנקים ומעבדים את התוכן שלך לבסיס ידע באמצעות הטמעות וקטוריות מתקדמות.
+                      </p>
                     </div>
 
-                    <div style={{ marginBottom: '16px' }}>
-                      <div style={{
-                        background: 'var(--panel)',
-                        color: 'var(--text)',
-                        padding: '12px 16px',
-                        borderRadius: '18px 18px 18px 4px',
-                        maxWidth: '85%',
-                        fontSize: '14px',
-                        lineHeight: '1.4',
-                        border: '1px solid var(--border)'
-                      }}>
-                        עבור לימודים אנחנו בדרך כלל ממליצים על
-                        MacBook Pro M2 או Dell XPS 15.
-                        שניהם מציעים ביצועים מעולים, חיי סוללה ארוכים, ומסכים איכותיים. האם יש לך תקציב או דרישות ספציפיות?
-                      </div>
-                      <div style={{ fontSize: '12px', color: 'var(--text-dim)', marginTop: '4px' }}>
-                        יורו-קום • 2:34 PM
-                      </div>
-                    </div>
+                  </div>
 
-                    <div style={{ marginBottom: '16px' }}>
-                      <div style={{
-                        background: 'var(--brand)',
-                        color: 'white',
-                        padding: '12px 16px',
-                        borderRadius: '18px 18px 4px 18px',
-                        maxWidth: '80%',
-                        marginLeft: 'auto',
-                        fontSize: '14px',
-                        lineHeight: '1.4'
-                      }}>
-                        סביב $1500-2000. אני צריכה משהו שיכול להתחבר לכמה מסכים.
-                      </div>
-                      <div style={{ fontSize: '12px', color: 'var(--text-dim)', textAlign: 'right', marginTop: '4px' }}>
-                        Customer • 2:35 PM
-                      </div>
+                  {/* Step 3 */}
+                  <div className="step-item">
+                    <div className="step-line">
+                      <svg width="6" height="71" viewBox="0 0 6 71" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <line x1="3" y1="3" x2="3" y2="68" stroke="#BA42BA" strokeWidth="6" strokeLinecap="round" />
+                      </svg>
                     </div>
-
-                    <div style={{ marginBottom: '16px' }}>
-                      <div style={{
-                        background: 'var(--panel)',
-                        color: 'var(--text)',
-                        padding: '12px 16px',
-                        borderRadius: '18px 18px 18px 4px',
-                        maxWidth: '85%',
-                        fontSize: '14px',
-                        lineHeight: '1.4',
-                        border: '1px solid var(--border)'
-                      }}>
-                        מעולה! ה-MacBook Pro M2 14" ($1,999) תומך עד 2 מסכים חיצוניים. יש לנו גם את ה-Dell XPS 15 ($1,799) עם יכולות דומות. שניהם מגיעים עם 16GB RAM ו-512GB SSD. תרצי לראות את המפרטים המלאים?
-                      </div>
-                      <div style={{ fontSize: '12px', color: 'var(--text-dim)', marginTop: '4px' }}>
-                        יורו-קום • 2:35 PM
-                      </div>
+                    <div className="step-text">
+                      <h3 className="step-title">שלב 3 – קבל את ה-API שלך</h3>
+                      <p className="step-description">
+                        קבל נקודת קצה API מוכנה לשימוש שמניעה את הצ'אטבוט שלך בכל פלטפורמה או אינטגרציה.
+                      </p>
                     </div>
                   </div>
                 </div>
+              </div>
 
-
-                {/* Healthcare Chat Example */}
-                <div style={{
-                  background: 'var(--panel-strong)',
-                  borderRadius: '16px',
-                  border: '1px solid var(--border)',
-                  overflow: 'hidden'
-                }}>
-                  <div style={{
-                    background: 'var(--gradient)',
-                    padding: '16px 20px',
-                    color: 'white',
-                    fontWeight: '600',
-                    fontSize: '14px'
-                  }}>
-                    מרכז רפואי נווה-אמירים
-                  </div>
-                  <div style={{ padding: '20px', height: '300px', overflowY: 'auto' }}>
-                    <div style={{ marginBottom: '16px' }}>
-                      <div style={{
-                        background: 'var(--brand)',
-                        color: 'white',
-                        padding: '12px 16px',
-                        borderRadius: '18px 18px 4px 18px',
-                        maxWidth: '80%',
-                        marginLeft: 'auto',
-                        fontSize: '14px',
-                        lineHeight: '1.4'
-                      }}>
-                        אני צריכה לקבוע תור עם ד"ר גבני. מה השעות הפנויות?
-                      </div>
-                      <div style={{ fontSize: '12px', color: 'var(--text-dim)', textAlign: 'right', marginTop: '4px' }}>
-                        מטופל • 1:45 PM
-                      </div>
-                    </div>
-
-                    <div style={{ marginBottom: '16px' }}>
-                      <div style={{
-                        background: 'var(--panel)',
-                        color: 'var(--text)',
-                        padding: '12px 16px',
-                        borderRadius: '18px 18px 18px 4px',
-                        maxWidth: '85%',
-                        fontSize: '14px',
-                        lineHeight: '1.4',
-                        border: '1px solid var(--border)'
-                      }}>
-                        ד״ר גבני פנוי בשעות האלה:
-                        <br /><br />
-                        יום שני 14:30
-                        • יום שלישי 14:30
-                        • יום רביעי 10:00
-                        • יום חמישי 15:15
-                        • יום שישי 09:30
-                        <br /><br />
-                        מה סוג התור שאת צריכה?
-                      </div>
-                      <div style={{ fontSize: '12px', color: 'var(--text-dim)', marginTop: '4px' }}>
-                        מרכז רפואי נווה-אמירים • 1:45 PM
-                      </div>
-                    </div>
-
-                    <div style={{ marginBottom: '16px' }}>
-                      <div style={{
-                        background: 'var(--brand)',
-                        color: 'white',
-                        padding: '12px 16px',
-                        borderRadius: '18px 18px 4px 18px',
-                        maxWidth: '80%',
-                        marginLeft: 'auto',
-                        fontSize: '14px',
-                        lineHeight: '1.4'
-                      }}>
-                        זה בדיקה שגרתית. יום שלישי בשעה 14:30 מתאים לי.
-                      </div>
-                      <div style={{ fontSize: '12px', color: 'var(--text-dim)', textAlign: 'right', marginTop: '4px' }}>
-                        מטופל • 1:46 PM
-                      </div>
-                    </div>
-
-                    <div style={{ marginBottom: '16px' }}>
-                      <div style={{
-                        background: 'var(--panel)',
-                        color: 'var(--text)',
-                        padding: '12px 16px',
-                        borderRadius: '18px 18px 18px 4px',
-                        maxWidth: '85%',
-                        fontSize: '14px',
-                        lineHeight: '1.4',
-                        border: '1px solid var(--border)'
-                      }}>
-                        מעולה! קבעתי לך תור ביום שלישי בשעה 14:30 עם ד"ר גבני לבדיקה השגרתית שלך. תקבלי אישור במייל בקרוב.
-                        <br /><br />
-                        אנא הגיעי 15 דקות לפני הזמן ואל תשכחי להביא את כרטיס הביטוח שלך ואת תעודת הזהות. יש לך שאלות לגבי התור?
-                      </div>
-                      <div style={{ fontSize: '12px', color: 'var(--text-dim)', marginTop: '4px' }}>
-                        מרכז רפואי נווה-אמירים • 1:46 PM
-                      </div>
-                    </div>
-                  </div>
-                </div>
+              <div className="how-it-works-image-container">
+                <div className="how-it-works-ellipse-1" />
+                <div className="how-it-works-ellipse-2" />
+                <img src={group5Image} alt="How it works" className="how-it-works-image" />
               </div>
             </div>
           </section>
 
 
           {/* Integration Showcase */}
-          <section className="landing-features">
-            <h2 className="landing-section__title">מתחבר להכל</h2>
-            <p className="landing-section__subtitle">
-              API אחד, אפשרויות אינסופיות. חבר את הצ׳אט למערכות שלך
-            </p>
-
-            <div className="features-grid">
-              <div className="feature-card">
-                <div className="feature-icon"><FaWhatsapp color="#25D366" /></div>
-                <h3 className="feature-title">וואצאפ</h3>
-                <p className="feature-desc">
-                  הגיעו ללקוחות היכן שהם נמצאים. שלחו תגובות אוטומטיות להודעות וואצאפ באמצעות ההטמעה הפשוטה שלנו.
+          <section className="smart-start-section">
+            <div className="smart-start-container">
+              <div className="smart-start-content">
+                <h2 className="smart-start-title">
+                  הדרך החכמה להתחיל:<br />
+                  גרסה חינמית, ללא התחייבות.
+                </h2>
+                <p className="smart-start-description">
+                  בנו בוט ראשון, הפעילו אותו, ותראו בעצמכם איך כמות השיחות והלידים שלכם עולה.
+                  <br />
+                  תוכלו לשדרג ולפתוח את כל הכוח של המערכת כשתרצו!
                 </p>
+                <button className="btn btn--primary smart-start-btn" onClick={handleGetStarted}>
+                  התחל עכשיו
+                </button>
               </div>
 
-              <div className="feature-card">
-                <div className="feature-icon">💼</div>
-                <h3 className="feature-title">צאט פנים ארגוני</h3>
-                <p className="feature-desc">
-                  בוטים פנימיים לצוות שלך. ענו על שאלות לגבי מדיניות החברה, נהלים ודוקומנטציה מיידית.
-                </p>
+              <div className="smart-start-visuals">
+                <div className="smart-start-blob blob-1" />
+                <div className="smart-start-blob blob-2" />
+                <div className="smart-start-blob blob-3" />
+
+                <div className="smart-card card-1">גישה מלאה ל-API</div>
+                <div className="smart-card card-2">אין צורך בכרטיס אשראי</div>
+                <div className="smart-card card-3">מערכת ניהול בוטים</div>
               </div>
 
-              <div className="feature-card">
-                <div className="feature-icon">🌐</div>
-                <h3 className="feature-title">וידג׳ט צ׳אט</h3>
-                <p className="feature-desc">
-                  ווידג׳ט צ׳אט יפהפה שניתן להתאמה אישית שמתאים למותג שלך. הטמעה קלה בשורת JavaScript אחת.
-                </p>
-              </div>
 
-              <div className="feature-card">
-                <div className="feature-icon">📱</div>
-                <h3 className="feature-title">אפליקציות מובייל</h3>
-                <p className="feature-desc">
-                  תמיכה ב-iOS ואנדרואיד. השתמשו ב-REST API שלנו כדי להפעיל תכונות צ'אט בתוך האפליקציה ותמיכה בלקוחות.
-                </p>
-              </div>
-
-              <div className="feature-card">
-                <div className="feature-icon">🔗</div>
-                <h3 className="feature-title">שילוב עם CRM</h3>
-                <p className="feature-desc">
-                  התחברו עם Salesforce, HubSpot, או כל CRM אחר. רשמו שיחות אוטומטית ועדכנו רישומי לקוחות.
-                </p>
-              </div>
-
-              <div className="feature-card">
-                <div className="feature-icon">⚡</div>
-                <h3 className="feature-title">פתרונות מותאמים אישית</h3>
-                <p className="feature-desc">
-                  גישה מלאה ל-API עבור אינטגרציות מותאמות אישית. Webhooks, SDKs, ותיעוד מקיף למפתחים.
-                </p>
-              </div>
             </div>
           </section>
 
