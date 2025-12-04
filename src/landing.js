@@ -1,14 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 // Updated: Added fullname and phone support - $(date)
 import { useNavigate } from 'react-router-dom';
 // import styles from './App.module.css';
 import Cookies from 'js-cookie';
 import logoLight from './logo-light.png';
-import clientsImage from './clients.png';
+import clientsImage from './logos.png';
 import './landingStyles.css';
 import { FaWhatsapp } from "react-icons/fa";
 import botIcon from './bot icon.png';
 import group5Image from './Group 5.png';
+import menuIcon from './menu.png';
 
 const designTokens = `
 * { box-sizing: border-box; }
@@ -26,6 +27,8 @@ function Landing() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isHeaderVisible, setIsHeaderVisible] = useState(true);
+  const lastScrollY = useRef(0);
   const navigate = useNavigate();
 
   // Check if user is logged in
@@ -116,16 +119,42 @@ function Landing() {
     return () => { document.removeEventListener('mousedown', handleClickOutside) };
   }, [mobileMenuOpen]);
 
+  // Handle header visibility on scroll
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+
+      // If at the top of the page, always show header
+      if (currentScrollY < 10) {
+        setIsHeaderVisible(true);
+      }
+      // If scrolling down, hide header
+      else if (currentScrollY > lastScrollY.current && currentScrollY > 100) {
+        setIsHeaderVisible(false);
+      }
+      // If scrolling up, show header
+      else if (currentScrollY < lastScrollY.current) {
+        setIsHeaderVisible(true);
+      }
+
+      lastScrollY.current = currentScrollY;
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
 
   return (
     <div className={`landing-root ${theme === 'dark' ? 'theme-dark' : 'theme-light'} bg`}>
       <style>{designTokens}</style>
-      <div className="landing-bg" />
-      <div className="landing-ellipse-1" />
-      <div className="landing-ellipse-2" />
-
+      <div className="background-wrapper">
+        <div className="landing-bg" />
+        <div className="landing-ellipse-1" />
+        <div className="landing-ellipse-2" />
+      </div>
       {/* Header */}
-      <header className="landing-header">
+      <header className={`landing-header ${!isHeaderVisible ? 'header-hidden' : ''}`}>
         <nav className="landing-nav">
 
           {/* Desktop Navigation */}
@@ -161,7 +190,7 @@ function Landing() {
 
           {/* Mobile Menu Toggle */}
           <button className="mobile-menu-toggle" onClick={toggleMobileMenu} aria-label="Toggle mobile menu">
-            {mobileMenuOpen ? '✕' : '☰'}
+            {mobileMenuOpen ? '✕' : <img style={{ width: '24px', height: '24px', filter: 'brightness(0) invert(1)' }} src={menuIcon} alt="Menu" />}
           </button>
 
           {/* Mobile Menu Dropdown */}
@@ -198,13 +227,6 @@ function Landing() {
                 </button>
               </>
             )}
-            <button
-              className="btn"
-              onClick={() => { setTheme(theme === 'dark' ? 'light' : 'dark'); closeMobileMenu(); }}
-              style={{ marginTop: '8px', borderTop: '1px solid var(--border)', paddingTop: '12px' }}
-            >
-              {theme === 'dark' ? '☀️ Light Mode' : '🌙 Dark Mode'}
-            </button>
           </div>
         </nav>
       </header>
@@ -213,10 +235,14 @@ function Landing() {
       {activeSection === 'home' && (
         <>
           {/* Hero Section */}
-          <section className="landing-hero">
+          <section className="landing-hero " >
             {/* <h1 className="landing-hero__title rubik-font"> */}
-            <h1 className="landing-hero-title">
-              צור בוט תוך 40 שניות,
+            <h1 className="landing-hero-title ">
+              <strong>
+                צור בוט תוך{' '}
+                <br className="mobile-br" />
+
+                40  שניות, </strong>
               <br />
               חסוך שעות עבודה וייצר יותר
               <br />
@@ -225,7 +251,9 @@ function Landing() {
             <h2 className="landing-hero-subtitle">
               הדרך הכי פשוטה להפוך שיחות למכירות.
               <br />
-              חברו את המערכת, הגדירו אוטומציות — ותנו ל-FlowChat לעבוד בשבילכם 24/7.</h2>
+              חברו את המערכת, הגדירו אוטומציות — ותנו ל-FlowChat ל
+              <br className="mobile-br" />
+              עבוד בשבילכם 24/7.</h2>
             <br />
 
             <div className="landing-hero__cta">
@@ -239,10 +267,13 @@ function Landing() {
               </>
             </div>
 
-            <h2 className="landing-hero-our-clients">
-              בין לקוחותינו
-            </h2>
-            <img src={clientsImage} alt="Clients" style={{ maxWidth: '100%', marginTop: '24px' }} />
+
+
+            {/* Clients Logos */}
+            <div className="clients-container">
+              <img src={clientsImage} alt="Clients" className="clients-image" />
+            </div>
+
 
             {/* Statistics */}
             {/* {!isLoggedIn && (
@@ -272,7 +303,7 @@ function Landing() {
 
 
 
-          <section className="landing-robot">
+          <section className="landing-robot" style={{ zIndex: 12 }}>
             <div className="robot-container">
               <div className="robot-text-content">
                 <h2 className="robot-title">יותר שיחות. יותר מכירות.<br />אפס עבודה ידנית.</h2>
@@ -287,7 +318,8 @@ function Landing() {
                   {/* Top right Bubble */}
                   <div className="robot-bubble bubble-top-left">
                     <div className="bubble-bg-top-left">
-                      <svg width="100%" height="100%" viewBox="0 0 263 140" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      {/* Desktop SVG */}
+                      <svg className="desktop-only" width="100%" height="100%" viewBox="0 0 263 140" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <g filter="url(#filter0_d_181_1922)">
                           <path d="M195.051 16C208.305 16.0002 219.051 26.7453 219.051 40V57.2434C219.051 59.266 220.269 61.0895 222.138 61.8632L239.245 68.9455C243.806 70.8334 243.219 77.7669 238.506 79.2309C236.455 79.8678 234.483 80.55 232.788 81.2539C229.069 82.7985 224.803 85.2309 221.368 87.3452C219.916 88.2388 219.051 89.8313 219.051 91.5363V92C219.051 105.255 208.305 116 195.051 116H44C30.7452 116 20 105.255 20 92V40C20 26.7452 30.7452 16 44 16H195.051Z" fill="white" fillOpacity="0.9" shapeRendering="crispEdges" />
                         </g>
@@ -304,9 +336,30 @@ function Landing() {
                           </filter>
                         </defs>
                       </svg>
+
+                      {/* Mobile SVG */}
+                      <svg className="mobile-only" width="218" height="158" viewBox="0 0 218 178" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <g filter="url(#filter0_d_253_672)">
+                          <path d="M187 16C200.255 16.0002 211 26.7453 211 40V97.2246C211 110.479 200.255 121.224 187 121.225H182.133C180.684 121.225 179.307 121.853 178.357 122.947L153.368 151.729C150.152 155.432 143.864 152.755 144.123 147.857C144.461 141.481 144.613 134.339 144.126 128.732C144.032 127.647 143.905 126.524 143.752 125.378C143.43 122.969 141.334 121.225 138.905 121.225H44C30.7452 121.225 20 110.479 20 97.2246V40C20 26.7452 30.7452 16 44 16H187Z" fill="white" fillOpacity="0.9" shapeRendering="crispEdges" />
+                        </g>
+                        <defs>
+                          <filter id="filter0_d_253_672" x="0" y="0" width="231" height="177.461" filterUnits="userSpaceOnUse" colorInterpolationFilters="sRGB">
+                            <feFlood floodOpacity="0" result="BackgroundImageFix" />
+                            <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha" />
+                            <feOffset dy="4" />
+                            <feGaussianBlur stdDeviation="10" />
+                            <feComposite in2="hardAlpha" operator="out" />
+                            <feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.05 0" />
+                            <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_253_672" />
+                            <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_253_672" result="shape" />
+                          </filter>
+                        </defs>
+                      </svg>
                     </div>
                     <div className="bubble-text">
-                      מחובר. מוכן. אוטומטי.<br />
+                      מחובר. מוכן.
+                      <br className='mobile-only' />
+                      אוטומטי.<br />
                       בוא נביא תוצאות!
                     </div>
                   </div>
@@ -348,7 +401,7 @@ function Landing() {
 
           {/* Features Section */}
           <section className="landing-features">
-            <div style={{ maxWidth: '1440px', margin: '0 auto', padding: '0 24px' }}>
+            <div className="features-container" style={{ maxWidth: '1440px', margin: '0 auto', padding: '0 24px' }}>
 
               <div className="features-grid">
                 <div className="feature-card">
@@ -467,7 +520,7 @@ function Landing() {
                   <div className="step-item">
                     <div className="step-line">
                       <svg width="6" height="71" viewBox="0 0 6 71" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <line x1="3" y1="3" x2="3" y2="68" stroke="#BA42BA" strokeWidth="6" strokeLinecap="round" />
+                        <line x1="3" y1="3" x2="3" y2="69" stroke="#BA42BA" strokeWidth="6" strokeLinecap="round" />
                       </svg>
                     </div>
                     <div className="step-text">
@@ -483,7 +536,7 @@ function Landing() {
                   <div className="step-item">
                     <div className="step-line">
                       <svg width="6" height="71" viewBox="0 0 6 71" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <line x1="3" y1="3" x2="3" y2="68" stroke="#BA42BA" strokeWidth="6" strokeLinecap="round" />
+                        <line x1="3" y1="3" x2="3" y2="69" stroke="#BA42BA" strokeWidth="6" strokeLinecap="round" />
                       </svg>
                     </div>
                     <div className="step-text">
@@ -499,7 +552,7 @@ function Landing() {
                   <div className="step-item">
                     <div className="step-line">
                       <svg width="6" height="71" viewBox="0 0 6 71" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <line x1="3" y1="3" x2="3" y2="68" stroke="#BA42BA" strokeWidth="6" strokeLinecap="round" />
+                        <line x1="3" y1="3" x2="3" y2="69" stroke="#BA42BA" strokeWidth="6" strokeLinecap="round" />
                       </svg>
                     </div>
                     <div className="step-text">
@@ -534,9 +587,6 @@ function Landing() {
                   <br />
                   תוכלו לשדרג ולפתוח את כל הכוח של המערכת כשתרצו!
                 </p>
-                <button className="btn btn--primary smart-start-btn" onClick={handleGetStarted}>
-                  התחל עכשיו
-                </button>
               </div>
 
               <div className="smart-start-visuals">
@@ -544,50 +594,21 @@ function Landing() {
                 <div className="smart-start-blob blob-2" />
                 <div className="smart-start-blob blob-3" />
 
-                <div className="smart-card card-1">גישה מלאה ל-API</div>
-                <div className="smart-card card-2">אין צורך בכרטיס אשראי</div>
-                <div className="smart-card card-3">מערכת ניהול בוטים</div>
+                <div className="smart-cards-wrapper">
+                  <div className="smart-card card-1">גישה מלאה ל-API</div>
+                  <div className="smart-card card-2">אין צורך בכרטיס אשראי</div>
+                  <div className="smart-card card-3">מערכת ניהול בוטים</div>
+                </div>
+
+                <button className="btn btn--primary smart-start-btn" onClick={handleGetStarted}>
+                  התחל עכשיו
+                </button>
               </div>
 
 
             </div>
           </section>
 
-          {/* How It Works Section */}
-          <section className="landing-how" id="how-it-works">
-            <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 24px' }}>
-              <h2 className="landing-section__title">איך זה עובד</h2>
-              <p className="landing-section__subtitle">
-                שלושה צעדים פשוטים לצ'אטבוט החכם שלך
-              </p>
-
-              <div className="steps-grid">
-                <div className="step-card">
-                  <div className="step-number">1</div>
-                  <h3 className="step-title">הכנס את כתובת האתר שלך</h3>
-                  <p className="step-desc">
-                    פשוט הכנס את כתובת האתר שלך. המערכת שלנו תסרוק את האתר שלך ותבנה בסיס ידע.
-                  </p>
-                </div>
-
-                <div className="step-card">
-                  <div className="step-number">2</div>
-                  <h3 className="step-title">עיבוד AI</h3>
-                  <p className="step-desc">
-                    אנו שולפים, מנקים ומעבדים את התוכן שלך לבסיס ידע באמצעות הטמעות וקטוריות מתקדמות.
-                  </p>
-                </div>
-
-                <div className="step-card">
-                  <div className="step-number">3</div>
-                  <h3 className="step-title">קבל את ה-API שלך</h3>
-                  <p className="step-desc">
-                    קבל נקודת קצה API מוכנה לשימוש שמניעה את הצ'אטבוט שלך בכל פלטפורמה או אינטגרציה.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </section>
 
           {/* Testimonials Section */}
           {/* <section className="landing-features" style={{ background: 'var(--panel)', margin: '80px 0' }}>
@@ -669,261 +690,131 @@ function Landing() {
           </section> */}
 
           {/* FAQ Section */}
-          <section className="landing-features">
-            <h2 className="landing-section__title">שאלות נפוצות</h2>
-            <p className="landing-section__subtitle">
-              כל מה שצריך לדעת על flowchat
-            </p>
+          {/* FAQ Section */}
+          <section className="faq-section">
+            <div className="faq-container">
+              <h2 className="faq-title">שאלות נפוצות</h2>
 
-            <div style={{ maxWidth: '100%', margin: '0 auto', textAlign: 'right', width: '100%', padding: '0 20px' }} dir="rtl">
-              <div style={{ marginBottom: '24px' }}>
-                <h3 style={{ fontSize: '1.2rem', fontWeight: '700', marginBottom: '8px', color: 'var(--text)' }}>
+              <div className="faq-item">
+                <h3 className="faq-question">
                   כמה זמן לוקח להקים בוט?
                 </h3>
-                <p style={{ color: 'var(--text-dim)', lineHeight: '1.6' }}>
+                <p className="faq-answer">
                   בדרך כלל 40-60 שניות. פשוט ספק את כתובת האתר שלך, וה-AI שלנו סורק, מעבד ומייצר את הבוט שלך באופן אוטומטי. אין צורך בהכשרה ידנית.
                 </p>
+                <div className="faq-separator"></div>
               </div>
 
-              <div style={{ marginBottom: '24px' }}>
-                <h3 style={{ fontSize: '1.2rem', fontWeight: '700', marginBottom: '8px', color: 'var(--text)' }}>
+              <div className="faq-item">
+                <h3 className="faq-question">
                   איזה סוגי אתרים עובדים הכי טוב?
                 </h3>
-                <p style={{ color: 'var(--text-dim)', lineHeight: '1.6' }}>
+                <p className="faq-answer">
                   כל אתר עם תוכן טקסטואלי עובד מצוין! אתרי מסחר אלקטרוני, פלטפורמות SaaS, ספקי שירותי בריאות, מוסדות חינוך ועסקי שירותים רואים כולם תוצאות מצוינות.
                 </p>
+                <div className="faq-separator"></div>
               </div>
 
-              <div style={{ marginBottom: '24px' }}>
-                <h3 style={{ fontSize: '1.2rem', fontWeight: '700', marginBottom: '8px', color: 'var(--text)' }}>
+              <div className="faq-item">
+                <h3 className="faq-question">
                   האם אני יכול להתאים אישית את התגובות של הבוט?
                 </h3>
-                <p style={{ color: 'var(--text-dim)', lineHeight: '1.6' }}>
+                <p className="faq-answer">
                   כן! אתה יכול להתאים אישית את האישיות של הבוט, להוסיף הוראות ספציפיות ואפילו לספק נתוני הכשרה נוספים כדי לשפר את התגובות למקרה השימוש הספציפי שלך.
                 </p>
+                <div className="faq-separator"></div>
               </div>
 
-              <div style={{ marginBottom: '24px' }}>
-                <h3 style={{ fontSize: '1.2rem', fontWeight: '700', marginBottom: '8px', color: 'var(--text)' }}>
+              <div className="faq-item">
+                <h3 className="faq-question">
                   האם הנתונים שלי מאובטחים?
                 </h3>
-                <p style={{ color: 'var(--text-dim)', lineHeight: '1.6' }}>
+                <p className="faq-answer">
                   בהחלט. אנו משתמשים בהצפנה ברמה ארגונית, לעולם לא משתפים את הנתונים שלך עם צדדים שלישיים, ועומדים בדרישות GDPR, CCPA ורגולציות פרטיות אחרות.
                 </p>
+                <div className="faq-separator"></div>
               </div>
 
-              <div style={{ marginBottom: '24px' }}>
-                <h3 style={{ fontSize: '1.2rem', fontWeight: '700', marginBottom: '8px', color: 'var(--text)' }}>
+              <div className="faq-item">
+                <h3 className="faq-question">
                   מה קורה אם הבוט לא יודע את התשובה?
                 </h3>
-                <p style={{ color: 'var(--text-dim)', lineHeight: '1.6' }}>
+                <p className="faq-answer">
                   הבוט יגיד בנימוס שאין לו את המידע הזה ויכול להעלות את זה לתמיכה אנושית או לבקש הבהרה. אתה יכול גם להגדיר תגובות חלופיות.
                 </p>
+                <div className="faq-separator"></div>
               </div>
 
-              <div style={{ marginBottom: '24px' }}>
-                <h3 style={{ fontSize: '1.2rem', fontWeight: '700', marginBottom: '8px', color: 'var(--text)' }}>
+              <div className="faq-item">
+                <h3 className="faq-question">
                   האם אני יכול לשלב עם הכלים הקיימים שלי?
                 </h3>
-                <p style={{ color: 'var(--text-dim)', lineHeight: '1.6' }}>
+                <p className="faq-answer">
                   כן! אנו מספקים APIs, webhooks, ואינטגרציות מוכנות לפלטפורמות פופולריות כמו Slack, WhatsApp, Salesforce ועוד. אינטגרציות מותאמות אישית נתמכות גם הן.
                 </p>
+                <div className="faq-separator"></div>
               </div>
             </div>
           </section>
 
 
-          {/* Pricing Section */}
-          <section className="landing-pricing">
-            <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 24px' }}>
-              <h2 className="landing-section__title">תמחור פשוט</h2>
-              <p className="landing-section__subtitle">
-                התחל בחינם, אין צורך בכרטיס אשראי.
-              </p>
-
-              <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '60px' }}>
-                <div className="pricing-card featured" style={{ maxWidth: '500px', width: '100%' }}>
-                  <div className="pricing-badge">חינם ל-14 יום</div>
-                  <h3 className="pricing-title" style={{ color: '#2d0a46' }}>ללא התחייבות</h3>
-                  <div className="pricing-price">התנסות חינם</div>
-                  <ul className="pricing-features">
-                    <li>בוט אחד</li>
-                    <li>מערכת ניהול בוטים</li>
-                    <li>גישה מלאה ל-API</li>
-                    <li>אין צורך בכרטיס אשראי</li>
-                  </ul>
-                  <div className="flex-space-around">
-                    <button className="btn btn--primary" onClick={() => handleSelectPlan('free')}>
-                      התחל חינם עכשיו
-                    </button>
-                  </div>
-                  <div style={{
-                    marginTop: '20px',
-                    padding: '16px',
-                    background: '#fbeefaff',
-                    borderRadius: '8px',
-                    border: '1px solid #8120742f',
-                    fontSize: '0.9rem',
-                    color: '#000000'
-                  }}>
-                    <strong>מצוין עבור:</strong> עסקים קטנים ובינוניים, או כל מי שרוצה לנסות צ'אט-בוטים מבוססי AI
-                  </div>
-                </div>
+          {/* Any question Section */}
+          {/* Contact Section */}
+          <section className="contact-section">
+            <div className="contact-ellipse" />
+            <div className="contact-container">
+              <div className="contact-robot-wrapper">
+                <img src={botIcon} alt="Contact Robot" className="contact-robot-image" />
               </div>
 
+              <div className="contact-content">
+                <h2 className="contact-title">
+                  יש לכם שאלה? צריכים עזרה?<br />
+                  אנחנו כאן בשבילכם.
+                </h2>
+                <p className="contact-subtitle">
+                  השאירו פרטים ונחזור אליכם במהירות עם כל המידע, ההכוונה או הדמו<br />
+                  שאתם צריכים כדי לצאת לדרך.
+                </p>
+
+                <form className="contact-form" onSubmit={(e) => e.preventDefault()}>
+                  <div className="contact-inputs-row">
+                    <input type="text" placeholder="שם מלא" className="contact-input" />
+                    <input type="tel" placeholder="טלפון" className="contact-input" />
+                    <input type="email" placeholder="אימייל" className="contact-input" />
+                    <button type="submit" className="contact-btn">
+                      <span>שלח</span>
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M20 12H4M4 12L10 6M4 12L10 18" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                    </button>
+                  </div>
+
+                </form>
+              </div>
             </div>
           </section>
         </>
       )}
 
-      {/* Bots Section */}
-      {activeSection === 'bots' && isLoggedIn && (
-        <section className="landing-features" style={{ paddingTop: '120px' }}>
-          <h2 className="landing-section__title">הבוטים שלך</h2>
-          <p className="landing-section__subtitle">
-            נהל את הבוטים
-          </p>
 
-          {error && (
-            <div style={{
-              background: 'rgba(239,68,68,0.1)',
-              border: '1px solid rgba(239,68,68,0.3)',
-              borderRadius: '12px',
-              padding: '16px',
-              margin: '20px 0',
-              color: 'var(--warn)',
-              textAlign: 'center'
-            }}>
-              {error}
-            </div>
-          )}
-
-          {bots.length < 1 && (
-            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '40px' }}>
-              <button className="btn btn--primary" onClick={handleCreateBot}>
-                + Create New Bot
-              </button>
-            </div>
-          )}
-
-          {bots.length >= 1 && (
-            <div style={{
-              textAlign: 'center',
-              padding: '20px',
-              background: 'rgba(110,168,254,0.1)',
-              borderRadius: '12px',
-              border: '1px solid rgba(110,168,254,0.3)',
-              marginBottom: '40px',
-              color: 'var(--brand)'
-            }}>
-              <strong>חינם ל-14 יום:</strong> יצירה של עד בוט אחד
-            </div>
-          )}
-
-          {loading ? (
-            <div style={{ textAlign: 'center', padding: '40px', color: 'var(--text-dim)' }}>
-              Loading your bots...
-            </div>
-          ) : bots.length === 0 ? (
-            <div style={{
-              textAlign: 'center',
-              padding: '60px 20px',
-              background: 'var(--panel)',
-              borderRadius: '16px',
-              border: '1px solid var(--border)'
-            }}>
-              <div style={{ fontSize: '48px', marginBottom: '20px' }}>🤖</div>
-              <h3 style={{ margin: '0 0 12px 0', fontSize: '1.5rem' }}>No bots yet</h3>
-              <p style={{ color: 'var(--text-dim)', margin: '0 0 24px 0' }}>
-                Create your first AI bot to get started with automated customer support. Free plan allows 1 bot.
-                צור את הבוט האינטליגנטי הראשון שלך!
-              </p>
-              <button className="btn btn--primary" onClick={handleCreateBot}>
-                Create Your First Bot
-              </button>
-            </div>
-          ) : (
-            <div style={{ display: 'flex', justifyContent: 'center' }}>
-              <div className="feature-card" style={{ maxWidth: '400px', width: '100%' }}>
-                <div className="feature-icon">🤖</div>
-                <h3 className="feature-title" style={{ fontFamily: 'Arial, sans-serif' }}>הבוט של {fullname}</h3>
-                <p className="feature-desc">
-                  {bots.length} conversation{bots.length !== 1 ? 's' : ''} • Active
-                </p>
-                <div style={{ marginTop: '20px', display: 'flex', gap: '8px' }}>
-                  <button
-                    className="btn btn--primary"
-                    onClick={() => navigate('/fullchat')}
-                    style={{ flex: 1, display: 'flex', justifyContent: 'center' }}
-                  >
-                    נהל את הבוט
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
-        </section>
-      )}
 
       {/* Final CTA Section */}
-      {!isLoggedIn && (
-        <section className="landing-features" style={{
-          background: 'linear-gradient(135deg, var(--brand), var(--brand-2))',
-          color: 'white',
-          margin: '80px 0 0 0',
-          textAlign: 'center'
-        }}>
-          <h2 style={{ fontSize: '2.5rem', fontWeight: '800', margin: '0 0 16px 0' }}>
-            מוכן לשדרג את התמיכה בלקוחות שלך?
-          </h2>
-          <p style={{ fontSize: '1.2rem', margin: '0 0 40px 0', opacity: '0.9' }}>
-            אוטומציה בשירות לקוחות זו רמה אחרת לגמרי. אין סיבה שלך לא יהיה!
-          </p>
-          <div className="final-cta-buttons" style={{ display: 'flex', gap: '16px', justifyContent: 'center', flexWrap: 'wrap' }}>
-            <button
-              className="btn"
-              onClick={handleGetStarted}
-              style={{
-                background: 'white',
-                color: 'var(--brand)',
-                border: 'none',
-                padding: '16px 32px',
-                fontSize: '16px',
-                fontWeight: '700'
-              }}
-            >
-              התחל בחינם
-            </button>
-            <button
-              className="btn"
-              onClick={() => document.getElementById('how-it-works').scrollIntoView({ behavior: 'smooth' })}
-              style={{
-                background: 'transparent',
-                color: 'white',
-                border: '2px solid white',
-                padding: '16px 32px',
-                fontSize: '16px',
-                fontWeight: '700'
-              }}
-            >
-              למידע נוסף
-            </button>
-          </div>
-          <div style={{ marginTop: '40px', fontSize: '0.9rem', opacity: '0.8' }}>
-            הגדרה תוך 40 שניות • אין צורך בכרטיס אשראי • 💬 שירות ותמיכה
-          </div>
-        </section>
-      )}
 
       {/* Footer */}
+      {/* Footer Section */}
       <footer className="landing-footer">
-        <div className="landing-footer__logo">
-          <div className="landing-logo__dot" />
-          <span>flowchat</span>
+        <div className="footer-content">
+          <div className="footer-logo">
+            <img src={logoLight} alt="FlowChat Logo" style={{ width: '156px', height: '77px' }} />
+          </div>
+          <p className="footer-description">
+            מערכת אוטומציה חכמה לבניית בוטים ושיחות מכירה, שמאפשרת לכל עסק לעבוד בצורה מהירה, יעילה ועם מינימום התעסקות ידנית.
+          </p>
         </div>
-        <p className="landing-footer__text">
-          flowchat מבית stealthCode | המלאכה 16 ראש-העין | שירות לקוחות: 054-5779917
-        </p>
+        <div className="footer-copyright">
+          © כל הזכויות שמורות FlowChat 2025
+        </div>
       </footer>
     </div>
   );
