@@ -504,7 +504,7 @@ function Landing() {
 
           {/* How it works Section */}
 
-          <section className="landing-how-it-works">
+          <section id="how-it-works" className="landing-how-it-works">
             <div className="how-it-works-container">
 
 
