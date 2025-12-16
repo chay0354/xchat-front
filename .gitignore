@@ -1,7 +1,1 @@
 node_modules
-build
-dist
-.npm
-.env
-.env.*.local
-.DS_Store

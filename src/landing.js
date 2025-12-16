@@ -45,6 +45,11 @@ function Landing() {
     }
   }, []);
 
+  // Scroll to top when section changes
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [activeSection]);
+
   const loadBots = async () => {
     const token = Cookies.get('testtoken');
     if (!token) return;
@@ -795,6 +800,206 @@ function Landing() {
             </div>
           </section>
         </>
+      )}
+
+      {/* Bots Section */}
+      {activeSection === 'bots' && (
+        <section className="bots-section" style={{ 
+          minHeight: '80vh', 
+          padding: '120px 24px 80px', 
+          maxWidth: '1200px', 
+          margin: '0 auto',
+          width: '100%'
+        }}>
+          <div style={{ marginBottom: '40px' }}>
+            <h1 style={{ 
+              fontSize: '2.5rem', 
+              fontWeight: 'bold', 
+              color: 'var(--text)', 
+              textAlign: 'center',
+              marginBottom: '16px'
+            }}>
+              הבוטים שלך
+            </h1>
+            <p style={{ 
+              fontSize: '1.1rem', 
+              color: 'var(--text-dim)', 
+              textAlign: 'center',
+              marginBottom: '32px'
+            }}>
+              ניהול וצפייה בכל הבוטים שיצרת
+            </p>
+          </div>
+
+          {loading && (
+            <div style={{ textAlign: 'center', padding: '40px', color: 'var(--text-dim)' }}>
+              טוען בוטים...
+            </div>
+          )}
+
+          {error && (
+            <div style={{ 
+              textAlign: 'center', 
+              padding: '20px', 
+              background: 'rgba(255, 0, 0, 0.1)', 
+              borderRadius: '8px',
+              color: '#ff4444',
+              marginBottom: '24px'
+            }}>
+              {error}
+            </div>
+          )}
+
+          {!loading && !error && bots.length === 0 && (
+            <div style={{ 
+              textAlign: 'center', 
+              padding: '60px 24px',
+              background: 'var(--panel)',
+              borderRadius: '16px',
+              border: '2px dashed var(--border)'
+            }}>
+              <img 
+                src={botIcon} 
+                alt="Bot" 
+                style={{ width: '80px', height: '80px', marginBottom: '24px', opacity: 0.5 }}
+              />
+              <h3 style={{ 
+                fontSize: '1.5rem', 
+                color: 'var(--text)', 
+                marginBottom: '12px' 
+              }}>
+                עדיין אין לך בוטים
+              </h3>
+              <p style={{ 
+                fontSize: '1rem', 
+                color: 'var(--text-dim)', 
+                marginBottom: '24px' 
+              }}>
+                צור בוט ראשון שלך תוך 40 שניות
+              </p>
+              <button 
+                className="btn btn--primary" 
+                onClick={handleCreateBot}
+                style={{ padding: '12px 32px', fontSize: '1rem' }}
+              >
+                צור בוט חדש
+              </button>
+            </div>
+          )}
+
+          {!loading && !error && bots.length > 0 && (
+            <>
+              <div style={{ 
+                display: 'flex', 
+                justifyContent: 'space-between', 
+                alignItems: 'center',
+                marginBottom: '24px',
+                flexWrap: 'wrap',
+                gap: '16px'
+              }}>
+                <div style={{ color: 'var(--text-dim)', fontSize: '0.9rem' }}>
+                  נמצאו {bots.length} בוט{bots.length !== 1 ? 'ים' : ''}
+                </div>
+                <button 
+                  className="btn btn--primary" 
+                  onClick={handleCreateBot}
+                  style={{ padding: '10px 24px', fontSize: '0.9rem' }}
+                >
+                  + צור בוט חדש
+                </button>
+              </div>
+
+              <div style={{ 
+                display: 'grid', 
+                gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', 
+                gap: '24px' 
+              }}>
+                {bots.map((bot, index) => (
+                  <div 
+                    key={bot.convtoken || index}
+                    onClick={() => navigate(`/fullchat?convtoken=${encodeURIComponent(bot.convtoken)}`)}
+                    style={{ 
+                      background: 'var(--panel)',
+                      borderRadius: '12px',
+                      padding: '24px',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s ease',
+                      border: '1px solid var(--border)',
+                      boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.transform = 'translateY(-4px)';
+                      e.currentTarget.style.boxShadow = '0 4px 16px rgba(0,0,0,0.15)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.transform = 'translateY(0)';
+                      e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.1)';
+                    }}
+                  >
+                    <div style={{ 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      gap: '12px',
+                      marginBottom: '16px'
+                    }}>
+                      <img 
+                        src={botIcon} 
+                        alt="Bot" 
+                        style={{ width: '40px', height: '40px' }}
+                      />
+                      <div style={{ flex: 1 }}>
+                        <h3 style={{ 
+                          fontSize: '1.2rem', 
+                          fontWeight: 'bold', 
+                          color: 'var(--text)',
+                          marginBottom: '4px'
+                        }}>
+                          {bot.domain || bot.name || `בוט ${index + 1}`}
+                        </h3>
+                        {bot.domain && (
+                          <p style={{ 
+                            fontSize: '0.85rem', 
+                            color: 'var(--text-dim)' 
+                          }}>
+                            {bot.domain}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                    
+                    {bot.last_message && (
+                      <p style={{ 
+                        fontSize: '0.9rem', 
+                        color: 'var(--text-dim)',
+                        marginBottom: '12px',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        display: '-webkit-box',
+                        WebkitLineClamp: 2,
+                        WebkitBoxOrient: 'vertical'
+                      }}>
+                        {bot.last_message}
+                      </p>
+                    )}
+
+                    <div style={{ 
+                      display: 'flex', 
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      fontSize: '0.85rem',
+                      color: 'var(--text-dim)',
+                      paddingTop: '12px',
+                      borderTop: '1px solid var(--border)'
+                    }}>
+                      <span>לחץ לפתיחה</span>
+                      <span style={{ fontSize: '1.2rem' }}>→</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
+        </section>
       )}
 
 
