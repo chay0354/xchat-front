@@ -657,6 +657,7 @@ function Admin() {
   const [users, setUsers] = useState([]);
   const [selectedUser, setSelectedUser] = useState(null);
   const [userDetails, setUserDetails] = useState(null);
+  const [userTokens, setUserTokens] = useState({}); // Store tokens by user ID
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [deleting, setDeleting] = useState(false);
@@ -683,7 +684,7 @@ function Admin() {
       }
       
       const response = await fetch(
-        `${process.env.REACT_APP_API_URL || 'http://localhost:5137'}/admin/users?usertoken=${encodeURIComponent(usertoken)}`
+        `${process.env.REACT_APP_API_URL}/admin/users?usertoken=${encodeURIComponent(usertoken)}`
       );
       
       if (!response.ok) {
@@ -692,6 +693,21 @@ function Admin() {
       
       const data = await response.json();
       setUsers(data.users);
+      
+      // Try to extract tokens from users array if available
+      // Users array structure: [id, email, created_at, ...possibly token...]
+      const tokensMap = {};
+      data.users.forEach((user) => {
+        // Check various indices where token might be
+        if (user[3]) tokensMap[user[0]] = user[3]; // Index 3
+        if (user[4]) tokensMap[user[0]] = user[4]; // Index 4
+        // Also check if user is an object with token property
+        if (user.token) tokensMap[user[0]] = user.token;
+        if (user.usertoken) tokensMap[user[0]] = user.usertoken;
+      });
+      if (Object.keys(tokensMap).length > 0) {
+        setUserTokens(tokensMap);
+      }
     } catch (err) {
       setError(err.message);
     } finally {
@@ -704,7 +720,7 @@ function Admin() {
       setLoading(true);
       const usertoken = Cookies.get('testtoken') || Cookies.get('usertoken');
       const response = await fetch(
-        `${process.env.REACT_APP_API_URL || 'http://localhost:5137'}/admin/user/${userId}?usertoken=${encodeURIComponent(usertoken)}`
+        `${process.env.REACT_APP_API_URL}/admin/user/${userId}?usertoken=${encodeURIComponent(usertoken)}`
       );
       
       if (!response.ok) {
@@ -712,6 +728,17 @@ function Admin() {
       }
       
       const data = await response.json();
+      console.log('User details response:', data); // Debug: log the response
+      
+      // If token is not in userDetails, try to fetch it
+      if (!data.user?.token && !data.user?.usertoken && data.user?.email) {
+        // Check if we already have the token stored
+        if (userTokens[userId]) {
+          // Add token to userDetails if we have it stored
+          data.user = { ...data.user, token: userTokens[userId] };
+        }
+      }
+      
       setUserDetails(data);
     } catch (err) {
       setError(err.message);
@@ -722,6 +749,7 @@ function Admin() {
 
   const handleUserSelect = (user) => {
     setSelectedUser(user);
+    console.log('Selected user array:', user); // Debug: log the user array structure
     fetchUserDetails(user[0]); // user[0] is the id
   };
 
@@ -740,7 +768,7 @@ function Admin() {
       setDeleting(true);
       const usertoken = Cookies.get('testtoken') || Cookies.get('usertoken');
       const response = await fetch(
-        `${process.env.REACT_APP_API_URL || 'http://localhost:5137'}/admin/user/${userId}?usertoken=${encodeURIComponent(usertoken)}`,
+        `${process.env.REACT_APP_API_URL}/admin/user/${userId}?usertoken=${encodeURIComponent(usertoken)}`,
         { method: 'DELETE' }
       );
       
@@ -830,6 +858,66 @@ function Admin() {
                 <div className="info-row">
                   <span className="info-label">אימייל:</span>
                   <span className="info-value">{userDetails.user.email}</span>
+                </div>
+                <div className="info-row">
+                  <span className="info-label">User Token:</span>
+                  <span className="info-value" style={{ 
+                    fontFamily: 'monospace', 
+                    fontSize: '12px',
+                    wordBreak: 'break-all',
+                    cursor: 'pointer',
+                    userSelect: 'all',
+                    color: '#6ea8fe'
+                  }} 
+                  onClick={(e) => {
+                    // Check all possible locations for the token
+                    const userId = userDetails.user?.id;
+                    const token = userDetails.user?.usertoken || 
+                                  userDetails.user?.token || 
+                                  userDetails.user?.userToken ||
+                                  userDetails?.usertoken ||
+                                  userDetails?.token ||
+                                  userTokens[userId] || // Check stored tokens
+                                  selectedUser?.[3] || 
+                                  selectedUser?.[4] ||
+                                  selectedUser?.token || 
+                                  selectedUser?.usertoken || 
+                                  'לא זמין';
+                    if (token !== 'לא זמין') {
+                      navigator.clipboard.writeText(token).then(() => {
+                        alert('User Token הועתק ללוח');
+                      }).catch(() => {
+                        // Fallback for older browsers
+                        const textArea = document.createElement('textarea');
+                        textArea.value = token;
+                        document.body.appendChild(textArea);
+                        textArea.select();
+                        document.execCommand('copy');
+                        document.body.removeChild(textArea);
+                        alert('User Token הועתק ללוח');
+                      });
+                    }
+                  }}
+                  title="לחץ להעתקה">
+                    {(() => {
+                      // Try to get token from all possible locations
+                      const userId = userDetails.user?.id;
+                      const token = userDetails.user?.usertoken || 
+                                    userDetails.user?.token || 
+                                    userDetails.user?.userToken ||
+                                    userDetails?.usertoken ||
+                                    userDetails?.token ||
+                                    userTokens[userId] || // Check stored tokens
+                                    selectedUser?.[3] || 
+                                    selectedUser?.[4] ||
+                                    selectedUser?.token || 
+                                    selectedUser?.usertoken;
+                      if (token) {
+                        return token;
+                      }
+                      return 'לא זמין';
+                    })()}
+                  </span>
                 </div>
                 <div className="info-row">
                   <span className="info-label">שם מלא:</span>

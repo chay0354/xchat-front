@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Cookies from 'js-cookie';
 import { useNavigate } from 'react-router-dom';
 // Using environment variable directly
-const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:5137';
+const API_BASE = process.env.REACT_APP_API_URL;
 
 function FullChat() {
   const [chats, setChats] = useState([]);

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Cookies from 'js-cookie';
 import { useNavigate } from 'react-router-dom';
 // 🔗 Backend base URL from environment variable
-const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:5137';
+const API_BASE = process.env.REACT_APP_API_URL;
 
 const designTokens = `
 :root {

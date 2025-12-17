@@ -25,7 +25,9 @@ function Landing() {
   const [activeSection, setActiveSection] = useState('home');
   const [bots, setBots] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [botsLoading, setBotsLoading] = useState(false); // Separate loading state for bots section
   const [error, setError] = useState('');
+  const [botsLastLoaded, setBotsLastLoaded] = useState(null); // Track when bots were last loaded
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isHeaderVisible, setIsHeaderVisible] = useState(true);
   const lastScrollY = useRef(0);
@@ -50,22 +52,32 @@ function Landing() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [activeSection]);
 
-  const loadBots = async () => {
+  const loadBots = async (forceRefresh = false) => {
     const token = Cookies.get('testtoken');
     if (!token) return;
 
+    // If we have cached data and it's less than 30 seconds old, don't reload unless forced
+    const now = Date.now();
+    if (!forceRefresh && bots.length > 0 && botsLastLoaded && (now - botsLastLoaded) < 30000) {
+      return; // Use cached data
+    }
+
     try {
-      setLoading(true);
-      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5137'}/fullchat?usertoken=${encodeURIComponent(token)}`);
+      setBotsLoading(true);
+      setError('');
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/fullchat?usertoken=${encodeURIComponent(token)}`);
       if (response.ok) {
         const data = await response.json();
         setBots(data.chats || []);
+        setBotsLastLoaded(now);
+      } else {
+        setError('Failed to load bots');
       }
     } catch (err) {
       console.error('Error loading bots:', err);
       setError('Failed to load bots');
     } finally {
-      setLoading(false);
+      setBotsLoading(false);
     }
   };
 
@@ -74,7 +86,7 @@ function Landing() {
     if (!token) return;
 
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5137'}/get-user-info?usertoken=${encodeURIComponent(token)}`);
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/get-user-info?usertoken=${encodeURIComponent(token)}`);
       if (response.ok) {
         const data = await response.json();
         if (data && data.length > 0) {
@@ -831,9 +843,21 @@ function Landing() {
             </p>
           </div>
 
-          {loading && (
+          {botsLoading && bots.length === 0 && (
             <div style={{ textAlign: 'center', padding: '40px', color: 'var(--text-dim)' }}>
               טוען בוטים...
+            </div>
+          )}
+          
+          {botsLoading && bots.length > 0 && (
+            <div style={{ 
+              textAlign: 'center', 
+              padding: '10px', 
+              color: 'var(--text-dim)', 
+              fontSize: '0.9rem',
+              marginBottom: '16px'
+            }}>
+              מעדכן רשימה...
             </div>
           )}
 
@@ -850,7 +874,7 @@ function Landing() {
             </div>
           )}
 
-          {!loading && !error && bots.length === 0 && (
+          {!botsLoading && !error && bots.length === 0 && !botsLastLoaded && (
             <div style={{ 
               textAlign: 'center', 
               padding: '60px 24px',
@@ -887,7 +911,7 @@ function Landing() {
             </div>
           )}
 
-          {!loading && !error && bots.length > 0 && (
+          {(!botsLoading || bots.length > 0) && bots.length > 0 && (
             <>
               <div style={{ 
                 display: 'flex', 
@@ -900,13 +924,29 @@ function Landing() {
                 <div style={{ color: 'var(--text-dim)', fontSize: '0.9rem' }}>
                   נמצאו {bots.length} בוט{bots.length !== 1 ? 'ים' : ''}
                 </div>
-                <button 
-                  className="btn btn--primary" 
-                  onClick={handleCreateBot}
-                  style={{ padding: '10px 24px', fontSize: '0.9rem' }}
-                >
-                  + צור בוט חדש
-                </button>
+                <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                  <button 
+                    className="btn" 
+                    onClick={() => loadBots(true)}
+                    disabled={botsLoading}
+                    style={{ 
+                      padding: '10px 20px', 
+                      fontSize: '0.9rem',
+                      opacity: botsLoading ? 0.6 : 1,
+                      cursor: botsLoading ? 'not-allowed' : 'pointer'
+                    }}
+                    title="רענן רשימה"
+                  >
+                    🔄 רענן
+                  </button>
+                  <button 
+                    className="btn btn--primary" 
+                    onClick={handleCreateBot}
+                    style={{ padding: '10px 24px', fontSize: '0.9rem' }}
+                  >
+                    + צור בוט חדש
+                  </button>
+                </div>
               </div>
 
               <div style={{ 

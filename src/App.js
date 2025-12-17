@@ -258,7 +258,7 @@ function Login() {
 
       // ✅ Backend call using environment variable
       const authRes = await fetch(
-        `${process.env.REACT_APP_API_URL || 'http://localhost:5137'}/auth?email=${encodeURIComponent(emailInput)}&password=${encodeURIComponent(passwordInput)}`
+        `${process.env.REACT_APP_API_URL}/auth?username=${encodeURIComponent(emailInput)}&password=${encodeURIComponent(passwordInput)}`
       );
       if (!authRes.ok) {
         setError('Incorrect email or password.');
@@ -266,7 +266,7 @@ function Login() {
       }
 
       const tokenRes = await fetch(
-        `${process.env.REACT_APP_API_URL || 'http://localhost:5137'}/get-token?email=${encodeURIComponent(emailInput)}`
+        `${process.env.REACT_APP_API_URL}/get-token?username=${encodeURIComponent(emailInput)}`
       );
       if (!tokenRes.ok) throw new Error('Failed to fetch token');
       const data = await tokenRes.json();
