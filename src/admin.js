@@ -694,19 +694,29 @@ function Admin() {
       const data = await response.json();
       setUsers(data.users);
       
-      // Try to extract tokens from users array if available
-      // Users array structure: [id, email, created_at, ...possibly token...]
+      // Extract tokens from users array - backend returns [id, username, created_at, token]
       const tokensMap = {};
       data.users.forEach((user) => {
-        // Check various indices where token might be
-        if (user[3]) tokensMap[user[0]] = user[3]; // Index 3
-        if (user[4]) tokensMap[user[0]] = user[4]; // Index 4
-        // Also check if user is an object with token property
-        if (user.token) tokensMap[user[0]] = user.token;
-        if (user.usertoken) tokensMap[user[0]] = user.usertoken;
+        const userId = user[0];
+        // Backend returns token at index 3: [id, username, created_at, token]
+        if (user[3] && userId) {
+          tokensMap[userId] = user[3];
+        }
+        // Also check other possible locations for compatibility
+        if (user[4] && userId && !tokensMap[userId]) {
+          tokensMap[userId] = user[4];
+        }
+        // Check if user is an object with token property
+        if (user.token && userId && !tokensMap[userId]) {
+          tokensMap[userId] = user.token;
+        }
+        if (user.usertoken && userId && !tokensMap[userId]) {
+          tokensMap[userId] = user.usertoken;
+        }
       });
       if (Object.keys(tokensMap).length > 0) {
         setUserTokens(tokensMap);
+        console.log('Stored user tokens:', tokensMap); // Debug log
       }
     } catch (err) {
       setError(err.message);
@@ -730,15 +740,23 @@ function Admin() {
       const data = await response.json();
       console.log('User details response:', data); // Debug: log the response
       
-      // If token is not in userDetails, try to fetch it
-      if (!data.user?.token && !data.user?.usertoken && data.user?.email) {
-        // Check if we already have the token stored
-        if (userTokens[userId]) {
-          // Add token to userDetails if we have it stored
-          data.user = { ...data.user, token: userTokens[userId] };
+      // Ensure token is always present in userDetails
+      const userDetailsId = data.user?.id;
+      if (userDetailsId) {
+        // If token is missing, try to get it from stored tokens
+        if (!data.user?.token && !data.user?.usertoken && userTokens[userDetailsId]) {
+          data.user.token = userTokens[userDetailsId];
+          data.user.usertoken = userTokens[userDetailsId];
+          data.user.userToken = userTokens[userDetailsId];
+        }
+        // Store the token for future use
+        if (data.user?.token || data.user?.usertoken) {
+          const token = data.user.token || data.user.usertoken;
+          setUserTokens(prev => ({ ...prev, [userDetailsId]: token }));
         }
       }
       
+      console.log('User details after processing:', data); // Debug log
       setUserDetails(data);
     } catch (err) {
       setError(err.message);
@@ -870,19 +888,32 @@ function Admin() {
                     color: '#6ea8fe'
                   }} 
                   onClick={(e) => {
-                    // Check all possible locations for the token
+                    // Check all possible locations for the token - prioritize userDetails
                     const userId = userDetails.user?.id;
-                    const token = userDetails.user?.usertoken || 
-                                  userDetails.user?.token || 
-                                  userDetails.user?.userToken ||
-                                  userDetails?.usertoken ||
-                                  userDetails?.token ||
-                                  userTokens[userId] || // Check stored tokens
-                                  selectedUser?.[3] || 
-                                  selectedUser?.[4] ||
-                                  selectedUser?.token || 
-                                  selectedUser?.usertoken || 
-                                  'לא זמין';
+                    let token = userDetails.user?.usertoken || 
+                                userDetails.user?.token || 
+                                userDetails.user?.userToken ||
+                                userDetails?.usertoken ||
+                                userDetails?.token;
+                    
+                    // Fallback to stored tokens or selectedUser
+                    if (!token || token === '') {
+                      token = userTokens[userId] || 
+                              selectedUser?.[3] || 
+                              selectedUser?.[4] ||
+                              selectedUser?.token || 
+                              selectedUser?.usertoken;
+                    }
+                    
+                    // Final fallback: try to get from users list if we have userId
+                    if ((!token || token === '') && userId && users.length > 0) {
+                      const userFromList = users.find(u => u[0] === userId);
+                      if (userFromList && userFromList[3]) {
+                        token = userFromList[3];
+                      }
+                    }
+                    
+                    token = token || 'לא זמין';
                     if (token !== 'לא זמין') {
                       navigator.clipboard.writeText(token).then(() => {
                         alert('User Token הועתק ללוח');
@@ -900,22 +931,32 @@ function Admin() {
                   }}
                   title="לחץ להעתקה">
                     {(() => {
-                      // Try to get token from all possible locations
+                      // Try to get token from all possible locations - prioritize userDetails
                       const userId = userDetails.user?.id;
-                      const token = userDetails.user?.usertoken || 
-                                    userDetails.user?.token || 
-                                    userDetails.user?.userToken ||
-                                    userDetails?.usertoken ||
-                                    userDetails?.token ||
-                                    userTokens[userId] || // Check stored tokens
-                                    selectedUser?.[3] || 
-                                    selectedUser?.[4] ||
-                                    selectedUser?.token || 
-                                    selectedUser?.usertoken;
-                      if (token) {
-                        return token;
+                      let token = userDetails.user?.usertoken || 
+                                  userDetails.user?.token || 
+                                  userDetails.user?.userToken ||
+                                  userDetails?.usertoken ||
+                                  userDetails?.token;
+                      
+                      // Fallback to stored tokens or selectedUser
+                      if (!token || token === '') {
+                        token = userTokens[userId] || 
+                                selectedUser?.[3] || 
+                                selectedUser?.[4] ||
+                                selectedUser?.token || 
+                                selectedUser?.usertoken;
                       }
-                      return 'לא זמין';
+                      
+                      // Final fallback: try to get from users list if we have userId
+                      if ((!token || token === '') && userId && users.length > 0) {
+                        const userFromList = users.find(u => u[0] === userId);
+                        if (userFromList && userFromList[3]) {
+                          token = userFromList[3];
+                        }
+                      }
+                      
+                      return token || 'לא זמין';
                     })()}
                   </span>
                 </div>
