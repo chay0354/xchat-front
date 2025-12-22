@@ -2,7 +2,11 @@ import React, { useState, useEffect } from 'react';
 import Cookies from 'js-cookie';
 import { useNavigate } from 'react-router-dom';
 // 🔗 Backend base URL from environment variable
-const API_BASE = process.env.REACT_APP_API_URL;
+const API_BASE = process.env.REACT_APP_API_URL || 'https://xchatback123.xyz';
+if (!process.env.REACT_APP_API_URL) {
+  console.warn('REACT_APP_API_URL is not set! Using fallback: https://xchatback123.xyz');
+  console.warn('Please check your .env file and restart the React app.');
+}
 
 const designTokens = `
 :root {
@@ -589,8 +593,23 @@ function Register() {
       setSuccessMessage('');
       return;
     }
+    if (!email || !password) {
+      setErrorMessage('אימייל וסיסמה נדרשים');
+      setSuccessMessage('');
+      return;
+    }
     setErrorMessage('');
-    const payload = { email, password, botDefinition, googleCalendarToken, plan: selectedPlan, fullname, phone };
+    // Backend expects 'username' not 'email'
+    const payload = { 
+      username: email, 
+      email: email,
+      password, 
+      botDefinition, 
+      googleCalendarToken, 
+      plan: selectedPlan, 
+      fullname, 
+      phone 
+    };
     fetch(`${API_BASE}/savedata`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

@@ -11,6 +11,13 @@ import botIcon from './bot icon.png';
 import group5Image from './Group 5.png';
 import menuIcon from './menu.png';
 
+// Validate environment variable and set fallback
+const API_BASE = process.env.REACT_APP_API_URL || 'https://xchatback123.xyz';
+if (!process.env.REACT_APP_API_URL) {
+  console.warn('REACT_APP_API_URL is not set! Using fallback: https://xchatback123.xyz');
+  console.warn('Please check your .env file and restart the React app.');
+}
+
 const designTokens = `
 * { box-sizing: border-box; }
 html, body, #root { min-height: 100%; }
@@ -52,6 +59,31 @@ function Landing() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [activeSection]);
 
+  // Retry function with exponential backoff
+  const fetchWithRetry = async (url, options = {}, maxRetries = 3) => {
+    for (let attempt = 0; attempt < maxRetries; attempt++) {
+      try {
+        const response = await fetch(url, options);
+        if (response.ok) {
+          return response;
+        }
+        
+        // If it's a 500 error, try again
+        if (response.status === 500 && attempt < maxRetries - 1) {
+          const waitTime = Math.min(1000 * Math.pow(2, attempt), 5000); // Max 5 seconds
+          await new Promise(resolve => setTimeout(resolve, waitTime));
+          continue;
+        }
+        
+        return response;
+      } catch (err) {
+        if (attempt === maxRetries - 1) throw err;
+        const waitTime = Math.min(1000 * Math.pow(2, attempt), 5000);
+        await new Promise(resolve => setTimeout(resolve, waitTime));
+      }
+    }
+  };
+
   const loadBots = async (forceRefresh = false) => {
     const token = Cookies.get('testtoken');
     if (!token) return;
@@ -65,17 +97,24 @@ function Landing() {
     try {
       setBotsLoading(true);
       setError('');
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/fullchat?usertoken=${encodeURIComponent(token)}`);
+      const response = await fetchWithRetry(`${API_BASE}/fullchat?usertoken=${encodeURIComponent(token)}`);
+      
       if (response.ok) {
         const data = await response.json();
         setBots(data.chats || []);
         setBotsLastLoaded(now);
+        setError(''); // Clear any previous errors
       } else {
-        setError('Failed to load bots');
+        const errorData = await response.json().catch(() => ({}));
+        if (response.status === 500) {
+          setError('שרת זמנית לא זמין. נסה שוב בעוד רגע.');
+        } else {
+          setError(errorData.message || errorData.error || 'נכשל בטעינת הבוטים');
+        }
       }
     } catch (err) {
       console.error('Error loading bots:', err);
-      setError('Failed to load bots');
+      setError('נכשל בטעינת הבוטים. אנא רענן את הדף.');
     } finally {
       setBotsLoading(false);
     }
@@ -86,7 +125,7 @@ function Landing() {
     if (!token) return;
 
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/get-user-info?usertoken=${encodeURIComponent(token)}`);
+      const response = await fetch(`${API_BASE}/get-user-info?usertoken=${encodeURIComponent(token)}`);
       if (response.ok) {
         const data = await response.json();
         if (data && data.length > 0) {

@@ -3,6 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import Cookies from 'js-cookie';
 import logo from './logo.png';
 
+// Validate environment variable and set fallback
+const API_BASE = process.env.REACT_APP_API_URL || 'https://xchatback123.xyz';
+if (!process.env.REACT_APP_API_URL) {
+  console.warn('REACT_APP_API_URL is not set! Using fallback: https://xchatback123.xyz');
+  console.warn('Please check your .env file and restart the React app.');
+}
+
 const adminStyles = `
 .admin-root {
   min-height: 100vh;
@@ -687,7 +694,7 @@ function Admin() {
       }
       
       const response = await fetch(
-        `${process.env.REACT_APP_API_URL}/admin/users?usertoken=${encodeURIComponent(usertoken)}`
+        `${API_BASE}/admin/users?usertoken=${encodeURIComponent(usertoken)}`
       );
       
       if (!response.ok) {
@@ -741,7 +748,7 @@ function Admin() {
       setLoading(true);
       const usertoken = Cookies.get('testtoken') || Cookies.get('usertoken');
       const response = await fetch(
-        `${process.env.REACT_APP_API_URL}/admin/user/${userId}?usertoken=${encodeURIComponent(usertoken)}`
+        `${API_BASE}/admin/user/${userId}?usertoken=${encodeURIComponent(usertoken)}`
       );
       
       if (!response.ok) {
@@ -817,7 +824,7 @@ function Admin() {
       setDeleting(true);
       const usertoken = Cookies.get('testtoken') || Cookies.get('usertoken');
       const response = await fetch(
-        `${process.env.REACT_APP_API_URL}/admin/user/${userId}?usertoken=${encodeURIComponent(usertoken)}`,
+        `${API_BASE}/admin/user/${userId}?usertoken=${encodeURIComponent(usertoken)}`,
         { method: 'DELETE' }
       );
       

@@ -2,7 +2,11 @@ import React, { useState, useEffect } from 'react';
 import Cookies from 'js-cookie';
 import { useNavigate } from 'react-router-dom';
 // Point frontend → EC2 backend (HTTPS behind Nginx/Certbot)
-const API_BASE = process.env.REACT_APP_API_URL;
+const API_BASE = process.env.REACT_APP_API_URL || 'https://xchatback123.xyz';
+if (!process.env.REACT_APP_API_URL) {
+  console.warn('REACT_APP_API_URL is not set! Using fallback: https://xchatback123.xyz');
+  console.warn('Please check your .env file and restart the React app.');
+}
 
 const designTokens = `
 :root {

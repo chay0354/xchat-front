@@ -9,6 +9,11 @@ import Landing from './landing';
 import Admin from './admin';
 import logoLight from './logo-light.png';
 // Using environment variable directly
+const API_BASE = process.env.REACT_APP_API_URL || 'https://xchatback123.xyz';
+if (!process.env.REACT_APP_API_URL) {
+  console.warn('REACT_APP_API_URL is not set! Using fallback: https://xchatback123.xyz');
+  console.warn('Please check your .env file and restart the React app.');
+}
 
 /* ---------------- Shared Design Tokens ---------------- */
 const designTokens = `
@@ -473,7 +478,7 @@ function Login() {
 
       // ✅ Backend call using environment variable
       const authRes = await fetch(
-        `${process.env.REACT_APP_API_URL}/auth?username=${encodeURIComponent(emailInput)}&password=${encodeURIComponent(passwordInput)}`
+        `${API_BASE}/auth?username=${encodeURIComponent(emailInput)}&password=${encodeURIComponent(passwordInput)}`
       );
       if (!authRes.ok) {
         setError('Incorrect email or password.');
@@ -481,7 +486,7 @@ function Login() {
       }
 
       const tokenRes = await fetch(
-        `${process.env.REACT_APP_API_URL}/get-token?username=${encodeURIComponent(emailInput)}`
+        `${API_BASE}/get-token?username=${encodeURIComponent(emailInput)}`
       );
       if (!tokenRes.ok) throw new Error('Failed to fetch token');
       const data = await tokenRes.json();

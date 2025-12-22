@@ -2,7 +2,11 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Cookies from 'js-cookie';
 import { useNavigate } from 'react-router-dom';
 // Using environment variable directly
-const API_BASE = process.env.REACT_APP_API_URL;
+const API_BASE = process.env.REACT_APP_API_URL || 'https://xchatback123.xyz';
+if (!process.env.REACT_APP_API_URL) {
+  console.warn('REACT_APP_API_URL is not set! Using fallback: https://xchatback123.xyz');
+  console.warn('Please check your .env file and restart the React app.');
+}
 
 function FullChat() {
   const [chats, setChats] = useState([]);
@@ -35,6 +39,30 @@ function FullChat() {
     return { __html: html };
   };
 
+  // Retry function with exponential backoff
+  const fetchWithRetry = useCallback(async (url, options = {}, maxRetries = 3) => {
+    for (let attempt = 0; attempt < maxRetries; attempt++) {
+      try {
+        const response = await fetch(url, options);
+        if (response.ok) {
+          return response;
+        }
+        
+        // If it's a 500 error, try again
+        if (response.status === 500 && attempt < maxRetries - 1) {
+          const waitTime = Math.min(1000 * Math.pow(2, attempt), 5000); // Max 5 seconds
+          await new Promise(resolve => setTimeout(resolve, waitTime));
+          continue;
+        }
+        
+        return response;
+      } catch (err) {
+        if (attempt === maxRetries - 1) throw err;
+        const waitTime = Math.min(1000 * Math.pow(2, attempt), 5000);
+        await new Promise(resolve => setTimeout(resolve, waitTime));
+      }
+    }
+  }, []);
 
   // Load full conversation for a specific chat
   const loadFullConversation = useCallback(async (chat) => {
@@ -47,12 +75,18 @@ function FullChat() {
         return;
       }
 
-      const response = await fetch(
+      const response = await fetchWithRetry(
         `${API_BASE}/conversation?usertoken=${encodeURIComponent(usertoken)}&convtoken=${encodeURIComponent(chat.convtoken)}`
       );
       
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const errorData = await response.json().catch(() => ({}));
+        if (response.status === 500) {
+          setError('שרת זמנית לא זמין. נסה שוב בעוד רגע.');
+        } else {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return;
       }
       
       const data = await response.json();
@@ -63,9 +97,9 @@ function FullChat() {
       );
     } catch (error) {
       console.error('Error loading conversation:', error);
-      setError('Failed to load conversation');
+      setError('נכשל בטעינת השיחה');
     }
-  }, []);
+  }, [fetchWithRetry]);
 
   // Load chats on component mount
   useEffect(() => {
@@ -79,8 +113,8 @@ function FullChat() {
       console.log('Loading chats with token:', usertoken.substring(0, 8) + '***');
 
       try {
-        // Try with usertoken first (new version)
-        let response = await fetch(`${API_BASE}/fullchat?usertoken=${encodeURIComponent(usertoken)}`);
+        // Try with usertoken first (new version) - with retry logic
+        let response = await fetchWithRetry(`${API_BASE}/fullchat?usertoken=${encodeURIComponent(usertoken)}`);
         
         // If that fails with "No email provided", try with email parameter (old version)
         if (!response.ok) {
@@ -88,12 +122,12 @@ function FullChat() {
           if (errorData.error === 'No email provided') {
             console.log('Trying with email parameter for compatibility...');
             // Get email from token by calling get-user-info first
-            const userInfoResponse = await fetch(`${API_BASE}/get-user-info?usertoken=${encodeURIComponent(usertoken)}`);
+            const userInfoResponse = await fetchWithRetry(`${API_BASE}/get-user-info?usertoken=${encodeURIComponent(usertoken)}`);
             if (userInfoResponse.ok) {
               const userData = await userInfoResponse.json();
               const email = userData[0]?.email;
               if (email) {
-                response = await fetch(`${API_BASE}/fullchat?email=${encodeURIComponent(email)}`);
+                response = await fetchWithRetry(`${API_BASE}/fullchat?email=${encodeURIComponent(email)}`);
               }
             }
           }
@@ -103,10 +137,18 @@ function FullChat() {
           console.error('Fullchat response error:', response.status, response.statusText);
           const errorData = await response.json().catch(() => ({}));
           console.error('Error details:', errorData);
-          throw new Error(`Failed to load chats: ${response.status} ${response.statusText}`);
+          
+          if (response.status === 500) {
+            setError('שרת זמנית לא זמין. נסה שוב בעוד רגע.');
+          } else {
+            setError(errorData.message || errorData.error || 'נכשל בטעינת השיחות');
+          }
+          return;
         }
+        
         const data = await response.json();
         setChats(data.chats || []);
+        setError(''); // Clear any previous errors
         
         // Auto-select test chat if available
         const testChat = data.chats?.find(chat => chat.convtoken === 'testchat');
@@ -116,12 +158,12 @@ function FullChat() {
         }
       } catch (error) {
         console.error('Error loading chats:', error);
-        setError('Failed to load chats');
+        setError('נכשל בטעינת השיחות. אנא רענן את הדף.');
       }
     };
 
     loadChats();
-  }, [loadFullConversation]);
+  }, [loadFullConversation, fetchWithRetry]);
 
   // Auto-scroll to bottom
   useEffect(() => {
