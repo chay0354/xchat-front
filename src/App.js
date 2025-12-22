@@ -7,109 +7,166 @@ import FullChat from './fullchat';
 import EditUserInfo from './edituserinfo';
 import Landing from './landing';
 import Admin from './admin';
-import logo from './logo.png';
+import logoLight from './logo-light.png';
 // Using environment variable directly
 
 /* ---------------- Shared Design Tokens ---------------- */
 const designTokens = `
-:root {
-  --bg: #0f1420;
-  --panel: rgba(255,255,255,0.06);
-  --panel-strong: rgba(255,255,255,0.12);
-  --text: #e8ecf3;
-  --text-dim: #aab3c5;
-  --brand: #6ea8fe;
-  --brand-2: #8a7dff;
-  --ok: #22c55e;
-  --warn: #ef4444;
-  --border: rgba(255,255,255,0.12);
-  --shadow: 0 8px 30px rgba(0,0,0,0.25);
+@font-face {
+  font-family: 'Tel Aviv Brutalist';
+  src: url('./fonts/TelAviv-BrutalistBold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
 }
 
-.theme-light {
-  --bg: #f3f6fb;
-  --panel: #ffffff;
-  --panel-strong: #ffffff;
-  --text: #0f1420;
-  --text-dim: #5b667a;
-  --brand: #316bff;
-  --brand-2: #6b5cff;
-  --ok: #16a34a;
+@font-face {
+  font-family: 'Tel Aviv Brutalist';
+  src: url('./fonts/TelAviv-BrutalistRegular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Assistant';
+  src: url('./fonts/Assistant-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+}
+
+:root {
+  --primary-purple: #BA42BA;
+  --primary-purple-hover: #a035a0;
+  --gradient-start: #2D0A46;
+  --gradient-end: #6F19AC;
+  --text-dark: #002169;
+  --text-gray: #3C3C3C;
+  --bg-light: #F8F7FD;
+  --bg-white: #FFFFFF;
+  --border-light: #E2DEF7;
+  --ok: #22c55e;
   --warn: #dc2626;
-  --border: rgba(15,20,32,0.12);
-  --shadow: 0 10px 25px rgba(15,20,32,0.08);
+  --shadow: 0 20px 60px rgba(45, 10, 70, 0.15);
+  --shadow-card: 0 8px 32px rgba(45, 10, 70, 0.12);
 }
 
 * { box-sizing: border-box; }
 html, body, #root { height: 100%; }
-body { margin: 0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial; }
+body { 
+  margin: 0; 
+  font-family: 'Assistant', ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial;
+  direction: rtl;
+}
 `;
 
 /* ---------------- Login Page Styles ---------------- */
 const loginStyles = `
-html, body, #root { overflow: hidden; }
-
 .login-root {
-  height: 100dvh;
-  display: grid;
-  place-items: center;
-  color: var(--text);
-  background: radial-gradient(1200px 900px at -10% -20%, #1b2232 0%, var(--bg) 50%), var(--bg);
+  min-height: 100vh;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--bg-light) 0%, #F3F0FA 50%, #EDE8F5 100%);
+  position: relative;
+  overflow-y: auto;
+  padding: 24px 16px 32px;
+}
+
+/* Animated background blobs */
+.login-bg {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
   overflow: hidden;
 }
 
-.login-bg {
-  position: absolute; inset: 0; pointer-events: none;
-  background:
-    radial-gradient(500px 300px at 10% 10%, rgba(142,125,255,0.12), transparent 60%),
-    radial-gradient(600px 400px at 90% 80%, rgba(110,168,254,0.10), transparent 60%);
-  filter: blur(2px);
+.login-bg::before {
+  content: '';
+  position: absolute;
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, rgba(186, 66, 186, 0.15) 0%, transparent 70%);
+  top: -200px;
+  right: -100px;
+  animation: float-blob 8s ease-in-out infinite;
+}
+
+.login-bg::after {
+  content: '';
+  position: absolute;
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(circle, rgba(111, 25, 172, 0.12) 0%, transparent 70%);
+  bottom: -150px;
+  left: -100px;
+  animation: float-blob 10s ease-in-out infinite reverse;
+}
+
+@keyframes float-blob {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(30px, -30px) scale(1.1); }
 }
 
 .login-card {
   position: relative;
-  width: min(92vw, 420px);
-  padding: 28px 24px 20px;
-  border-radius: 18px;
-  border: 1px solid var(--border);
-  background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03));
-  box-shadow: var(--shadow);
-  backdrop-filter: blur(10px);
+  width: min(92vw, 440px);
+  padding: 40px 36px 32px;
+  border-radius: 24px;
+  border: 1px solid var(--border-light);
+  background: var(--bg-white);
+  box-shadow: var(--shadow-card);
+  z-index: 10;
+}
+
+.login-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 14px;
+  background: linear-gradient(90deg, var(--gradient-start), var(--gradient-end), var(--primary-purple));
+  border-radius: 24px 24px 0 0;
 }
 
 @media (max-width: 768px) {
+  .login-root {
+    align-items: center;
+    padding: 16px 16px 24px;
+  }
+
   .login-card {
-    width: min(95vw, 400px);
-    padding: 24px 20px 18px;
-    margin: 0 16px;
+    width: 95vw;
+    min-height: auto;
+    padding: 32px 24px 24px;
+    margin: 0 auto;
   }
   
   .login-title {
-    font-size: 20px;
+    font-size: 26px !important;
   }
   
   .login-sub {
-    font-size: 14px;
-    min-height: 20px;
+    font-size: 15px !important;
+    min-height: 24px;
   }
   
   .input {
-    padding: 14px 16px;
-    font-size: 16px; /* Prevents zoom on iOS */
+    padding: 16px 18px !important;
+    font-size: 16px !important;
   }
   
   .btn {
-    padding: 14px 12px;
-    font-size: 16px;
+    padding: 16px 14px !important;
+    font-size: 16px !important;
   }
   
   .actions {
-    grid-template-columns: 1fr;
-    gap: 12px;
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
   }
   
   .login-foot {
-    font-size: 11px;
+    font-size: 13px !important;
     text-align: center;
   }
 }
@@ -117,95 +174,253 @@ html, body, #root { overflow: hidden; }
 @media (max-width: 480px) {
   .login-card {
     width: 95vw;
-    padding: 20px 16px 16px;
-    margin: 0 8px;
+    padding: 28px 20px 20px;
+    margin: 16px auto;
+    border-radius: 20px;
   }
   
   .login-title {
-    font-size: 18px;
+    font-size: 24px !important;
   }
   
   .login-sub {
-    font-size: 13px;
-  }
-  
-  .input {
-    padding: 12px 14px;
-    font-size: 16px;
-  }
-  
-  .btn {
-    padding: 12px 10px;
-    font-size: 15px;
+    font-size: 14px !important;
   }
 }
 
 .login-header {
-  display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 24px;
 }
 
 .login-brand {
-  display: flex; align-items: center; gap: 10px; font-weight: 800; letter-spacing: .3px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  transition: transform 0.2s ease;
 }
-.login-dot { width: 12px; height: 12px; border-radius: 50%;
-  background: linear-gradient(135deg, var(--brand), var(--brand-2)); box-shadow: 0 0 14px var(--brand);
+
+.login-brand:hover {
+  transform: scale(1.02);
 }
 
-.theme-toggle {
-  background: var(--panel); color: var(--text);
-  border: 1px solid var(--border); border-radius: 10px;
-  padding: 8px 10px; cursor: pointer;
+.login-logo-container {
+  width: 164px;
+  height: 74px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 20px rgba(111, 25, 172, 0.3);
 }
-.theme-toggle:hover { border-color: var(--brand); }
 
-.login-title { font-size: 22px; font-weight: 800; margin: 6px 0 4px; }
-.login-sub { color: var(--text-dim); min-height: 22px; }
+.login-logo-container img {
+  height: 44px;
+  width: auto;
+  filter: brightness(0) invert(1);
+}
 
-.login-form { display: grid; gap: 12px; margin-top: 18px; }
+.login-title {
+  font-family: 'Tel Aviv Brutalist', sans-serif;
+  font-size: 30px;
+  font-weight: 400;
+  color: var(--text-dark);
+  margin: 0 0 8px;
+  text-align: center;
+}
 
-.input-wrap { display: grid; gap: 6px; }
-.input-label { font-size: 12px; color: var(--text-dim); }
+.login-sub {
+  font-family: 'Assistant', sans-serif;
+  color: var(--text-gray);
+  font-size: 16px;
+  min-height: 26px;
+  text-align: center;
+  line-height: 1.5;
+}
+
+.login-form {
+  display: grid;
+  gap: 18px;
+  margin-top: 8px;
+}
+
+.input-wrap {
+  display: grid;
+  gap: 8px;
+}
+
+.input-label {
+  font-family: 'Assistant', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-dark);
+}
 
 .input {
   width: 100%;
-  padding: 12px 14px;
-  background: var(--panel);
-  color: var(--text);
-  border: 1px solid var(--border);
+  padding: 14px 18px;
+  background: var(--bg-light);
+  color: var(--text-dark);
+  border: 2px solid transparent;
   border-radius: 12px;
   outline: none;
+  font-family: 'Assistant', sans-serif;
+  font-size: 15px;
+  transition: all 0.2s ease;
 }
-.input::placeholder { color: var(--text-dim); }
+
+.input:focus {
+  border-color: var(--primary-purple);
+  background: var(--bg-white);
+  box-shadow: 0 0 0 4px rgba(186, 66, 186, 0.1);
+}
+
+.input::placeholder {
+  color: #999;
+}
 
 .actions {
-  display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 6px;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+  margin-top: 10px;
+  justify-items: center;
+  align-items: center;
+  margin-top: 20px;
+  width: 100%;
 }
+
+.actions > * {
+  width: min(360px, 100%);
+}
+
 .btn {
-  padding: 12px 10px;
+  padding: 14px 12px;
   border-radius: 12px;
-  border: 1px solid var(--border);
-  background: var(--panel);
-  color: var(--text);
+  border: 2px solid var(--border-light);
+  background: var(--bg-white);
+  color: var(--text-dark);
   cursor: pointer;
-  transition: transform .05s ease, background .2s ease, border-color .2s ease;
+  transition: all 0.2s ease;
+  font-family: 'Assistant', sans-serif;
   font-weight: 600;
+  font-size: 15px;
+  
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  width: 100%; 
 }
-.btn:hover { background: var(--panel-strong); border-color: var(--brand); transform: translateY(-1px); }
-.btn--primary { border-color: var(--brand); }
-.btn--muted { border-style: dashed; }
+.btn:hover {
+  border-color: var(--primary-purple);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(186, 66, 186, 0.15);
+}
+
+.btn--primary {
+  background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+  border: none;
+  color: white;
+  box-shadow: 0 4px 15px rgba(111, 25, 172, 0.3);
+
+}
+
+.btn--primary:hover {
+  background: linear-gradient(135deg, var(--gradient-end), var(--primary-purple));
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(111, 25, 172, 0.4);
+}
+
+.btn--secondary {
+  background: var(--bg-light);
+  border: 2px solid var(--border-light);
+  color: var(--text-dark);
+}
+
+.btn--secondary:hover {
+  background: var(--bg-white);
+  border-color: var(--primary-purple);
+}
+
+.btn--muted {
+  background: transparent;
+  border: 2px dashed var(--border-light);
+  color: var(--text-gray);
+}
+
+.btn--muted:hover {
+  border-color: var(--primary-purple);
+  color: var(--primary-purple);
+}
+
+.btn--back {
+  background: transparent;
+  border: none;
+  color: var(--text-gray);
+  font-size: 13px;
+  padding: 8px 16px;
+}
+
+.btn--back:hover {
+  color: var(--primary-purple);
+  background: rgba(186, 66, 186, 0.05);
+  transform: none;
+  box-shadow: none;
+}
 
 .login-foot {
-  margin-top: 14px;
-  font-size: 12px; color: var(--text-dim);
-  display: flex; align-items: center; gap: 8px; justify-content: center;
+  padding-top: 15px;
+  border-top: 1px solid var(--border-light);
+  font-size: 14px;
+  color: var(--text-gray);
+  display: flex;
+  
+  gap: 8px;
+  justify-content: center;
+  font-family: 'Assistant', sans-serif;
+}
+
+.login-foot a {
+  color: var(--primary-purple);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.login-foot a:hover {
+  text-decoration: underline;
 }
 
 .alert {
-  margin-top: 10px;
-  color: #fff;
-  background: linear-gradient(180deg, rgba(239,68,68,0.30), rgba(239,68,68,0.15));
-  border: 1px solid rgba(239,68,68,0.45);
-  padding: 8px 10px; border-radius: 10px;
+  margin-top: 12px;
+  color: var(--warn);
+  background: rgba(220, 38, 38, 0.08);
+  border: 1px solid rgba(220, 38, 38, 0.2);
+  padding: 12px 16px;
+  border-radius: 12px;
+  font-size: 14px;
+  text-align: center;
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin: 8px 0;
+  color: var(--text-gray);
+  font-size: 13px;
+}
+
+.divider::before,
+.divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border-light);
 }
 `;
 
@@ -278,7 +493,7 @@ function Login() {
       navigate('/', { replace: true });
     } catch (e) {
       console.error(e);
-      setError('Something went wrong. Please try again.');
+      setError('לא הצלחנו להתחבר. אנא ודא שכתובת האימייל והסיסמה נכונים ונסה שוב.');
     }
   };
 
@@ -286,31 +501,29 @@ function Login() {
   const handleBackToLanding = () => navigate('/');
 
   return (
-    <div className={`login-root ${theme === 'dark' ? 'theme-dark' : 'theme-light'}`}>
+    <div className="login-root">
       <style>{designTokens + loginStyles}</style>
       <div className="login-bg" />
-      <div className="login-card">
+      <div className="login-card ">
         <div className="login-header">
-          <p></p>
-          <div className="login-brand" onClick={handleBackToLanding} style={{ cursor: 'pointer' }}>
-            <img src={logo} alt="Logo" style={{  height: '38px' }} />
+          <div className="login-brand" onClick={handleBackToLanding}>
+            <div className="login-logo-container">
+              <img src={logoLight} alt="Logo" />
+            </div>
           </div>
-          {/* <button className="theme-toggle" onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')} aria-label="Toggle theme">
-            {theme === 'dark' ? '☀️ Light' : '🌙 Dark'}
-          </button> */}
         </div>
 
-        <div className="login-title">ברוכים השבים :)</div>
-        <div className="login-sub">{currentText}</div>
+        <div className="login-title">ברוכים השבים! 👋</div>
+        <div className="login-sub">{currentText || 'התחברו כדי להמשיך לנהל את הבוטים שלכם'}</div>
 
         <div className="login-form" onKeyDown={(e) => e.key === 'Enter' && handleLogin()}>
           <div className="input-wrap">
-            <label htmlFor="email" className="input-label">אימייל</label>
+            <label htmlFor="email" className="input-label">כתובת אימייל</label>
             <input
               id="email"
               type="email"
               className="input"
-              placeholder="לדוגמא: user@example.com"
+              placeholder="your@email.com"
               value={emailInput}
               onChange={(e) => setEmailInput(e.target.value)}
               autoFocus
@@ -324,32 +537,31 @@ function Login() {
               id="password"
               type="password"
               className="input"
-              // placeholder="••••••••"
+              placeholder="הזינו את הסיסמה שלכם"
               value={passwordInput}
               onChange={(e) => setPasswordInput(e.target.value)}
               autoComplete="current-password"
             />
           </div>
 
-          <div className="actions">
-            <button className="btn btn--primary" type="button" onClick={handleLogin}>
-              כניסה
-            </button>
-            <button className="btn btn--muted" type="button" onClick={handleRegister}>
-              הרשמה
-            </button>
-          </div>
-
-          <div style={{ textAlign: 'center', marginTop: '16px' }}>
-            <button className="btn btn--muted" type="button" onClick={handleBackToLanding} style={{ fontSize: '12px', padding: '6px 12px' }}>
-              חזרה לדף הבית
-            </button>
-          </div>
-
           {error && <div className="alert">{error}</div>}
 
+          <div className="actions ">
+            <button className="btn btn--primary " type="button" onClick={handleLogin}>
+              התחברות
+            </button>
+            <div className="divider">או</div>
+
+            <button className="btn btn--secondary" type="button" onClick={handleRegister}>
+              יצירת חשבון
+            </button>
+          </div>
+
+
+   
+
           <div className="login-foot">
-            שירות לקוחות (טלפון+וואצאפ): 054-5779917
+            צריכים עזרה? <a href="https://wa.me/972545779917">054-5779917</a>
           </div>
         </div>
       </div>

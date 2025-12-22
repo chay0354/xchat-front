@@ -65,6 +65,9 @@ const adminStyles = `
   transition: all 0.2s ease;
   font-weight: 600;
   font-size: 14px;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .btn:hover {

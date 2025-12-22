@@ -6,6 +6,31 @@ const API_BASE = process.env.REACT_APP_API_URL;
 
 const designTokens = `
 :root {
+  --primary-purple: #BA42BA;
+}
+
+@font-face {
+  font-family: 'Tel Aviv Brutalist';
+  src: url('./fonts/TelAviv-BrutalistBold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Tel Aviv Brutalist';
+  src: url('./fonts/TelAviv-BrutalistRegular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Assistant';
+  src: url('./fonts/Assistant-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+}
+
+:root {
   --bg: #0f1420;
   --panel: rgba(255,255,255,0.06);
   --panel-strong: rgba(255,255,255,0.12);
@@ -19,43 +44,69 @@ const designTokens = `
   --shadow: 0 8px 30px rgba(0,0,0,0.25);
 }
 .theme-light {
-  --bg: #f3f6fb;
-  --panel: #ffffff;
-  --panel-strong: #ffffff;
-  --text: #0f1420;
-  --text-dim: #5b667a;
-  --brand: #316bff;
-  --brand-2: #6b5cff;
+  --bg: #F8F7FD;
+  --panel: #FFFFFF;
+  --panel-strong: #FFFFFF;
+  --text: #002169;
+  --text-dim: #3C3C3C;
+  --brand: #2D0A46;
+  --brand-2: #6F19AC;
   --ok: #16a34a;
   --warn: #dc2626;
-  --border: rgba(15,20,32,0.12);
-  --shadow: 0 10px 25px rgba(15,20,32,0.08);
+  --border: #E2DEF7;
+  --shadow: 0 20px 60px rgba(45, 10, 70, 0.15);
 }
 * { box-sizing: border-box; }
 html, body, #root { min-height: 100%; }
-body { margin: 0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial; }
+body { margin: 0; font-family: 'Assistant', ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial; }
 `;
 
 const pageStyles = `
 .reg-root {
-  min-height: 100dvh; display: flex; align-items: center; justify-content: center; color: var(--text);
-  background: radial-gradient(1200px 900px at -10% -20%, #1b2232 0%, var(--bg) 50%), var(--bg);
-  padding: 20px; position: relative;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text);
+  background: linear-gradient(135deg, var(--bg) 0%, #F3F0FA 50%, #EDE8F5 100%);
+  padding: 24px 16px 32px;
+  position: relative;
 }
-.reg-bg { position: absolute; inset: 0; pointer-events: none;
-  background:
-    radial-gradient(500px 300px at 10% 10%, rgba(142,125,255,0.12), transparent 60%),
-    radial-gradient(600px 400px at 90% 80%, rgba(110,168,254,0.10), transparent 60%);
-  filter: blur(2px);
+.reg-bg { 
+  position: absolute; 
+  inset: 0; 
+  pointer-events: none;
 }
 .reg-card {
-  position: relative; width: min(96vw, 980px); max-height: 90vh;
-  border: 1px solid var(--border); border-radius: 20px;
-  background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03));
-  box-shadow: var(--shadow); backdrop-filter: blur(10px);
-  display: flex; flex-direction: column; overflow: hidden;
+  position: relative;
+  width: min(96vw, 980px);
+  max-height: 90vh;
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  background: #FFFFFF;
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
-.reg-header { display: flex; align-items: center; justify-content: space-between; padding: 10px 16px; border-bottom: 1px solid var(--border); }
+.reg-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 14px;
+  background: linear-gradient(90deg, var(--brand), var(--brand-2), #BA42BA);
+  border-radius: 24px 24px 0 0;
+}
+.reg-header { 
+  display: flex; 
+  align-items: center; 
+  justify-content: space-between; 
+  padding: 18px 24px 10px; 
+  border-bottom: 1px solid var(--border); 
+  background: #FFFFFF;
+}
 .reg-brand { display: flex; align-items: center; gap: 10px; font-weight: 900; letter-spacing: .3px; }
 .reg-dot { width: 12px; height: 12px; border-radius: 50%;
   background: linear-gradient(135deg, var(--brand), var(--brand-2)); box-shadow: 0 0 14px var(--brand);
@@ -64,44 +115,130 @@ const pageStyles = `
   border: 1px solid var(--border); border-radius: 10px; padding: 8px 10px; cursor: pointer;
 }
 .theme-toggle:hover { border-color: var(--brand); }
-.reg-steps { padding: 8px 18px; border-bottom: 1px solid var(--border); display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.reg-steps { 
+  padding: 12px 16px; 
+  margin: 0 12px 12px;
+  background: #FFFFFF;
+  border: 1px solid var(--border); 
+  border-radius: 18px;
+  display: grid; 
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); 
+  gap: 12px; 
+  box-shadow: 0 12px 30px rgba(45, 10, 70, 0.08);
+}
 .step {
-  display: grid; grid-template-columns: 36px 1fr; align-items: center; gap: 8px;
-  padding: 8px; border-radius: 12px; border: 1px dashed var(--border); color: var(--text-dim);
-  background: var(--panel);
+  display: grid; grid-template-columns: 42px 1fr; align-items: center; gap: 12px;
+  padding: 12px 14px; border-radius: 14px; border: 1px solid #E8E3F5; color: var(--text-dim);
+  background: #F8F7FD;
+  box-shadow: 0 8px 22px rgba(45, 10, 70, 0.06);
+  transition: all 0.2s ease;
 }
-.step.active { border: 1px solid var(--brand); color: var(--text); background: var(--panel-strong); }
+.step:hover {
+  border-color: var(--brand);
+  background: #ffffff;
+  box-shadow: 0 10px 28px rgba(45, 10, 70, 0.1);
+}
+.step.active { 
+  border: 1px solid var(--brand); 
+  color: var(--text); 
+  background: linear-gradient(135deg, rgba(45,10,70,0.05), rgba(111,25,172,0.08)); 
+  box-shadow: 0 12px 32px rgba(45, 10, 70, 0.14);
+}
 .step-num {
-  width: 36px; height: 36px; border-radius: 10px; display:flex; align-items:center; justify-content:center;
-  background: var(--panel-strong); font-weight: 800;
+  width: 42px; height: 42px; border-radius: 12px; display:flex; align-items:center; justify-content:center;
+  background: linear-gradient(135deg, var(--brand), var(--brand-2)); 
+  color: #FFFFFF;
+  font-weight: 800;
+  box-shadow: 0 6px 18px rgba(111, 25, 172, 0.25);
 }
-.step-title { font-weight: 700; }
+.step-title { 
+  font-weight: 700; 
+  font-size: 15px;
+  color: var(--text);
+}
 .reg-content { padding: 12px; overflow-y: auto; flex: 1; min-height: 0; }
-.section { display: grid; gap: 10px; max-width: 760px; margin: 0 auto; }
-.label { font-size: 12px; color: var(--text-dim); }
+.section { display: grid; gap: 14px; padding: 8px 4px; }
+.section h2 {
+  margin: 0;
+  font-family: 'Tel Aviv Brutalist', sans-serif;
+  font-weight: 400;
+  font-size: 28px;
+  color: var(--text);
+  letter-spacing: -0.02em;
+}
+.label { 
+  font-size: 13px; 
+  color: var(--text-dim); 
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+.form-row {
+  display: grid;
+  gap: 14px 20px;
+  width: 100%;
+}
+.form-row.two {
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+}
+.form-row.single {
+  grid-template-columns: 1fr;
+}
+.field {
+  display: grid;
+  gap: 6px;
+}
+.field.span-all {
+  grid-column: 1 / -1;
+}
 .input, .textarea, .select {
   width: 100%; padding: 12px 14px; border-radius: 12px; border: 1px solid var(--border);
-  background: var(--panel); color: var(--text); outline: none;
+  background: #F8F7FD; color: var(--text); outline: none;
+  font-family: 'Assistant', sans-serif;
+  transition: border-color .2s ease, box-shadow .2s ease, background .2s ease;
+}
+.input:focus, .textarea:focus, .select:focus {
+  border-color: var(--brand);
+  background: #ffffff;
+  box-shadow: 0 0 0 4px rgba(186, 66, 186, 0.08);
+}
+.input::placeholder, .textarea::placeholder {
+  color: #9ca3af;
 }
 .textarea { resize: vertical; min-height: 120px; }
 .actions { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
 .btn {
   padding: 12px 10px; border-radius: 12px; border: 1px solid var(--border);
-  background: var(--panel); color: var(--text); cursor: pointer; font-weight: 700;
+  background: #FFFFFF; color: var(--text); cursor: pointer; font-weight: 700;
   transition: transform .05s ease, background .2s ease, border-color .2s ease;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
 }
 .btn:hover { background: var(--panel-strong); border-color: var(--brand); transform: translateY(-1px); }
 .btn--primary { border-color: var(--brand); }
 .btn--danger  { border-color: var(--warn); }
 .btn--wide { grid-column: 1 / -1; }
 .alert {
-  color: #fff; border-radius: 10px; padding: 10px 12px;
-  border: 1px solid rgba(239,68,68,0.45);
-  background: linear-gradient(180deg, rgba(239,68,68,0.30), rgba(239,68,68,0.15));
+  color: #C53030;
+  border-radius: 12px;
+  padding: 12px 14px;
+  border: 1px solid #FBC4C4;
+  background: #FFF6F6;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  box-shadow: 0 8px 20px rgba(197, 48, 48, 0.08);
 }
 .success {
-  color: #0e1; border: 1px solid rgba(34,197,94,0.45);
-  background: linear-gradient(180deg, rgba(34,197,94,0.25), rgba(34,197,94,0.12));
+  color: #166534;
+  border: 1px solid #BBF7D0;
+  background: #F0FFF4;
+  border-radius: 12px;
+  padding: 12px 14px;
+  font-weight: 600;
+  box-shadow: 0 8px 20px rgba(22, 101, 52, 0.08);
 }
 .codebox {
   border-radius: 12px; border: 1px solid var(--border);
@@ -123,13 +260,15 @@ const pageStyles = `
 
 @media (max-width: 768px) {
   .reg-root { 
-    padding: 10px; 
+    padding: 16px; 
     min-height: 100vh;
+    align-items: center;
+    justify-content: center;
   }
   
   .reg-card { 
-    width: 100%; 
-    max-height: 95vh; 
+    width: 100%;
+    max-height: none;
     border-radius: 16px;
   }
   
@@ -142,34 +281,140 @@ const pageStyles = `
     max-width: 100%;
   }
   
+  /* Mobile Timeline Steps */
   .reg-steps {
-    padding: 6px 12px;
-    gap: 6px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 16px 12px;
+    margin: 0 8px 12px;
+    background: #FFFFFF;
+    border-radius: 16px;
+    gap: 4px;
+    position: relative;
+    box-shadow: 0 8px 24px rgba(45, 10, 70, 0.08);
+  }
+  
+  /* Timeline connecting line */
+  .reg-steps::before {
+    content: '';
+    position: absolute;
+    top: 32px;
+    left: 24px;
+    right: 24px;
+    height: 3px;
+    background: #E8E3F5;
+    z-index: 0;
   }
   
   .step {
-    padding: 6px;
-    font-size: 13px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 0;
+    border: none;
+    background: transparent;
+    box-shadow: none;
+    position: relative;
+    z-index: 1;
+    flex: 1;
+    max-width: 80px;
+  }
+  
+  .step:hover {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+  }
+  
+  .step.active {
+    background: transparent;
+    border: none;
+    box-shadow: none;
   }
   
   .step-num {
-    width: 32px;
-    height: 32px;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
     font-size: 14px;
+    font-weight: 800;
+    background: #E8E3F5;
+    color: #9CA3AF;
+    box-shadow: none;
+    transition: all 0.3s ease;
+  }
+  
+  .step.active .step-num {
+    background: linear-gradient(135deg, var(--brand), var(--brand-2));
+    color: #FFFFFF;
+    box-shadow: 0 4px 12px rgba(111, 25, 172, 0.35);
+    transform: scale(1.1);
+  }
+  
+  /* Completed steps (before active) */
+  .step.completed .step-num {
+    background: var(--ok);
+    color: #FFFFFF;
   }
   
   .step-title {
-    font-size: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    color: #9CA3AF;
+    text-align: center;
+    line-height: 1.2;
+    transition: color 0.3s ease;
+  }
+  
+  .step.active .step-title {
+    color: var(--brand);
+    font-weight: 700;
+  }
+  
+  .step.completed .step-title {
+    color: var(--ok);
+  }
+  
+  /* Hide step description on mobile */
+  .step > div > div:last-child {
+    display: none;
   }
   
   .input, .textarea, .select {
     padding: 14px 16px;
-    font-size: 16px; /* Prevents zoom on iOS */
+    font-size: 16px;
   }
   
   .btn {
     padding: 14px 12px;
     font-size: 16px;
+  }
+
+  .btn--solid-primary {
+    background: linear-gradient(135deg, var(--brand), var(--brand-2));
+    color: #ffffff;
+    border-color: transparent;
+    text-align: center;
+    justify-content: center;
+  }
+    .btn--solid-primary2 {
+    background: linear-gradient(135deg, rgb(187, 0, 255), rgb(158, 95, 179));
+    color: #ffffff;
+    border-color: transparent;
+    text-align: center;
+    justify-content: center;
+  }
+      .btn--solid-primary2:hover {
+    background: linear-gradient(135deg, rgb(158, 95, 179), rgb(187, 0, 255));
+    transform: translateY(-2px);
+  }
+  
+  .btn--solid-primary:hover {
+    background: linear-gradient(135deg, var(--brand-2), var(--brand));
+    transform: translateY(-2px);
   }
   
   .actions {
@@ -201,23 +446,23 @@ const pageStyles = `
   }
   
   .reg-steps {
-    padding: 4px 8px;
-    gap: 4px;
+    padding: 14px 8px;
+    margin: 0 4px 10px;
   }
   
-  .step {
-    padding: 4px;
-    font-size: 12px;
+  .reg-steps::before {
+    left: 20px;
+    right: 20px;
   }
   
   .step-num {
-    width: 28px;
-    height: 28px;
-    font-size: 12px;
+    width: 32px;
+    height: 32px;
+    font-size: 13px;
   }
   
   .step-title {
-    font-size: 11px;
+    font-size: 10px;
   }
   
   .input, .textarea, .select {
@@ -228,6 +473,14 @@ const pageStyles = `
   .btn {
     padding: 12px 10px;
     font-size: 15px;
+  }
+
+  .btn--solid-primary {
+    background: linear-gradient(135deg, var(--brand), var(--brand-2));
+    color: #ffffff;
+    border-color: transparent;
+    text-align: center;
+    justify-content: center;
   }
   
   .codebox {
@@ -277,7 +530,7 @@ function Register() {
       return;
     }
     if (password !== confirmPassword) {
-      setErrorMessage('Passwords do not match.');
+      setErrorMessage('הסיסמאות אינם תואמות');
       setSuccessMessage('');
       return;
     }
@@ -286,18 +539,18 @@ function Register() {
     Cookies.set('password', password, { expires: 1, path: '/', sameSite: 'Lax' });
     Cookies.set('fullname', fullname, { expires: 1, path: '/', sameSite: 'Lax' });
     Cookies.set('phone', phone, { expires: 1, path: '/', sameSite: 'Lax' });
-    setSuccessMessage('Saved!');
+    setSuccessMessage('נשמרו פרטים בהצלחה!');
     setTimeout(() => { setSuccessMessage(''); setCurrentStage(2); }, 900);
   };
 
   const handleStage2Next = () => {
     if (!selectedPlan) {
-      setErrorMessage('Please select a plan to continue.');
+      setErrorMessage('יש לבחור תוכנית כדי להמשיך.');
       setSuccessMessage('');
       return;
     }
     setErrorMessage('');
-    setSuccessMessage('Plan selected!');
+    setSuccessMessage('התוכנית נבחרה בהצלחה!');
     setTimeout(() => { setSuccessMessage(''); setCurrentStage(3); }, 900);
   };
 
@@ -306,7 +559,7 @@ function Register() {
 
   const handleDefine = () => {
     if (!websiteUrl) {
-      setErrorMessage('Please enter your website URL before defining your bot.');
+      setErrorMessage('יש להזין את כתובת האתר שלך לפני שתוכל להגדיר את הבוט.');
       setSuccessMessage('');
       return;
     }
@@ -326,13 +579,13 @@ function Register() {
           setErrorMessage(data.error || 'Failed to get bot definition.');
         }
       })
-      .catch(() => setErrorMessage('Error sending request to server.'))
+      .catch(() => setErrorMessage('לא ניתן לסרוק את האתר שלך בשל שגיאה בשרת.'))
       .finally(() => setIsDefining(false));
   };
 
   const handleStage3Next = () => {
     if (!botDefinition) {
-      setErrorMessage('צריך קודם ללחוץ על "הגדר" כדי לקבל הגדרות לבוט');
+      setErrorMessage('צריך קודם ללחוץ על "סרוק את האתר שלי" כדי לקבל הגדרות לבוט');
       setSuccessMessage('');
       return;
     }
@@ -355,7 +608,7 @@ function Register() {
           setErrorMessage(data.error || 'Failed to save data.');
         }
       })
-      .catch(() => setErrorMessage('Error sending data to server.'));
+      .catch(() => setErrorMessage('לא ניתן לשמור את המידע בשל שגיאה בשרת.'));
   };
 
   const userToken = Cookies.get('usertoken') || 'Token not available';
@@ -400,68 +653,75 @@ print(response.json())`;
           {!!errorMessage && <div className="alert">{errorMessage}</div>}
           {!!successMessage && <div className="success">{successMessage}</div>}
 
-          <div>
-            <div className="label">שם מלא</div>
-            <input
-              className="input"
-              type="text"
-              placeholder="e.g. יוסי כהן"
-              value={fullname}
-              onChange={(e) => setFullname(e.target.value)}
-              autoComplete="name"
-            />
+          <div className="form-row two">
+            <div className="field">
+              <div className="label">שם מלא</div>
+              <input
+                className="input"
+                type="text"
+                placeholder="e.g. יוסי כהן"
+                value={fullname}
+                onChange={(e) => setFullname(e.target.value)}
+                autoComplete="name"
+              />
+            </div>
+
+            <div className="field">
+              <div className="label">טלפון</div>
+              <input
+                className="input"
+                type="tel"
+                placeholder="e.g. 050-1234567"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                autoComplete="tel"
+              />
+            </div>
           </div>
 
-          <div>
-            <div className="label">אימייל</div>
-            <input
-              className="input"
-              type="email"
-              placeholder="e.g. user@example.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              autoComplete="email"
-            />
+          <div className="form-row two">
+            <div className="field">
+
+                            <div className="label">וודא סיסמה</div>
+              <input
+                className="input"
+                type="password"
+                placeholder=""
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                autoComplete="new-password"
+              />
+            </div>
+
+            <div className="field">
+              <div className="label">סיסמה</div>
+              <input
+                className="input"
+                type="password"
+                placeholder=""
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                autoComplete="new-password"
+              />
+            </div>
           </div>
 
-          <div>
-            <div className="label">טלפון</div>
-            <input
-              className="input"
-              type="tel"
-              placeholder="e.g. 050-1234567"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              autoComplete="tel"
-            />
-          </div>
-
-          <div>
-            <div className="label">סיסמה</div>
-            <input
-              className="input"
-              type="password"
-              placeholder=""
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              autoComplete="new-password"
-            />
-          </div>
-
-          <div>
-            <div className="label">וודא סיסמה</div>
-            <input
-              className="input"
-              type="password"
-              placeholder=""
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              autoComplete="new-password"
-            />
+          <div className="form-row two">            
+            <div className="field span-all">
+              <div className="label">אימייל</div>
+              <input
+                className="input"
+                type="email"
+                placeholder="e.g. user@example.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                autoComplete="email"
+              />
+            </div>
           </div>
 
           <div className="actions">
-            <button className="btn btn--primary btn--wide" onClick={handleStage1Next}>המשך</button>
+            <button className="btn btn--solid-primary btn--wide" onClick={handleStage1Next}>המשך</button>
           </div>
         </div>
       );
@@ -513,7 +773,7 @@ print(response.json())`;
 
           <div className="actions">
             <button className="btn" onClick={handleStage2Back}>חזור</button>
-            <button className="btn btn--primary" onClick={handleStage2Next}>הבא</button>
+            <button className="btn btn--solid-primary" onClick={handleStage2Next}>המשך</button>
           </div>
         </div>
       );
@@ -560,17 +820,17 @@ print(response.json())`;
 
           <div className="actions">
             <button className="btn" onClick={handleStage3Back}>חזור</button>
-            <button className="btn" onClick={handleDefine} disabled={isDefining}>
+            <button className="btn btn--solid-primary2" onClick={handleDefine} disabled={isDefining}>
               {isDefining ? (
                 <>
                   <span className="spinner" style={{marginRight: '8px'}}></span>
-                  מגדיר...
+                  סורק...
                 </>
               ) : (
-                'הגדר'
+                'סרוק את האתר שלי'
               )}
             </button>
-            <button className="btn btn--primary" onClick={handleStage3Next}>הבא</button>
+            <button className="btn btn--solid-primary" onClick={handleStage3Next}>המשך</button>
           </div>
         </div>
       );
@@ -639,37 +899,35 @@ print(response.json())`;
             <div className="reg-dot" />
             <div>בוא נתחיל...</div>
           </div>
-          <button className="theme-toggle" onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}>
-            {theme === 'dark' ? '☀️ Light' : '🌙 Dark'}
-          </button>
+
         </div>
 
         <div className="reg-steps">
-          <div className={`step ${currentStage === 1 ? 'active' : ''}`}>
-            <div className="step-num">1</div>
+          <div className={`step ${currentStage === 1 ? 'active' : ''} ${currentStage > 1 ? 'completed' : ''}`}>
+            <div className="step-num">{currentStage > 1 ? '✓' : '1'}</div>
             <div>
               <div className="step-title">חשבון</div>
               <div style={{ fontSize: 12, color: 'var(--text-dim)' }}>פרטים אישיים</div>
             </div>
           </div>
-          <div className={`step ${currentStage === 2 ? 'active' : ''}`}>
-            <div className="step-num">2</div>
+          <div className={`step ${currentStage === 2 ? 'active' : ''} ${currentStage > 2 ? 'completed' : ''}`}>
+            <div className="step-num">{currentStage > 2 ? '✓' : '2'}</div>
             <div>
               <div className="step-title">תכנית</div>
               <div style={{ fontSize: 12, color: 'var(--text-dim)' }}>בחר את התוכנית שלך</div>
             </div>
           </div>
-          <div className={`step ${currentStage === 3 ? 'active' : ''}`}>
-            <div className="step-num">3</div>
+          <div className={`step ${currentStage === 3 ? 'active' : ''} ${currentStage > 3 ? 'completed' : ''}`}>
+            <div className="step-num">{currentStage > 3 ? '✓' : '3'}</div>
             <div>
-              <div className="step-title">הגדר את הבוט שלך</div>
+              <div className="step-title">בוט</div>
               <div style={{ fontSize: 12, color: 'var(--text-dim)' }}>אתר, לוח שנה, הגדרות</div>
             </div>
           </div>
           <div className={`step ${currentStage === 4 ? 'active' : ''}`}>
             <div className="step-num">4</div>
             <div>
-              <div className="step-title">API</div>
+              <div className="step-title">סיום</div>
               <div style={{ fontSize: 12, color: 'var(--text-dim)' }}>טוקן ודוגמאות</div>
             </div>
           </div>
