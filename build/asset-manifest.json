@@ -1,0 +1,28 @@
+{
+  "files": {
+    "main.css": "/static/css/main.35a41540.css",
+    "main.js": "/static/js/main.feb305a9.js",
+    "static/js/453.275a89b7.chunk.js": "/static/js/453.275a89b7.chunk.js",
+    "static/media/Ellipse 6252.png": "/static/media/Ellipse 6252.b870733282062fbefa95.png",
+    "static/media/Ellipse 6253.png": "/static/media/Ellipse 6253.9d7a47237017e5cd4845.png",
+    "static/media/Group 2 (2).png": "/static/media/Group 2 (2).a74a00cb17d7c11cc714.png",
+    "static/media/logo.png": "/static/media/logo.6e200ccd00b360365b5a.png",
+    "static/media/Group 5.png": "/static/media/Group 5.24168921a92197c110fc.png",
+    "static/media/logo-light.png": "/static/media/logo-light.1736cf712fd5951faa13.png",
+    "static/media/Assistant-Regular.ttf": "/static/media/Assistant-Regular.7fd835c6b13d654724ab.ttf",
+    "static/media/TelAviv-BrutalistBold.ttf": "/static/media/TelAviv-BrutalistBold.93145202fe852888777a.ttf",
+    "static/media/TelAviv-BrutalistRegular.ttf": "/static/media/TelAviv-BrutalistRegular.52a48a6457a25b71fed2.ttf",
+    "static/media/TelAviv-ModernistRegular.ttf": "/static/media/TelAviv-ModernistRegular.7837ecef2fef487734f0.ttf",
+    "static/media/TelAviv-ModernistBold.ttf": "/static/media/TelAviv-ModernistBold.16556bf46541d6ad46ed.ttf",
+    "static/media/bot icon.png": "/static/media/bot icon.7628ccfdddba9de713ec.png",
+    "static/media/logos.png": "/static/media/logos.551bd23b3c990eb1f71e.png",
+    "index.html": "/index.html",
+    "main.35a41540.css.map": "/static/css/main.35a41540.css.map",
+    "main.feb305a9.js.map": "/static/js/main.feb305a9.js.map",
+    "453.275a89b7.chunk.js.map": "/static/js/453.275a89b7.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.35a41540.css",
+    "static/js/main.feb305a9.js"
+  ]
+}
