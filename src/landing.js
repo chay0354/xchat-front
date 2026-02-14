@@ -1058,7 +1058,7 @@ function Landing() {
           </p>
         </div>
         <div className="footer-copyright">
-          © כל הזכויות שמורות FlowChat 2025
+          © כל הזכויות שמורות FlowChat 2026
         </div>
       </footer>
     </div>
