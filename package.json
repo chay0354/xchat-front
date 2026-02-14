@@ -10,6 +10,7 @@
     "ajv": "^6.12.6",
     "ajv-keywords": "^3.5.2",
     "js-cookie": "^3.0.5",
+    "next-sitemap": "^4.2.3",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-icons": "^5.5.0",
@@ -22,7 +23,8 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "dev": "react-scripts start"
+    "dev": "react-scripts start",
+    "postbuild": "next-sitemap"
   },
   "eslintConfig": {
     "extends": [
