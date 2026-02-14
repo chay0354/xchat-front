@@ -287,9 +287,9 @@ function Landing() {
 
 
             {/* Clients Logos */}
-            <div className="clients-container">
+            {/* <div className="clients-container">
               <img src={clientsImage} alt="Clients" className="clients-image" />
-            </div>
+            </div> */}
 
 
             {/* Statistics */}
